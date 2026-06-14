@@ -38,6 +38,21 @@ def test_volatility_features_preserve_history_nulls_and_formula_values() -> None
     assert result.loc[19, "adr_percent_20"] == 20.0
 
 
+def test_range_and_close_location_features() -> None:
+    bars = make_bars("SPY", [10.0] * 20)
+    bars.loc[0, ["high", "low"]] = [10.0, 10.0]
+
+    result = add_volatility_features(bars)
+
+    assert result.loc[1, "range_percent"] == 20.0
+    assert result.loc[4, "average_range_percent_5"] == pytest.approx(16.0)
+    assert pd.isna(result.loc[18, "average_range_percent_20"])
+    assert result.loc[19, "average_range_percent_20"] == pytest.approx(19.0)
+    assert result.loc[19, "range_ratio_5_to_20"] == pytest.approx(20.0 / 19.0)
+    assert pd.isna(result.loc[0, "close_location_value"])
+    assert result.loc[1, "close_location_value"] == pytest.approx(0.5)
+
+
 def test_liquidity_features_calculate_volume_and_dollar_volume_windows() -> None:
     bars = make_bars("SPY", [10.0] * 50)
 
@@ -52,6 +67,19 @@ def test_liquidity_features_calculate_volume_and_dollar_volume_windows() -> None
     )
     assert last["relative_volume_20"] == pytest.approx(1049 / last["average_volume_20"])
     assert pd.isna(result.loc[18, "average_volume_20"])
+
+
+def test_average_volume_5_and_volume_ratio() -> None:
+    bars = make_bars("SPY", [10.0] * 20)
+
+    result = add_liquidity_features(bars)
+
+    assert pd.isna(result.loc[3, "average_volume_5"])
+    assert result.loc[4, "average_volume_5"] == pytest.approx(sum(range(1000, 1005)) / 5)
+    assert pd.isna(result.loc[18, "volume_ratio_5_to_20"])
+    assert result.loc[19, "volume_ratio_5_to_20"] == pytest.approx(
+        result.loc[19, "average_volume_5"] / result.loc[19, "average_volume_20"]
+    )
 
 
 def test_momentum_features_calculate_returns_highs_and_distances() -> None:
@@ -69,6 +97,9 @@ def test_momentum_features_calculate_returns_highs_and_distances() -> None:
     assert last["high_252d"] == 253.0
     assert last["distance_from_20d_high_percent"] == pytest.approx((252 - 253) / 253 * 100)
     assert last["distance_from_252d_high_percent"] == pytest.approx((252 - 253) / 253 * 100)
+    assert last["pullback_from_20d_high_percent"] == pytest.approx(
+        last["distance_from_20d_high_percent"]
+    )
     assert pd.isna(result.loc[250, "high_252d"])
 
 
@@ -89,6 +120,34 @@ def test_trend_features_calculate_moving_averages_and_alignment_flags() -> None:
     assert last["sma_50_above_sma_200"] is True
     assert last["trend_stage"] == "Confirmed Leader"
     assert pd.isna(result.loc[18, "close_above_sma_20"])
+
+
+def test_moving_average_distances_and_slope_lookbacks() -> None:
+    bars = make_bars("SPY", [float(value) for value in range(1, 101)])
+
+    result = add_trend_features(bars)
+    last_index = len(result) - 1
+    last = result.iloc[last_index]
+
+    assert last["distance_from_ema_9_percent"] == pytest.approx(
+        (last["close"] - last["ema_9"]) / last["ema_9"] * 100
+    )
+    assert last["distance_from_sma_20_percent"] == pytest.approx(
+        (last["close"] - last["sma_20"]) / last["sma_20"] * 100
+    )
+    assert last["distance_from_sma_50_percent"] == pytest.approx(
+        (last["close"] - last["sma_50"]) / last["sma_50"] * 100
+    )
+    assert pd.isna(result.loc[12, "ema_9_slope_5d_percent"])
+    assert last["ema_9_slope_5d_percent"] == pytest.approx(
+        (last["ema_9"] / result.loc[last_index - 5, "ema_9"] - 1) * 100
+    )
+    assert last["sma_20_slope_10d_percent"] == pytest.approx(
+        (last["sma_20"] / result.loc[last_index - 10, "sma_20"] - 1) * 100
+    )
+    assert last["sma_50_slope_20d_percent"] == pytest.approx(
+        (last["sma_50"] / result.loc[last_index - 20, "sma_50"] - 1) * 100
+    )
 
 
 @pytest.mark.parametrize(

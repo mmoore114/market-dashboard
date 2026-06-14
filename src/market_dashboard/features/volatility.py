@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def add_volatility_features(bars: pd.DataFrame) -> pd.DataFrame:
-    """Add true range, ATR, and average daily range features per ticker."""
+    """Add true range, range percent, ATR, ADR, and close-location features."""
     frame = bars.copy()
     frame["date"] = pd.to_datetime(frame["date"])
     frame = frame.sort_values(["ticker", "date"]).reset_index(drop=True)
@@ -24,8 +24,20 @@ def add_volatility_features(bars: pd.DataFrame) -> pd.DataFrame:
     )
     frame["atr_percent_14"] = frame["atr_14"] / frame["close"] * 100
 
-    daily_range_percent = (frame["high"] - frame["low"]) / frame["close"] * 100
-    frame["adr_percent_20"] = daily_range_percent.groupby(frame["ticker"]).transform(
+    frame["range_percent"] = (frame["high"] - frame["low"]) / frame["close"] * 100
+    frame["average_range_percent_5"] = frame.groupby("ticker")["range_percent"].transform(
+        lambda values: values.rolling(window=5, min_periods=5).mean()
+    )
+    frame["average_range_percent_20"] = frame.groupby("ticker")["range_percent"].transform(
         lambda values: values.rolling(window=20, min_periods=20).mean()
     )
+    frame["range_ratio_5_to_20"] = (
+        frame["average_range_percent_5"] / frame["average_range_percent_20"]
+    )
+    frame["adr_percent_20"] = frame["range_percent"].groupby(frame["ticker"]).transform(
+        lambda values: values.rolling(window=20, min_periods=20).mean()
+    )
+    intraday_range = frame["high"] - frame["low"]
+    frame["close_location_value"] = (frame["close"] - frame["low"]) / intraday_range
+    frame.loc[intraday_range == 0, "close_location_value"] = pd.NA
     return frame

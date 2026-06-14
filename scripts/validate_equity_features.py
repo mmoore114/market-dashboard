@@ -20,6 +20,29 @@ APPROVED_TREND_STAGES = {
     "Bearish Trend",
     "Unclassified",
 }
+APPROVED_PRICE_ACTION_STATES = {
+    "Extended",
+    "Bearish Expansion",
+    "Damaged",
+    "Constructive Pullback",
+    "Near Trigger",
+    "Trend Expansion",
+    "Fading",
+    "Bearish",
+    "No Setup",
+    "Insufficient Data",
+}
+APPROVED_LEADERSHIP_STATES = {
+    "Strong Leader",
+    "Leader",
+    "Emerging",
+    "Neutral",
+    "Lagging",
+    "Deteriorating",
+    "Insufficient Data",
+}
+APPROVED_DIRECTIONAL_BIASES = {"Long Watch", "Put Watch", "Neutral"}
+APPROVED_ENTRY_QUALITIES = {"Actionable", "Developing", "Avoid", "None"}
 
 
 def main() -> int:
@@ -93,6 +116,47 @@ def _validate_tables(connection: duckdb.DuckDBPyConnection, today: date) -> list
     if score_bounds:
         failures.append("opportunity scores outside 0 to 100")
 
+    leadership_score_bounds = connection.execute(
+        """
+        SELECT COUNT(*)
+        FROM latest_equity_snapshot
+        WHERE leadership_score IS NOT NULL
+          AND (leadership_score < 0 OR leadership_score > 100)
+        """
+    ).fetchone()[0]
+    if leadership_score_bounds:
+        failures.append("leadership scores outside 0 to 100")
+
+    invalid_leadership_state = connection.execute(
+        """
+        SELECT COUNT(*)
+        FROM latest_equity_snapshot
+        WHERE leadership_state IS NULL
+           OR leadership_state NOT IN (
+            'Strong Leader',
+            'Leader',
+            'Emerging',
+            'Neutral',
+            'Lagging',
+            'Deteriorating',
+            'Insufficient Data'
+           )
+        """
+    ).fetchone()[0]
+    if invalid_leadership_state:
+        failures.append("unapproved leadership_state values")
+
+    insufficient_with_score = connection.execute(
+        """
+        SELECT COUNT(*)
+        FROM latest_equity_snapshot
+        WHERE leadership_state = 'Insufficient Data'
+          AND leadership_score IS NOT NULL
+        """
+    ).fetchone()[0]
+    if insufficient_with_score:
+        failures.append("Insufficient Data leadership rows have non-null leadership_score")
+
     spy_excess_nonzero = connection.execute(
         """
         SELECT COUNT(*)
@@ -120,23 +184,58 @@ def _validate_tables(connection: duckdb.DuckDBPyConnection, today: date) -> list
     if negative_volume:
         failures.append("negative average volume or dollar volume")
 
-    invalid_stage = connection.execute(
+    invalid_price_action_state = connection.execute(
         """
         SELECT COUNT(*)
         FROM latest_equity_snapshot
-        WHERE trend_stage NOT IN (
+        WHERE price_action_state NOT IN (
             'Extended',
-            'Confirmed Leader',
-            'Emerging Leader',
-            'Pullback in Uptrend',
+            'Bearish Expansion',
+            'Damaged',
+            'Constructive Pullback',
+            'Near Trigger',
+            'Trend Expansion',
             'Fading',
-            'Bearish Trend',
-            'Unclassified'
+            'Bearish',
+            'No Setup',
+            'Insufficient Data'
         )
         """
     ).fetchone()[0]
-    if invalid_stage:
-        failures.append("unapproved trend_stage values")
+    if invalid_price_action_state:
+        failures.append("unapproved price_action_state values")
+
+    invalid_directional_bias = connection.execute(
+        """
+        SELECT COUNT(*)
+        FROM latest_equity_snapshot
+        WHERE directional_bias NOT IN ('Long Watch', 'Put Watch', 'Neutral')
+        """
+    ).fetchone()[0]
+    if invalid_directional_bias:
+        failures.append("unapproved directional_bias values")
+
+    invalid_entry_quality = connection.execute(
+        """
+        SELECT COUNT(*)
+        FROM latest_equity_snapshot
+        WHERE entry_quality NOT IN ('Actionable', 'Developing', 'Avoid', 'None')
+        """
+    ).fetchone()[0]
+    if invalid_entry_quality:
+        failures.append("unapproved entry_quality values")
+
+    price_action_nulls = connection.execute(
+        """
+        SELECT COUNT(*)
+        FROM latest_equity_snapshot
+        WHERE price_action_state IS NULL
+           OR directional_bias IS NULL
+           OR entry_quality IS NULL
+        """
+    ).fetchone()[0]
+    if price_action_nulls:
+        failures.append("price_action_state, directional_bias, or entry_quality contains nulls")
 
     daily_bar_tickers = connection.execute(
         "SELECT COUNT(DISTINCT ticker) FROM daily_bars"
@@ -180,6 +279,24 @@ def _validate_tables(connection: duckdb.DuckDBPyConnection, today: date) -> list
     ).fetchone()[0]
     if scored_missing_components:
         failures.append("scored eligible rows missing score components")
+
+    opportunity_leadership_collision = connection.execute(
+        """
+        SELECT
+            COUNT(*) > 0
+            AND COUNT(*) = SUM(
+                CASE
+                    WHEN opportunity_score = leadership_score THEN 1
+                    ELSE 0
+                END
+            )
+        FROM latest_equity_snapshot
+        WHERE opportunity_score IS NOT NULL
+          AND leadership_score IS NOT NULL
+        """
+    ).fetchone()[0]
+    if opportunity_leadership_collision:
+        failures.append("opportunity_score appears overwritten by leadership_score")
 
     return failures
 

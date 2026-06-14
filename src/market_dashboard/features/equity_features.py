@@ -26,14 +26,21 @@ FEATURE_COLUMNS = [
     "vwap",
     "transactions",
     "true_range",
+    "range_percent",
+    "average_range_percent_5",
+    "average_range_percent_20",
+    "range_ratio_5_to_20",
+    "close_location_value",
     "atr_14",
     "atr_percent_14",
     "adr_percent_20",
     "dollar_volume",
+    "average_volume_5",
     "average_volume_20",
     "average_volume_50",
     "average_dollar_volume_20",
     "relative_volume_20",
+    "volume_ratio_5_to_20",
     "return_5d_percent",
     "return_20d_percent",
     "return_60d_percent",
@@ -42,10 +49,17 @@ FEATURE_COLUMNS = [
     "high_252d",
     "distance_from_20d_high_percent",
     "distance_from_252d_high_percent",
+    "pullback_from_20d_high_percent",
     "ema_9",
     "sma_20",
     "sma_50",
     "sma_200",
+    "distance_from_ema_9_percent",
+    "distance_from_sma_20_percent",
+    "distance_from_sma_50_percent",
+    "ema_9_slope_5d_percent",
+    "sma_20_slope_10d_percent",
+    "sma_50_slope_20d_percent",
     "close_above_sma_20",
     "close_above_sma_50",
     "close_above_sma_200",
@@ -215,6 +229,8 @@ class EquityFeaturePipeline:
         columns_sql = self._feature_columns_sql()
         connection.execute(f"CREATE TABLE IF NOT EXISTS daily_equity_features ({columns_sql})")
         connection.execute(f"CREATE TABLE IF NOT EXISTS latest_equity_snapshot ({columns_sql})")
+        self._ensure_feature_columns(connection, "daily_equity_features")
+        self._ensure_feature_columns(connection, "latest_equity_snapshot")
         self._ensure_snapshot_score_columns(connection)
 
     def _ensure_indexes(self, connection: duckdb.DuckDBPyConnection) -> None:
@@ -256,14 +272,21 @@ class EquityFeaturePipeline:
             vwap DOUBLE,
             transactions BIGINT,
             true_range DOUBLE,
+            range_percent DOUBLE,
+            average_range_percent_5 DOUBLE,
+            average_range_percent_20 DOUBLE,
+            range_ratio_5_to_20 DOUBLE,
+            close_location_value DOUBLE,
             atr_14 DOUBLE,
             atr_percent_14 DOUBLE,
             adr_percent_20 DOUBLE,
             dollar_volume DOUBLE,
+            average_volume_5 DOUBLE,
             average_volume_20 DOUBLE,
             average_volume_50 DOUBLE,
             average_dollar_volume_20 DOUBLE,
             relative_volume_20 DOUBLE,
+            volume_ratio_5_to_20 DOUBLE,
             return_5d_percent DOUBLE,
             return_20d_percent DOUBLE,
             return_60d_percent DOUBLE,
@@ -272,10 +295,17 @@ class EquityFeaturePipeline:
             high_252d DOUBLE,
             distance_from_20d_high_percent DOUBLE,
             distance_from_252d_high_percent DOUBLE,
+            pullback_from_20d_high_percent DOUBLE,
             ema_9 DOUBLE,
             sma_20 DOUBLE,
             sma_50 DOUBLE,
             sma_200 DOUBLE,
+            distance_from_ema_9_percent DOUBLE,
+            distance_from_sma_20_percent DOUBLE,
+            distance_from_sma_50_percent DOUBLE,
+            ema_9_slope_5d_percent DOUBLE,
+            sma_20_slope_10d_percent DOUBLE,
+            sma_50_slope_20d_percent DOUBLE,
             close_above_sma_20 BOOLEAN,
             close_above_sma_50 BOOLEAN,
             close_above_sma_200 BOOLEAN,
@@ -286,6 +316,78 @@ class EquityFeaturePipeline:
             return_60d_excess_vs_spy DOUBLE,
             return_120d_excess_vs_spy DOUBLE
         """
+
+    def _ensure_feature_columns(
+        self,
+        connection: duckdb.DuckDBPyConnection,
+        table_name: str,
+    ) -> None:
+        existing_columns = {
+            row[1] for row in connection.execute(f"PRAGMA table_info('{table_name}')").fetchall()
+        }
+        column_sql = self._feature_column_types()
+        for column in FEATURE_COLUMNS:
+            if column not in existing_columns:
+                connection.execute(
+                    f"ALTER TABLE {table_name} ADD COLUMN {column} {column_sql[column]}"
+                )
+
+    def _feature_column_types(self) -> dict[str, str]:
+        return {
+            "ticker": "VARCHAR",
+            "date": "DATE",
+            "open": "DOUBLE",
+            "high": "DOUBLE",
+            "low": "DOUBLE",
+            "close": "DOUBLE",
+            "volume": "BIGINT",
+            "vwap": "DOUBLE",
+            "transactions": "BIGINT",
+            "true_range": "DOUBLE",
+            "range_percent": "DOUBLE",
+            "average_range_percent_5": "DOUBLE",
+            "average_range_percent_20": "DOUBLE",
+            "range_ratio_5_to_20": "DOUBLE",
+            "close_location_value": "DOUBLE",
+            "atr_14": "DOUBLE",
+            "atr_percent_14": "DOUBLE",
+            "adr_percent_20": "DOUBLE",
+            "dollar_volume": "DOUBLE",
+            "average_volume_5": "DOUBLE",
+            "average_volume_20": "DOUBLE",
+            "average_volume_50": "DOUBLE",
+            "average_dollar_volume_20": "DOUBLE",
+            "relative_volume_20": "DOUBLE",
+            "volume_ratio_5_to_20": "DOUBLE",
+            "return_5d_percent": "DOUBLE",
+            "return_20d_percent": "DOUBLE",
+            "return_60d_percent": "DOUBLE",
+            "return_120d_percent": "DOUBLE",
+            "high_20d": "DOUBLE",
+            "high_252d": "DOUBLE",
+            "distance_from_20d_high_percent": "DOUBLE",
+            "distance_from_252d_high_percent": "DOUBLE",
+            "pullback_from_20d_high_percent": "DOUBLE",
+            "ema_9": "DOUBLE",
+            "sma_20": "DOUBLE",
+            "sma_50": "DOUBLE",
+            "sma_200": "DOUBLE",
+            "distance_from_ema_9_percent": "DOUBLE",
+            "distance_from_sma_20_percent": "DOUBLE",
+            "distance_from_sma_50_percent": "DOUBLE",
+            "ema_9_slope_5d_percent": "DOUBLE",
+            "sma_20_slope_10d_percent": "DOUBLE",
+            "sma_50_slope_20d_percent": "DOUBLE",
+            "close_above_sma_20": "BOOLEAN",
+            "close_above_sma_50": "BOOLEAN",
+            "close_above_sma_200": "BOOLEAN",
+            "sma_20_above_sma_50": "BOOLEAN",
+            "sma_50_above_sma_200": "BOOLEAN",
+            "trend_stage": "VARCHAR",
+            "return_20d_excess_vs_spy": "DOUBLE",
+            "return_60d_excess_vs_spy": "DOUBLE",
+            "return_120d_excess_vs_spy": "DOUBLE",
+        }
 
     def _ensure_snapshot_score_columns(self, connection: duckdb.DuckDBPyConnection) -> None:
         existing_columns = {

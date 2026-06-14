@@ -134,6 +134,72 @@ Percentiles are calculated only across eligible rows with available data for tha
 
 This is an initial transparent research model for ranking and review. It is not a trading recommendation.
 
+## Research Layers
+
+The dashboard separates market research into independent layers:
+
+- Market mapping: future sector, industry, and theme rankings, plus breadth and rotation work.
+- Leadership: strength relative to the market, multi-window momentum, relative strength versus SPY, and proximity to recent highs.
+- Opportunity/tradability: movement and equity liquidity. This layer is directionally neutral and remains separate from leadership and timing.
+- Price action: shorter-term daily swing condition and possible timing. It is not Weinstein weekly stage analysis, and named chart patterns are intentionally not hard-coded.
+- Future options layer: spreads, open interest, contract volume, usable expirations and strikes, implied volatility, and options liquidity.
+
+### Leadership Score
+
+Leadership Score is a 0 to 100 model using:
+
+- 15% `return_20d_percentile`
+- 15% `return_60d_percentile`
+- 10% `return_120d_percentile`
+- 10% `excess_20d_vs_spy_percentile`
+- 15% `excess_60d_vs_spy_percentile`
+- 10% `excess_120d_vs_spy_percentile`
+- 10% `proximity_20d_high_percentile`
+- 10% `proximity_252d_high_percentile`
+- 5% `moving_average_structure_score`
+
+Leadership states:
+
+- `Strong Leader`: score >= 80
+- `Leader`: score >= 65 and < 80
+- `Emerging`: score >= 50 and < 65
+- `Neutral`: score >= 35 and < 50
+- `Lagging`: score >= 20 and < 35
+- `Deteriorating`: score < 20
+- `Insufficient Data`: required inputs unavailable
+
+### Price Action State
+
+`price_action_state` is the canonical shorter-term daily swing classifier. `trend_stage` is retained only for backward compatibility and is deprecated for dashboard use.
+
+Price Action State precedence:
+
+1. `Extended`
+2. `Bearish Expansion`
+3. `Damaged`
+4. `Constructive Pullback`
+5. `Near Trigger`
+6. `Trend Expansion`
+7. `Fading`
+8. `Bearish`
+9. `No Setup`
+10. `Insufficient Data`
+
+Directional bias meanings:
+
+- `Long Watch`: constructive long-side conditions to monitor.
+- `Put Watch`: weakening or bearish daily conditions to monitor.
+- `Neutral`: no directional watchlist bias from the daily classifier.
+
+Entry quality meanings:
+
+- `Actionable`: current state may be close enough for tactical review.
+- `Developing`: setup is incomplete or still forming.
+- `Avoid`: extended condition where new entries are lower quality.
+- `None`: no actionable setup state.
+
+All thresholds are initial transparent research assumptions and should be reviewed against actual workflow outcomes.
+
 ## Initial Development Phases
 
 1. Establish project structure, configuration, and storage paths.

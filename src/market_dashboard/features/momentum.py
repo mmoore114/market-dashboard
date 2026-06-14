@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def add_momentum_features(bars: pd.DataFrame) -> pd.DataFrame:
-    """Add return, rolling high, and distance-from-high momentum features."""
+    """Add returns, rolling highs, and pullback-from-high momentum features."""
     frame = bars.copy()
     frame["date"] = pd.to_datetime(frame["date"])
     frame = frame.sort_values(["ticker", "date"]).reset_index(drop=True)
@@ -27,4 +27,5 @@ def add_momentum_features(bars: pd.DataFrame) -> pd.DataFrame:
     frame["distance_from_252d_high_percent"] = (
         (frame["close"] - frame["high_252d"]) / frame["high_252d"] * 100
     )
+    frame["pullback_from_20d_high_percent"] = frame["distance_from_20d_high_percent"]
     return frame

@@ -1,4 +1,8 @@
-"""Trend feature calculations."""
+"""Trend feature calculations.
+
+`trend_stage` is deprecated compatibility output. Prefer `price_action_state`
+for shorter-term setup classification.
+"""
 
 from typing import Any
 
@@ -6,7 +10,7 @@ import pandas as pd
 
 
 def add_trend_features(bars: pd.DataFrame) -> pd.DataFrame:
-    """Add moving-average alignment and trend-stage features per ticker."""
+    """Add moving-average levels, distances, slopes, alignment, and trend stage."""
     frame = bars.copy()
     frame["date"] = pd.to_datetime(frame["date"])
     frame = frame.sort_values(["ticker", "date"]).reset_index(drop=True)
@@ -24,6 +28,18 @@ def add_trend_features(bars: pd.DataFrame) -> pd.DataFrame:
     frame["sma_200"] = grouped_close.transform(
         lambda values: values.rolling(window=200, min_periods=200).mean()
     )
+    frame["distance_from_ema_9_percent"] = (frame["close"] - frame["ema_9"]) / frame[
+        "ema_9"
+    ] * 100
+    frame["distance_from_sma_20_percent"] = (frame["close"] - frame["sma_20"]) / frame[
+        "sma_20"
+    ] * 100
+    frame["distance_from_sma_50_percent"] = (frame["close"] - frame["sma_50"]) / frame[
+        "sma_50"
+    ] * 100
+    frame["ema_9_slope_5d_percent"] = _slope_percent(frame, "ema_9", 5)
+    frame["sma_20_slope_10d_percent"] = _slope_percent(frame, "sma_20", 10)
+    frame["sma_50_slope_20d_percent"] = _slope_percent(frame, "sma_50", 20)
 
     frame["close_above_sma_20"] = _nullable_greater_than(frame["close"], frame["sma_20"])
     frame["close_above_sma_50"] = _nullable_greater_than(frame["close"], frame["sma_50"])
@@ -37,6 +53,11 @@ def add_trend_features(bars: pd.DataFrame) -> pd.DataFrame:
 def _nullable_greater_than(left: pd.Series, right: pd.Series) -> pd.Series:
     result = left > right
     return result.mask(left.isna() | right.isna(), pd.NA)
+
+
+def _slope_percent(frame: pd.DataFrame, column: str, lookback: int) -> pd.Series:
+    previous_value = frame.groupby("ticker")[column].shift(lookback)
+    return (frame[column] / previous_value - 1) * 100
 
 
 def _classify_trend_stage(row: pd.Series | dict[str, Any]) -> str:
