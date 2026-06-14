@@ -1,6 +1,16 @@
 project:
   name: market-dashboard
 data:
-  raw_dir: data/raw
-  processed_dir: data/processed
-  database_path: data/database/market_dashboard.duckdb
+  raw_directory: data/raw
+  processed_directory: data/processed
+  database_directory: data/database
+  duckdb_filename: market_dashboard.duckdb
+ingestion:
+  test_tickers:
+    - SPY
+    - QQQ
+    - NVDA
+    - AAPL
+    - MSFT
+  default_history_days: 400
+  request_pause_seconds: 0.25

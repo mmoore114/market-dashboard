@@ -39,6 +39,32 @@ Market Dashboard is a Python research repository for equity discovery, ranking, 
 
 The Massive API key belongs only in a local `.env` file. Never commit `.env`, copied environment files, API keys, database files, raw data, processed data, or exported parquet files.
 
+## Daily Bar Ingestion
+
+The test-universe ingestion script reads `config/settings.yaml` and retrieves adjusted daily bars for the configured tickers. By default, it requests about 400 calendar days ending today.
+
+```powershell
+python scripts/ingest_test_universe.py
+```
+
+Optional date and ticker overrides:
+
+```powershell
+python scripts/ingest_test_universe.py --start 2025-01-01 --end 2025-12-31 --tickers SPY QQQ
+```
+
+Parquet files are written one file per ticker under `data/processed/daily_bars/`. DuckDB is stored at `data/database/market_dashboard.duckdb`.
+
+Within each ingestion batch, rows are deduplicated by `ticker` and `date`. When writing Parquet, new rows are merged with existing ticker files and replace older rows for the same `ticker` and `date`. DuckDB uses the same key: existing `ticker`/`date` rows are deleted before inserting the latest batch rows, so reruns do not create duplicates.
+
+Validate local daily-bar storage with:
+
+```powershell
+python scripts/validate_daily_storage.py
+```
+
+The validation script reports per-ticker row counts and date ranges, duplicate `ticker`/`date` groups, required OHLCV null counts, and DuckDB-vs-Parquet row-count agreement. Generated market data is local research output and must not be committed to Git.
+
 ## Initial Development Phases
 
 1. Establish project structure, configuration, and storage paths.
