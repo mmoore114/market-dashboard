@@ -216,3 +216,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# market-dashboard local data and secrets
+.env.*
+!.env.example
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/database/*
+!data/database/.gitkeep
+*.duckdb
+*.db
+*.parquet
+.venv/

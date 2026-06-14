@@ -1,0 +1,6 @@
+project:
+  name: market-dashboard
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  database_path: data/database/market_dashboard.duckdb
