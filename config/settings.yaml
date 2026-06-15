@@ -14,3 +14,15 @@ ingestion:
     - MSFT
   default_history_days: 400
   request_pause_seconds: 0.25
+flat_files:
+  endpoint_url: https://files.massive.com
+  bucket: flatfiles
+  stock_day_aggregate_prefix: us_stocks_sip/day_aggs_v1
+  raw_directory: data/raw/massive_flat_files/stocks/day_aggs
+  parquet_directory: data/processed/full_market_daily
+  manifest_directory: data/processed/manifests
+  default_start_date: 2023-06-14
+  default_end_date: 2026-06-14
+  max_download_attempts: 4
+  retry_backoff_seconds: 2
+  multipart_threshold_mb: 32

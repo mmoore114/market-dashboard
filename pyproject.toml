@@ -18,6 +18,8 @@ dependencies = [
     "pydantic",
     "pyyaml",
     "streamlit",
+    "boto3",
+    "botocore",
 ]
 
 [project.optional-dependencies]
