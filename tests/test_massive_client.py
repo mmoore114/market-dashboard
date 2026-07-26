@@ -2,7 +2,7 @@ import httpx
 import pytest
 
 from market_dashboard.data import massive_client
-from market_dashboard.data.massive_client import MassiveClient
+from market_dashboard.data.massive_client import MassiveClient, MassiveRequestError
 
 
 def make_client(
@@ -74,9 +74,16 @@ def test_missing_api_key_raises_clear_error(monkeypatch: pytest.MonkeyPatch) -> 
         MassiveClient()
 
 
-def test_placeholder_api_key_raises_clear_error(monkeypatch: pytest.MonkeyPatch) -> None:
+@pytest.mark.parametrize(
+    "placeholder",
+    ["replace_with_your_api_key", "replace_with_your_massive_api_key"],
+)
+def test_placeholder_api_key_raises_clear_error(
+    monkeypatch: pytest.MonkeyPatch,
+    placeholder: str,
+) -> None:
     monkeypatch.setattr(massive_client, "load_dotenv", lambda: None)
-    monkeypatch.setenv("MASSIVE_API_KEY", "replace_with_your_api_key")
+    monkeypatch.setenv("MASSIVE_API_KEY", placeholder)
 
     with pytest.raises(ValueError, match="placeholder value"):
         MassiveClient()
@@ -130,3 +137,113 @@ def test_normalized_field_structure(monkeypatch: pytest.MonkeyPatch) -> None:
         "vwap",
         "transactions",
     }
+
+
+def test_retry_after_is_honored(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = 0
+    delays: list[float] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return httpx.Response(429, headers={"Retry-After": "7"})
+        return httpx.Response(200, json={"results": []})
+
+    monkeypatch.delenv("MASSIVE_API_KEY", raising=False)
+    client = MassiveClient(
+        api_key="test-key",
+        base_url="https://api.massive.test",
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        sleep=delays.append,
+        jitter=lambda: 0,
+    )
+
+    assert client.get_adjusted_daily_bars("SPY", "2024-01-01", "2024-01-31") == []
+    assert calls == 2
+    assert delays == [7.0]
+    assert client.last_attempt_count == 2
+
+
+def test_exponential_backoff_for_retryable_server_errors(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = 0
+    delays: list[float] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        if calls < 3:
+            return httpx.Response(503)
+        return httpx.Response(200, json={"results": []})
+
+    monkeypatch.delenv("MASSIVE_API_KEY", raising=False)
+    client = MassiveClient(
+        api_key="test-key",
+        base_url="https://api.massive.test",
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        maximum_attempts=3,
+        retry_backoff_seconds=2,
+        sleep=delays.append,
+        jitter=lambda: 0,
+    )
+
+    client.get_adjusted_daily_bars("SPY", "2024-01-01", "2024-01-31")
+
+    assert delays == [2, 4]
+    assert client.last_attempt_count == 3
+
+
+def test_connection_errors_are_retried(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls = 0
+    delays: list[float] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise httpx.ConnectError("temporary", request=request)
+        return httpx.Response(200, json={"results": []})
+
+    monkeypatch.delenv("MASSIVE_API_KEY", raising=False)
+    client = MassiveClient(
+        api_key="test-key",
+        base_url="https://api.massive.test",
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        sleep=delays.append,
+        jitter=lambda: 0,
+    )
+
+    client.get_adjusted_daily_bars("SPY", "2024-01-01", "2024-01-31")
+
+    assert calls == 2
+    assert delays == [2]
+
+
+@pytest.mark.parametrize("status", [400, 404])
+def test_permanent_http_errors_are_not_retried(
+    monkeypatch: pytest.MonkeyPatch,
+    status: int,
+) -> None:
+    calls = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        return httpx.Response(status)
+
+    monkeypatch.delenv("MASSIVE_API_KEY", raising=False)
+    client = MassiveClient(
+        api_key="test-key",
+        base_url="https://api.massive.test",
+        http_client=httpx.Client(transport=httpx.MockTransport(handler)),
+        sleep=lambda _: None,
+    )
+
+    with pytest.raises(MassiveRequestError) as error:
+        client.get_adjusted_daily_bars("SPY", "2024-01-01", "2024-01-31")
+
+    assert calls == 1
+    assert error.value.status_code == status
+    assert error.value.attempts == 1

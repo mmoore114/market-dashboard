@@ -14,6 +14,72 @@ ingestion:
     - MSFT
   default_history_days: 400
   request_pause_seconds: 0.25
+security_master:
+  parquet_directory: data/processed/security_master
+  reference_query:
+    market: stocks
+    locale: us
+    active: true
+    page_limit: 1000
+  candidate_filters:
+    locale: us
+    active_only: true
+    allowed_exchange_mics:
+      - XNYS
+      - XNAS
+      - ARCX
+      - XASE
+      - BATS
+    allowed_categories:
+      - Common Stock
+      - ETF
+    excluded_security_types:
+      ETS: Single-security ETF excluded from core swing universe
+    acquisition_vehicle_name_patterns:
+      - acquisition corp
+      - acquisition co
+      - blank check
+  exchange_mapping:
+    XNYS: NYSE
+    XNAS: Nasdaq
+    ARCX: NYSE Arca
+    XASE: NYSE American
+    BATS: Cboe BZX
+  security_type_mapping:
+    CS: Common Stock
+    ETF: ETF
+    ETS: ETF
+    ETV: Exchange Traded Vehicle
+    PFD: Preferred Share
+    WARRANT: Warrant
+    RIGHT: Right
+    UNIT: Unit
+    ADRC: Depositary Receipt
+    ADRP: Preferred Share
+    GDR: Depositary Receipt
+    FUND: Fund
+    ETN: Exchange Traded Note
+    SP: Structured Product
+    OS: Other Security
+    OTHER: Other Security
+swing_universe:
+  parquet_directory: data/processed/swing_universe
+  recent_window_sessions: 90
+  thresholds:
+    minimum_latest_close: 5
+    minimum_average_dollar_volume_20: 50000000
+    minimum_valid_observations: 60
+    minimum_session_coverage_percent: 90
+adjusted_backfill:
+  plan_parquet_directory: data/processed/adjusted_backfill_plans
+  manifest_database: data/processed/manifests/adjusted_ingestion_manifest.duckdb
+  planned_history_start: 2024-01-01
+  request_pause_seconds: 0.25
+  overlap_calendar_days: 0
+  maximum_attempts: 4
+  retry_backoff_seconds: 2
+  retry_max_backoff_seconds: 60
+  retry_jitter_ratio: 0.25
 flat_files:
   endpoint_url: https://files.massive.com
   bucket: flatfiles
