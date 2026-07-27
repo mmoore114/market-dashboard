@@ -14,6 +14,7 @@ DUCKDB_PATH = PROJECT_ROOT / "data" / "database" / "market_dashboard.duckdb"
 REQUIRED_FIELDS = [
     "plan_snapshot_date",
     "source_universe_snapshot_date",
+    "policy_version",
     "ticker",
     "name",
     "security_category",
@@ -35,6 +36,7 @@ REQUIRED_FIELDS = [
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate an adjusted-backfill plan.")
     parser.add_argument("--plan-snapshot-date", default=None)
+    parser.add_argument("--policy-version", required=True)
     return parser.parse_args()
 
 
@@ -43,6 +45,7 @@ def validate_adjusted_backfill_plan(
     parquet_directory: Path,
     *,
     plan_snapshot_date: str | date | None = None,
+    policy_version: str | None = None,
 ) -> tuple[int, dict]:
     if not duckdb_path.exists():
         return 1, {"error": f"duckdb database not found: {duckdb_path}"}
@@ -62,13 +65,15 @@ def validate_adjusted_backfill_plan(
                 "SELECT MAX(plan_snapshot_date) FROM adjusted_backfill_plan"
             ).fetchone()[0]
         )
+        if not policy_version or not policy_version.strip():
+            return 1, {"error": "policy version is required"}
         frame = connection.execute(
             """
             SELECT * FROM adjusted_backfill_plan
-            WHERE plan_snapshot_date = ?
+            WHERE plan_snapshot_date = ? AND policy_version = ?
             ORDER BY liquidity_rank
             """,
-            [selected_date],
+            [selected_date, policy_version],
         ).fetchdf()
     if frame.empty:
         return 1, {"error": f"adjusted backfill plan not found: {selected_date}"}
@@ -80,7 +85,9 @@ def validate_adjusted_backfill_plan(
     ranks = sorted(frame["liquidity_rank"].astype(int).tolist())
     rank_continuous = ranks == list(range(1, len(frame) + 1))
     duplicates = int(
-        frame.groupby(["plan_snapshot_date", "ticker"]).size().gt(1).sum()
+        frame.groupby(
+            ["plan_snapshot_date", "ticker", "policy_version"]
+        ).size().gt(1).sum()
     )
     duplicated_across_tiers = int(
         frame.groupby("ticker")["backfill_tier"].nunique().gt(1).sum()
@@ -112,11 +119,13 @@ def validate_adjusted_backfill_plan(
     parquet_path = (
         parquet_directory
         / f"plan_snapshot_date={selected_date.isoformat()}"
+        / f"policy_version={policy_version}"
         / "adjusted_backfill_plan.parquet"
     )
     parquet_rows = len(pd.read_parquet(parquet_path)) if parquet_path.exists() else None
     metrics = {
         "plan_snapshot_date": selected_date,
+        "policy_version": policy_version,
         "total_planned_symbols": len(frame),
         "tier_counts": tier_counts,
         "duplicate_plan_ticker_groups": duplicates,
@@ -174,6 +183,7 @@ def print_metrics(metrics: dict) -> None:
     print("adjusted backfill plan validation")
     for key in (
         "plan_snapshot_date",
+        "policy_version",
         "total_planned_symbols",
         "tier_counts",
         "duplicate_plan_ticker_groups",
@@ -208,6 +218,7 @@ def main() -> int:
         DUCKDB_PATH,
         PROJECT_ROOT / settings["adjusted_backfill"]["plan_parquet_directory"],
         plan_snapshot_date=args.plan_snapshot_date,
+        policy_version=args.policy_version,
     )
     print_metrics(metrics)
     return exit_code

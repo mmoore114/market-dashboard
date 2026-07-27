@@ -1,0 +1,173 @@
+policy_version: exposure-policy-v2
+
+# Maintained classifications are dated by the provider snapshot they are
+# applied to. They complement deterministic rules and are not provider facts.
+maintained_classifications:
+  single_security:
+    reason: Confirmed single-security wrapper from the 2026-07-26 policy audit
+    provenance: internal_policy_audit_2026-07-26
+    tickers:
+      - MUU
+      - SNXX
+      - TSLL
+      - NVDL
+      - PLTD
+      - MULL
+      - AMDL
+      - SNDU
+      - MSTZ
+      - MSFU
+      - TSDD
+      - MUD
+      - GGLL
+      - METU
+      - TSLQ
+      - INTW
+      - AMZD
+      - MVLL
+      - NVDX
+      - AMZU
+      - AAPD
+      - ASTX
+      - AAOX
+      - AVS
+      - RKLX
+      - PLTU
+      - TSMX
+      - NBIL
+      - BEX
+      - MSTX
+      - NEBX
+      - LITX
+      - ORCX
+      - AAPU
+      - PTIR
+      - WDCX
+      - SMCX
+      - IONZ
+      - GLWG
+      - IREZ
+      - ADBU
+      - AMDY
+      - AMZY
+      - APLY
+      - ARMH
+      - ASMH
+      - BABO
+      - BMNZ
+      - BPH
+      - BRKC
+      - COIA
+      - CONY
+      - CRCA
+      - CRCO
+      - CRSH
+      - CVNY
+      - DAMD
+      - DIPS
+      - DRAY
+      - FBY
+      - FIAT
+      - GMEY
+      - GOOY
+      - GSKH
+      - HIYY
+      - HOOY
+      - HOOZ
+      - HSBH
+      - ICOI
+      - IMRA
+      - IMST
+      - INYY
+      - IRE
+      - LLYX
+      - LOFF
+      - MARO
+      - MPL
+      - MRNX
+      - MRNY
+      - MSFO
+      - MSTY
+      - MUZ
+      - NFLY
+      - NVDB
+      - NVDY
+      - NVOH
+      - NVOX
+      - NYYY
+      - OKLS
+      - PLTA
+      - PLTY
+      - PYPU
+      - PYPY
+      - QSU
+      - RBLY
+      - RDYY
+      - RIOX
+      - SAPH
+      - SHEH
+      - SKHL
+      - SKHU
+      - SMCY
+      - SNOY
+      - SPCF
+      - STHH
+      - STSM
+      - TMH
+      - TSLI
+      - TSLY
+      - TSMY
+      - TXNU
+      - TYYY
+      - UNHU
+      - WNTR
+      - XOMO
+      - XYZY
+      - ZETX
+  diversified:
+    reason: Confirmed diversified or non-single-company exposure
+    provenance: internal_policy_audit_2026-07-26
+    tickers:
+      - BSTP
+      - DULL
+      - EAPR
+      - EBUF
+      - EJAN
+      - EJUL
+      - EOCT
+      - IAPR
+      - IAUG
+      - IBUF
+      - IDEC
+      - IFEB
+      - IJAN
+      - IJUL
+      - IJUN
+      - IMAR
+      - IMAY
+      - INOV
+      - IOCT
+      - ISEP
+      - MSOX
+      - PSTP
+      - QFLR
+      - RFLR
+      - RSDE
+      - RSJN
+      - RSSE
+      - SFLR
+      - SHNY
+  review_needed:
+    reason: Exposure could not be established confidently from stored metadata
+    provenance: internal_policy_audit_2026-07-26
+    tickers:
+      - AIYY
+      - GDXY
+      - HYNX
+      - JPO
+      - OARK
+      - SPAX
+      - YSPC
+
+# Dated overrides take precedence over every registry, rule, and provider signal.
+overrides: []

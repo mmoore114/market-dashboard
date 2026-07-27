@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 
 import yaml
+import duckdb
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -15,6 +16,10 @@ from market_dashboard.data.massive_reference_client import MassiveReferenceClien
 from market_dashboard.data.security_master import (
     SecurityMasterClassifier,
     SecurityMasterStore,
+)
+from market_dashboard.data.exposure_policy import (
+    ExposureClassificationStore,
+    ExposurePolicy,
 )
 from market_dashboard.data.storage import DUCKDB_PATH
 
@@ -44,6 +49,11 @@ def main() -> int:
     ) as handle:
         settings = yaml.safe_load(handle)
     config = settings["security_master"]
+    swing_config = settings["swing_universe"]
+    with (PROJECT_ROOT / swing_config["exposure_policy_config"]).open(
+        "r", encoding="utf-8"
+    ) as handle:
+        exposure_policy = ExposurePolicy(yaml.safe_load(handle))
     query = config["reference_query"]
     parquet_directory = PROJECT_ROOT / config["parquet_directory"]
 
@@ -64,6 +74,23 @@ def main() -> int:
                 page_limit=query["page_limit"],
             )
             summary = store.persist(records, snapshot_date, classifier)
+        with duckdb.connect(str(DUCKDB_PATH), read_only=True) as connection:
+            provider_frame = connection.execute(
+                """
+                SELECT ticker, name, security_type, normalized_category
+                FROM security_master
+                WHERE snapshot_date = ?
+                ORDER BY ticker
+                """,
+                [snapshot_date],
+            ).fetchdf()
+        classified = exposure_policy.classify_snapshot(provider_frame, snapshot_date)
+        classification_path = ExposureClassificationStore(
+            duckdb_path=DUCKDB_PATH,
+            parquet_directory=(
+                PROJECT_ROOT / swing_config["exposure_classification_directory"]
+            ),
+        ).persist(classified)
     except Exception as exc:  # noqa: BLE001 - CLI boundary.
         print(f"fatal error: {exc}")
         return 1
@@ -76,6 +103,9 @@ def main() -> int:
     print(f"rows written to duckdb: {summary['rows_written_to_duckdb']}")
     print(f"candidate tickers: {summary['candidate_tickers']}")
     print(f"parquet path: {summary['parquet_path']}")
+    print(f"exposure policy version: {exposure_policy.policy_version}")
+    print(f"exposure classification rows: {len(classified)}")
+    print(f"exposure classification parquet path: {classification_path}")
     return 0
 
 

@@ -264,6 +264,7 @@ class AdjustedBackfillRunner:
         start_date: str | date | None = None,
         end_date: str | date | None = None,
         overlap_days: int = 0,
+        policy_version: str | None = None,
     ) -> list[PlannedTickerRequest]:
         plan_date = date.fromisoformat(str(plan_snapshot_date))
         if tier not in {1, 2, 3}:
@@ -271,8 +272,42 @@ class AdjustedBackfillRunner:
         if overlap_days < 0:
             raise ValueError("overlap_days cannot be negative")
         with duckdb.connect(str(self.duckdb_path), read_only=True) as connection:
+            plan_columns = {
+                row[1]
+                for row in connection.execute(
+                    "PRAGMA table_info('adjusted_backfill_plan')"
+                ).fetchall()
+            }
+            if policy_version and "policy_version" not in plan_columns:
+                raise ValueError("adjusted backfill plan does not support policy versions")
+            if "policy_version" in plan_columns and not policy_version:
+                versions = connection.execute(
+                    """
+                    SELECT COUNT(DISTINCT policy_version)
+                    FROM adjusted_backfill_plan
+                    WHERE plan_snapshot_date = ?
+                    """,
+                    [plan_date],
+                ).fetchone()[0]
+                if versions > 1:
+                    raise ValueError(
+                        "policy_version is required when multiple plan versions exist"
+                    )
+            policy_predicate = (
+                "AND policy_version = ?" if policy_version else ""
+            )
+            parameters: list[Any] = [
+                plan_date,
+                tier,
+                start_rank,
+                start_rank,
+                end_rank,
+                end_rank,
+            ]
+            if policy_version:
+                parameters.append(policy_version)
             plan_rows = connection.execute(
-                """
+                f"""
                 SELECT ticker, liquidity_rank, backfill_tier,
                        planned_history_start, planned_history_end
                 FROM adjusted_backfill_plan
@@ -280,16 +315,10 @@ class AdjustedBackfillRunner:
                   AND backfill_tier = ?
                   AND (? IS NULL OR liquidity_rank >= ?)
                   AND (? IS NULL OR liquidity_rank <= ?)
+                  {policy_predicate}
                 ORDER BY liquidity_rank
                 """,
-                [
-                    plan_date,
-                    tier,
-                    start_rank,
-                    start_rank,
-                    end_rank,
-                    end_rank,
-                ],
+                parameters,
             ).fetchall()
             daily_exists = connection.execute(
                 """

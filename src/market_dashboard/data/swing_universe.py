@@ -14,11 +14,16 @@ from market_dashboard.data.storage import DUCKDB_PATH, PROCESSED_DIRECTORY
 
 SWING_UNIVERSE_COLUMNS = [
     "snapshot_date",
+    "policy_version",
     "ticker",
     "name",
     "security_category",
     "exchange",
     "exchange_mic",
+    "exposure_scope",
+    "exposure_classification_method",
+    "underlying_ticker",
+    "exposure_policy_reason",
     "latest_close",
     "latest_trading_date",
     "average_close_20",
@@ -44,6 +49,7 @@ SWING_UNIVERSE_COLUMNS = [
 @dataclass(frozen=True)
 class SwingUniverseBuildSummary:
     snapshot_date: str
+    policy_version: str
     source_security_master_snapshot_date: str
     source_flat_file_start_date: str
     source_flat_file_end_date: str
@@ -89,11 +95,15 @@ class SwingUniverseBuilder:
         security_master_snapshot_date: str | date,
         source_start_date: str | date,
         source_end_date: str | date,
+        policy_version: str,
     ) -> dict[str, Any]:
         snapshot = date.fromisoformat(str(snapshot_date))
         master_snapshot = date.fromisoformat(str(security_master_snapshot_date))
         start = date.fromisoformat(str(source_start_date))
         end = date.fromisoformat(str(source_end_date))
+        policy_version = str(policy_version).strip()
+        if not policy_version:
+            raise ValueError("policy_version cannot be empty")
         if start > end:
             raise ValueError("source_start_date must be on or before source_end_date")
 
@@ -101,6 +111,7 @@ class SwingUniverseBuilder:
             master_snapshot,
             start,
             end,
+            policy_version,
         )
         if expected_sessions < self.minimum_valid_observations:
             raise ValueError(
@@ -119,12 +130,14 @@ class SwingUniverseBuilder:
             start,
             end,
             expected_sessions,
+            policy_version,
         )
-        parquet_path = self.parquet_path(snapshot)
+        parquet_path = self.parquet_path(snapshot, policy_version)
         self._write_parquet(frame, parquet_path)
-        self._write_duckdb(frame, snapshot)
+        self._write_duckdb(frame, snapshot, policy_version)
         return SwingUniverseBuildSummary(
             snapshot_date=snapshot.isoformat(),
+            policy_version=policy_version,
             source_security_master_snapshot_date=master_snapshot.isoformat(),
             source_flat_file_start_date=start.isoformat(),
             source_flat_file_end_date=end.isoformat(),
@@ -135,10 +148,11 @@ class SwingUniverseBuilder:
             parquet_path=str(parquet_path),
         ).to_dict()
 
-    def parquet_path(self, snapshot_date: date) -> Path:
+    def parquet_path(self, snapshot_date: date, policy_version: str) -> Path:
         return (
             self.parquet_directory
             / f"snapshot_date={snapshot_date.isoformat()}"
+            / f"policy_version={policy_version}"
             / "swing_universe.parquet"
         )
 
@@ -147,6 +161,7 @@ class SwingUniverseBuilder:
         master_snapshot: date,
         start: date,
         end: date,
+        policy_version: str,
     ) -> tuple[pd.DataFrame, pd.DataFrame, int]:
         with duckdb.connect(str(self.duckdb_path), read_only=True) as connection:
             tables = {
@@ -162,16 +177,27 @@ class SwingUniverseBuilder:
                 raise ValueError("security_master table not found")
             if "flat_daily_bars_raw" not in tables:
                 raise ValueError("flat_daily_bars_raw view not found")
+            if "security_exposure_classification" not in tables:
+                raise ValueError("security_exposure_classification table not found")
 
             master = connection.execute(
                 """
-                SELECT ticker, name, normalized_category, normalized_exchange,
-                       primary_exchange, candidate_eligible, exclusion_reason
-                FROM security_master
-                WHERE snapshot_date = ?
+                SELECT m.ticker, m.name, m.normalized_category,
+                       m.normalized_exchange, m.primary_exchange,
+                       m.candidate_eligible, m.exclusion_reason,
+                       c.exposure_scope,
+                       c.classification_method AS exposure_classification_method,
+                       c.underlying_ticker,
+                       c.policy_reason AS exposure_policy_reason
+                FROM security_master m
+                JOIN security_exposure_classification c
+                  ON c.snapshot_date = m.snapshot_date
+                 AND c.ticker = m.ticker
+                 AND c.policy_version = ?
+                WHERE m.snapshot_date = ?
                 ORDER BY ticker
                 """,
-                [master_snapshot],
+                [policy_version, master_snapshot],
             ).fetchdf()
             if master.empty:
                 raise ValueError(
@@ -190,10 +216,15 @@ class SwingUniverseBuilder:
             metrics = connection.execute(
                 """
                 WITH structurally_eligible AS (
-                    SELECT ticker
-                    FROM security_master
-                    WHERE snapshot_date = ?
-                      AND candidate_eligible = TRUE
+                    SELECT m.ticker
+                    FROM security_master m
+                    JOIN security_exposure_classification c
+                      ON c.snapshot_date = m.snapshot_date
+                     AND c.ticker = m.ticker
+                     AND c.policy_version = ?
+                    WHERE m.snapshot_date = ?
+                      AND m.candidate_eligible = TRUE
+                      AND c.exposure_scope IN ('direct_equity', 'diversified')
                 ),
                 ranked AS (
                     SELECT
@@ -236,7 +267,7 @@ class SwingUniverseBuilder:
                 GROUP BY ticker
                 ORDER BY ticker
                 """,
-                [master_snapshot, start, end],
+                [policy_version, master_snapshot, start, end],
             ).fetchdf()
         return master, metrics, expected_sessions
 
@@ -249,9 +280,11 @@ class SwingUniverseBuilder:
         start: date,
         end: date,
         expected_sessions: int,
+        policy_version: str,
     ) -> pd.DataFrame:
         frame = master.merge(metrics, on="ticker", how="left")
         frame["snapshot_date"] = snapshot
+        frame["policy_version"] = policy_version
         frame["security_category"] = frame["normalized_category"]
         frame["exchange"] = frame["normalized_exchange"]
         frame["exchange_mic"] = frame["primary_exchange"]
@@ -264,6 +297,7 @@ class SwingUniverseBuilder:
         )
         frame["structurally_eligible"] = (
             frame["candidate_eligible"].fillna(False).astype(bool)
+            & frame["exposure_scope"].isin(["direct_equity", "diversified"])
         )
         frame["liquidity_eligible"] = (
             frame["latest_close"].ge(self.minimum_latest_close)
@@ -293,6 +327,10 @@ class SwingUniverseBuilder:
 
     def _exclusion_reason(self, row: pd.Series) -> str | None:
         if not bool(row["structurally_eligible"]):
+            if row["exposure_scope"] == "single_security":
+                return "Single-security product excluded from core swing universe"
+            if row["exposure_scope"] == "review_needed":
+                return "Exposure classification requires review"
             return str(row["exclusion_reason"])
         if int(row["valid_observation_count"]) < self.minimum_valid_observations:
             return "fewer_than_60_valid_observations"
@@ -327,7 +365,9 @@ class SwingUniverseBuilder:
             if temp_path.exists():
                 temp_path.unlink()
 
-    def _write_duckdb(self, frame: pd.DataFrame, snapshot_date: date) -> None:
+    def _write_duckdb(
+        self, frame: pd.DataFrame, snapshot_date: date, policy_version: str
+    ) -> None:
         with duckdb.connect(str(self.duckdb_path)) as connection:
             self._ensure_table(connection)
             connection.execute("BEGIN TRANSACTION")
@@ -345,12 +385,12 @@ class SwingUniverseBuilder:
                 connection.execute(
                     """
                     DELETE FROM swing_universe_snapshot
-                    WHERE snapshot_date = ?
+                    WHERE snapshot_date = ? AND policy_version = ?
                       AND ticker NOT IN (
                         SELECT ticker FROM incoming_swing_universe
                       )
                     """,
-                    [snapshot_date],
+                    [snapshot_date, policy_version],
                 )
                 connection.unregister("incoming_swing_universe")
                 connection.execute("COMMIT")
@@ -359,15 +399,53 @@ class SwingUniverseBuilder:
                 raise
 
     def _ensure_table(self, connection: duckdb.DuckDBPyConnection) -> None:
+        exists = connection.execute(
+            """
+            SELECT COUNT(*) FROM information_schema.tables
+            WHERE table_name = 'swing_universe_snapshot'
+            """
+        ).fetchone()[0]
+        if exists:
+            columns = {
+                row[1]
+                for row in connection.execute(
+                    "PRAGMA table_info('swing_universe_snapshot')"
+                ).fetchall()
+            }
+            legacy_columns = {
+                "policy_version": "VARCHAR DEFAULT 'legacy-policy-v1'",
+                "exposure_scope": "VARCHAR DEFAULT 'review_needed'",
+                "exposure_classification_method": (
+                    "VARCHAR DEFAULT 'legacy_unversioned_snapshot'"
+                ),
+                "underlying_ticker": "VARCHAR",
+                "exposure_policy_reason": (
+                    "VARCHAR DEFAULT 'Legacy snapshot requires policy-aware rebuild'"
+                ),
+            }
+            for column, definition in legacy_columns.items():
+                if column not in columns:
+                    connection.execute(
+                        f"ALTER TABLE swing_universe_snapshot "
+                        f"ADD COLUMN {column} {definition}"
+                    )
+            connection.execute(
+                "DROP INDEX IF EXISTS idx_swing_universe_snapshot_ticker"
+            )
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS swing_universe_snapshot (
                 snapshot_date DATE NOT NULL,
+                policy_version VARCHAR NOT NULL,
                 ticker VARCHAR NOT NULL,
                 name VARCHAR,
                 security_category VARCHAR NOT NULL,
                 exchange VARCHAR NOT NULL,
                 exchange_mic VARCHAR NOT NULL,
+                exposure_scope VARCHAR NOT NULL,
+                exposure_classification_method VARCHAR NOT NULL,
+                underlying_ticker VARCHAR,
+                exposure_policy_reason VARCHAR NOT NULL,
                 latest_close DOUBLE,
                 latest_trading_date DATE,
                 average_close_20 DOUBLE,
@@ -392,7 +470,7 @@ class SwingUniverseBuilder:
         )
         connection.execute(
             """
-            CREATE UNIQUE INDEX IF NOT EXISTS idx_swing_universe_snapshot_ticker
-            ON swing_universe_snapshot (snapshot_date, ticker)
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_swing_universe_snapshot_policy_ticker
+            ON swing_universe_snapshot (snapshot_date, ticker, policy_version)
             """
         )

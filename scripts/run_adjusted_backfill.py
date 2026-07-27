@@ -32,6 +32,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--start", default=None)
     parser.add_argument("--end", default=None)
     parser.add_argument("--overlap-days", type=int, default=None)
+    parser.add_argument("--policy-version", default=None)
     return parser.parse_args()
 
 
@@ -75,6 +76,7 @@ def main() -> int:
             resume=args.resume,
             dry_run=args.dry_run,
             stop_on_error=args.stop_on_error,
+            policy_version=args.policy_version,
         )
     except Exception as exc:  # noqa: BLE001 - CLI boundary.
         print(f"fatal error: {exc}")

@@ -13,11 +13,15 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DUCKDB_PATH = PROJECT_ROOT / "data" / "database" / "market_dashboard.duckdb"
 REQUIRED_FIELDS = [
     "snapshot_date",
+    "policy_version",
     "ticker",
     "name",
     "security_category",
     "exchange",
     "exchange_mic",
+    "exposure_scope",
+    "exposure_classification_method",
+    "exposure_policy_reason",
     "valid_observation_count",
     "expected_session_count",
     "session_coverage_percent",
@@ -45,6 +49,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate a swing-universe snapshot.")
     parser.add_argument("--snapshot-date", default=None)
     parser.add_argument("--sample-size", type=int, default=10)
+    parser.add_argument("--policy-version", required=True)
     return parser.parse_args()
 
 
@@ -53,6 +58,7 @@ def validate_swing_universe(
     parquet_directory: Path,
     *,
     snapshot_date: str | date | None = None,
+    policy_version: str | None = None,
     sample_size: int = 10,
 ) -> tuple[int, dict]:
     if not duckdb_path.exists():
@@ -73,25 +79,33 @@ def validate_swing_universe(
                 "SELECT MAX(snapshot_date) FROM swing_universe_snapshot"
             ).fetchone()[0]
         )
+        if not policy_version or not policy_version.strip():
+            return 1, {"error": "policy version is required"}
         frame = connection.execute(
             """
             SELECT * FROM swing_universe_snapshot
-            WHERE snapshot_date = ?
+            WHERE snapshot_date = ? AND policy_version = ?
             ORDER BY ticker
             """,
-            [selected_date],
+            [selected_date, policy_version],
         ).fetchdf()
     if frame.empty:
         return 1, {"error": f"swing universe snapshot not found: {selected_date}"}
 
     duplicates = int(
-        frame.groupby(["snapshot_date", "ticker"], dropna=False).size().gt(1).sum()
+        frame.groupby(
+            ["snapshot_date", "ticker", "policy_version"], dropna=False
+        ).size().gt(1).sum()
     )
     required_nulls = {
         field: int(frame[field].isna().sum()) for field in REQUIRED_FIELDS
     }
     structural = frame.loc[frame["structurally_eligible"].fillna(False)]
     core = frame.loc[frame["core_universe_eligible"].fillna(False)]
+    policy_violations = frame.loc[
+        frame["core_universe_eligible"].fillna(False)
+        & frame["exposure_scope"].isin(["single_security", "review_needed"])
+    ]
     structural_metric_nulls = {
         field: int(structural[field].isna().sum())
         for field in STRUCTURAL_METRIC_FIELDS
@@ -102,6 +116,7 @@ def validate_swing_universe(
     parquet_path = (
         parquet_directory
         / f"snapshot_date={selected_date.isoformat()}"
+        / f"policy_version={policy_version}"
         / "swing_universe.parquet"
     )
     parquet_rows = len(pd.read_parquet(parquet_path)) if parquet_path.exists() else None
@@ -113,6 +128,7 @@ def validate_swing_universe(
     }
     metrics = {
         "snapshot_date": selected_date,
+        "policy_version": policy_version,
         "total_rows": len(frame),
         "total_structurally_eligible": len(structural),
         "candidate_count_before_liquidity_filters": len(structural),
@@ -174,11 +190,20 @@ def validate_swing_universe(
         ],
         "parquet_rows": parquet_rows,
         "duckdb_parquet_row_count_match": parquet_rows == len(frame),
+        "exposure_scope_counts": _value_counts(frame["exposure_scope"]),
+        "single_security_tickers": frame.loc[
+            frame["exposure_scope"] == "single_security", "ticker"
+        ].tolist(),
+        "review_needed_tickers": frame.loc[
+            frame["exposure_scope"] == "review_needed", "ticker"
+        ].tolist(),
+        "policy_violation_tickers": policy_violations["ticker"].tolist(),
     }
     has_failure = bool(
         duplicates
         or any(required_nulls.values())
         or any(core_metric_nulls.values())
+        or len(policy_violations)
         or not metrics["duckdb_parquet_row_count_match"]
     )
     return (1 if has_failure else 0), metrics
@@ -226,6 +251,7 @@ def print_metrics(metrics: dict) -> None:
     print("swing universe validation")
     for key in (
         "snapshot_date",
+        "policy_version",
         "total_rows",
         "total_structurally_eligible",
         "candidate_count_before_liquidity_filters",
@@ -272,6 +298,7 @@ def main() -> int:
         DUCKDB_PATH,
         PROJECT_ROOT / settings["swing_universe"]["parquet_directory"],
         snapshot_date=args.snapshot_date,
+        policy_version=args.policy_version,
         sample_size=max(1, args.sample_size),
     )
     print_metrics(metrics)

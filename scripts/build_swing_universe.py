@@ -23,6 +23,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--security-master-snapshot-date", required=True)
     parser.add_argument("--start", required=True)
     parser.add_argument("--end", required=True)
+    parser.add_argument("--policy-version", default=None)
     return parser.parse_args()
 
 
@@ -33,6 +34,11 @@ def main() -> int:
     ) as handle:
         settings = yaml.safe_load(handle)
     config = settings["swing_universe"]
+    with (PROJECT_ROOT / config["exposure_policy_config"]).open(
+        "r", encoding="utf-8"
+    ) as handle:
+        exposure_policy = yaml.safe_load(handle)
+    policy_version = args.policy_version or exposure_policy["policy_version"]
     try:
         summary = SwingUniverseBuilder(
             duckdb_path=DUCKDB_PATH,
@@ -44,6 +50,7 @@ def main() -> int:
             security_master_snapshot_date=args.security_master_snapshot_date,
             source_start_date=args.start,
             source_end_date=args.end,
+            policy_version=policy_version,
         )
     except Exception as exc:  # noqa: BLE001 - CLI boundary.
         print(f"fatal error: {exc}")

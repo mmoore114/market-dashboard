@@ -9,6 +9,7 @@ from market_dashboard.data.security_master import (
     SecurityMasterClassifier,
     SecurityMasterStore,
 )
+from market_dashboard.data.exposure_policy import ExposureClassificationStore, ExposurePolicy
 from market_dashboard.data.swing_universe import SwingUniverseBuilder
 
 
@@ -19,6 +20,7 @@ from scripts.validate_swing_universe import validate_swing_universe
 
 
 MASTER_DATE = "2026-07-26"
+POLICY_VERSION = "exposure-policy-v2"
 START_DATE = date(2026, 3, 23)
 END_DATE = START_DATE + timedelta(days=89)
 THRESHOLDS = {
@@ -36,9 +38,7 @@ def config() -> dict:
             "active_only": True,
             "allowed_exchange_mics": ["XNYS", "XNAS", "ARCX", "XASE", "BATS"],
             "allowed_categories": ["Common Stock", "ETF"],
-            "excluded_security_types": {
-                "ETS": "Single-security ETF excluded from core swing universe"
-            },
+            "excluded_security_types": {},
             "acquisition_vehicle_name_patterns": ["acquisition corp"],
         },
         "exchange_mapping": {
@@ -89,10 +89,41 @@ def prepare_inputs(tmp_path: Path) -> tuple[Path, Path]:
             record("ILLIQUID"),
             record("SHORT"),
             record("SINGLE", exchange="BATS", security_type="ETS"),
+            record("REVIEW", exchange="BATS", security_type="ETF"),
         ],
         MASTER_DATE,
         SecurityMasterClassifier(config()),
     )
+    with duckdb.connect(str(duckdb_path), read_only=True) as connection:
+        master = connection.execute(
+            """
+            SELECT ticker, name, security_type, normalized_category
+            FROM security_master WHERE snapshot_date = ?
+            """,
+            [MASTER_DATE],
+        ).fetchdf()
+    policy = ExposurePolicy(
+        {
+            "policy_version": POLICY_VERSION,
+            "maintained_classifications": {
+                "single_security": {
+                    "reason": "confirmed",
+                    "provenance": "test",
+                    "tickers": ["SINGLE"],
+                },
+                "review_needed": {
+                    "reason": "ambiguous",
+                    "provenance": "test",
+                    "tickers": ["REVIEW"],
+                }
+            },
+            "overrides": [],
+        }
+    )
+    ExposureClassificationStore(
+        duckdb_path=duckdb_path,
+        parquet_directory=tmp_path / "exposure",
+    ).persist(policy.classify_snapshot(master, MASTER_DATE))
 
     rows: list[tuple] = []
     for index in range(90):
@@ -142,6 +173,7 @@ def build_snapshot(
         security_master_snapshot_date=MASTER_DATE,
         source_start_date=START_DATE,
         source_end_date=END_DATE,
+        policy_version=POLICY_VERSION,
     )
 
 
@@ -166,9 +198,22 @@ def test_bats_included_and_single_security_etf_excluded(tmp_path: Path) -> None:
             "SINGLE",
             False,
             False,
-            "Single-security ETF excluded from core swing universe",
+            "Single-security product excluded from core swing universe",
         ),
     ]
+
+
+def test_review_needed_cannot_enter_core_universe(tmp_path: Path) -> None:
+    duckdb_path, parquet_directory = prepare_inputs(tmp_path)
+    build_snapshot(duckdb_path, parquet_directory)
+    with duckdb.connect(str(duckdb_path), read_only=True) as connection:
+        row = connection.execute(
+            """
+            SELECT structurally_eligible, core_universe_eligible, exclusion_reason
+            FROM swing_universe_snapshot WHERE ticker = 'REVIEW'
+            """
+        ).fetchone()
+    assert row == (False, False, "Exposure classification requires review")
 
 
 def test_recent_metrics_coverage_and_liquidity_thresholds(tmp_path: Path) -> None:
@@ -227,8 +272,62 @@ def test_idempotency_and_older_snapshot_preservation(tmp_path: Path) -> None:
         ).fetchall()
 
     assert counts == [
-        (date(2026, 7, 25), 6, 6),
-        (date(2026, 7, 26), 6, 6),
+        (date(2026, 7, 25), 7, 7),
+        (date(2026, 7, 26), 7, 7),
+    ]
+
+
+def test_two_policy_versions_coexist_for_same_universe_date(tmp_path: Path) -> None:
+    duckdb_path, parquet_directory = prepare_inputs(tmp_path)
+    with duckdb.connect(str(duckdb_path), read_only=True) as connection:
+        master = connection.execute(
+            """
+            SELECT ticker, name, security_type, normalized_category
+            FROM security_master WHERE snapshot_date = ?
+            """,
+            [MASTER_DATE],
+        ).fetchdf()
+    v3_policy = ExposurePolicy(
+        {
+            "policy_version": "exposure-policy-v3",
+            "maintained_classifications": {
+                "single_security": {
+                    "reason": "confirmed",
+                    "provenance": "test",
+                    "tickers": ["SINGLE"],
+                }
+            },
+            "overrides": [],
+        }
+    )
+    ExposureClassificationStore(
+        duckdb_path=duckdb_path,
+        parquet_directory=tmp_path / "exposure",
+    ).persist(v3_policy.classify_snapshot(master, MASTER_DATE))
+    build_snapshot(duckdb_path, parquet_directory)
+    SwingUniverseBuilder(
+        duckdb_path=duckdb_path,
+        parquet_directory=parquet_directory,
+        thresholds=THRESHOLDS,
+        maximum_window_sessions=90,
+    ).build(
+        snapshot_date="2026-07-26",
+        security_master_snapshot_date=MASTER_DATE,
+        source_start_date=START_DATE,
+        source_end_date=END_DATE,
+        policy_version="exposure-policy-v3",
+    )
+    with duckdb.connect(str(duckdb_path), read_only=True) as connection:
+        counts = connection.execute(
+            """
+            SELECT policy_version, COUNT(*)
+            FROM swing_universe_snapshot
+            GROUP BY policy_version ORDER BY policy_version
+            """
+        ).fetchall()
+    assert counts == [
+        ("exposure-policy-v2", 7),
+        ("exposure-policy-v3", 7),
     ]
 
 
@@ -240,11 +339,12 @@ def test_validator_metrics(tmp_path: Path) -> None:
         duckdb_path,
         parquet_directory,
         snapshot_date="2026-07-26",
+        policy_version=POLICY_VERSION,
         sample_size=10,
     )
 
     assert exit_code == 0
-    assert metrics["total_rows"] == 6
+    assert metrics["total_rows"] == 7
     assert metrics["total_structurally_eligible"] == 5
     assert metrics["final_core_universe_count"] == 2
     assert metrics["duplicate_snapshot_ticker_groups"] == 0

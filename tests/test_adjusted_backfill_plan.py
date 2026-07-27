@@ -21,6 +21,7 @@ def create_source_universe(duckdb_path: Path, count: int = 1828) -> None:
             """
             CREATE TABLE swing_universe_snapshot (
                 snapshot_date DATE,
+                policy_version VARCHAR,
                 ticker VARCHAR,
                 name VARCHAR,
                 security_category VARCHAR,
@@ -42,6 +43,7 @@ def create_source_universe(duckdb_path: Path, count: int = 1828) -> None:
             rows.append(
                 (
                     "2026-07-26",
+                    "exposure-policy-v2",
                     ticker,
                     f"{ticker} Name",
                     "ETF" if rank % 5 == 0 else "Common Stock",
@@ -56,7 +58,7 @@ def create_source_universe(duckdb_path: Path, count: int = 1828) -> None:
                 )
             )
         connection.executemany(
-            "INSERT INTO swing_universe_snapshot VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO swing_universe_snapshot VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             rows,
         )
 
@@ -74,11 +76,13 @@ def test_tier_boundaries_deterministic_ranking_and_validation(tmp_path: Path) ->
         plan_snapshot_date="2026-07-26",
         source_universe_snapshot_date="2026-07-26",
         planned_history_start="2024-01-01",
+        policy_version="exposure-policy-v2",
     )
     exit_code, metrics = validate_adjusted_backfill_plan(
         duckdb_path,
         parquet_directory,
         plan_snapshot_date="2026-07-26",
+        policy_version="exposure-policy-v2",
     )
 
     assert summary["tier_1_count"] == 500
@@ -126,6 +130,7 @@ def test_tie_breakers_use_median_then_ticker(tmp_path: Path) -> None:
         plan_snapshot_date="2026-07-26",
         source_universe_snapshot_date="2026-07-26",
         planned_history_start="2024-01-01",
+        policy_version="exposure-policy-v2",
     )
 
     with duckdb.connect(str(duckdb_path), read_only=True) as connection:
@@ -153,6 +158,7 @@ def test_plan_idempotency_and_older_plan_preservation(tmp_path: Path) -> None:
             plan_snapshot_date=plan_date,
             source_universe_snapshot_date="2026-07-26",
             planned_history_start="2024-01-01",
+            policy_version="exposure-policy-v2",
         )
 
     with duckdb.connect(str(duckdb_path), read_only=True) as connection:
@@ -169,3 +175,42 @@ def test_plan_idempotency_and_older_plan_preservation(tmp_path: Path) -> None:
         (date(2026, 7, 25), 1828, 1828),
         (date(2026, 7, 26), 1828, 1828),
     ]
+
+
+def test_two_policy_versions_coexist_for_same_plan_date(tmp_path: Path) -> None:
+    duckdb_path = tmp_path / "market.duckdb"
+    create_source_universe(duckdb_path, count=3)
+    with duckdb.connect(str(duckdb_path)) as connection:
+        connection.execute(
+            """
+            INSERT INTO swing_universe_snapshot
+            SELECT snapshot_date, 'exposure-policy-v3', ticker, name,
+                   security_category, exchange, average_dollar_volume_20,
+                   median_dollar_volume_20, average_dollar_volume_60,
+                   latest_close, adr_percent_20, latest_trading_date,
+                   core_universe_eligible
+            FROM swing_universe_snapshot
+            """
+        )
+    store = AdjustedBackfillPlanStore(
+        duckdb_path=duckdb_path,
+        parquet_directory=tmp_path / "plans",
+    )
+    for version in ("exposure-policy-v2", "exposure-policy-v3"):
+        store.build(
+            plan_snapshot_date="2026-07-26",
+            source_universe_snapshot_date="2026-07-26",
+            planned_history_start="2024-01-01",
+            policy_version=version,
+        )
+    with duckdb.connect(str(duckdb_path), read_only=True) as connection:
+        assert connection.execute(
+            """
+            SELECT policy_version, COUNT(*)
+            FROM adjusted_backfill_plan
+            GROUP BY policy_version ORDER BY policy_version
+            """
+        ).fetchall() == [
+            ("exposure-policy-v2", 3),
+            ("exposure-policy-v3", 3),
+        ]

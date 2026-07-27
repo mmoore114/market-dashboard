@@ -15,6 +15,7 @@ from market_dashboard.data.storage import DUCKDB_PATH, PROCESSED_DIRECTORY
 PLAN_COLUMNS = [
     "plan_snapshot_date",
     "source_universe_snapshot_date",
+    "policy_version",
     "ticker",
     "name",
     "security_category",
@@ -37,6 +38,7 @@ PLAN_COLUMNS = [
 class BackfillPlanSummary:
     plan_snapshot_date: str
     source_universe_snapshot_date: str
+    policy_version: str
     total_symbols: int
     tier_1_count: int
     tier_2_count: int
@@ -69,11 +71,15 @@ class AdjustedBackfillPlanStore:
         source_universe_snapshot_date: str | date,
         planned_history_start: str | date,
         planned_history_end: str | date | None = None,
+        policy_version: str,
     ) -> dict[str, Any]:
         plan_date = date.fromisoformat(str(plan_snapshot_date))
         source_date = date.fromisoformat(str(source_universe_snapshot_date))
         start = date.fromisoformat(str(planned_history_start))
-        frame = self._read_ranked_universe(source_date)
+        policy_version = str(policy_version).strip()
+        if not policy_version:
+            raise ValueError("policy_version cannot be empty")
+        frame = self._read_ranked_universe(source_date, policy_version)
         if frame.empty:
             raise ValueError(f"no eligible source universe rows for {source_date}")
         if "SPY" not in set(frame["ticker"]):
@@ -88,17 +94,19 @@ class AdjustedBackfillPlanStore:
 
         frame["plan_snapshot_date"] = plan_date
         frame["source_universe_snapshot_date"] = source_date
+        frame["policy_version"] = policy_version
         frame["planned_history_start"] = start
         frame["planned_history_end"] = end
         frame["created_timestamp"] = datetime.now(tz=UTC).replace(tzinfo=None)
         frame = frame.reindex(columns=PLAN_COLUMNS)
-        path = self.parquet_path(plan_date)
+        path = self.parquet_path(plan_date, policy_version)
         self._write_parquet(frame, path)
-        self._write_duckdb(frame, plan_date)
+        self._write_duckdb(frame, plan_date, policy_version)
         tier_counts = frame["backfill_tier"].value_counts().to_dict()
         return BackfillPlanSummary(
             plan_snapshot_date=plan_date.isoformat(),
             source_universe_snapshot_date=source_date.isoformat(),
+            policy_version=policy_version,
             total_symbols=len(frame),
             tier_1_count=int(tier_counts.get(1, 0)),
             tier_2_count=int(tier_counts.get(2, 0)),
@@ -108,14 +116,17 @@ class AdjustedBackfillPlanStore:
             parquet_path=str(path),
         ).to_dict()
 
-    def parquet_path(self, plan_date: date) -> Path:
+    def parquet_path(self, plan_date: date, policy_version: str) -> Path:
         return (
             self.parquet_directory
             / f"plan_snapshot_date={plan_date.isoformat()}"
+            / f"policy_version={policy_version}"
             / "adjusted_backfill_plan.parquet"
         )
 
-    def _read_ranked_universe(self, source_date: date) -> pd.DataFrame:
+    def _read_ranked_universe(
+        self, source_date: date, policy_version: str
+    ) -> pd.DataFrame:
         with duckdb.connect(str(self.duckdb_path), read_only=True) as connection:
             table_exists = connection.execute(
                 """
@@ -146,6 +157,7 @@ class AdjustedBackfillPlanStore:
                         ) AS liquidity_rank
                     FROM swing_universe_snapshot
                     WHERE snapshot_date = ?
+                      AND policy_version = ?
                       AND core_universe_eligible = TRUE
                 )
                 SELECT *,
@@ -157,7 +169,7 @@ class AdjustedBackfillPlanStore:
                 FROM ranked
                 ORDER BY liquidity_rank
                 """,
-                [source_date],
+                [source_date, policy_version],
             ).fetchdf()
 
     def _write_parquet(self, frame: pd.DataFrame, path: Path) -> None:
@@ -176,7 +188,9 @@ class AdjustedBackfillPlanStore:
             if temp_path.exists():
                 temp_path.unlink()
 
-    def _write_duckdb(self, frame: pd.DataFrame, plan_date: date) -> None:
+    def _write_duckdb(
+        self, frame: pd.DataFrame, plan_date: date, policy_version: str
+    ) -> None:
         with duckdb.connect(str(self.duckdb_path)) as connection:
             self._ensure_table(connection)
             connection.execute("BEGIN TRANSACTION")
@@ -194,12 +208,12 @@ class AdjustedBackfillPlanStore:
                 connection.execute(
                     """
                     DELETE FROM adjusted_backfill_plan
-                    WHERE plan_snapshot_date = ?
+                    WHERE plan_snapshot_date = ? AND policy_version = ?
                       AND ticker NOT IN (
                         SELECT ticker FROM incoming_adjusted_backfill_plan
                       )
                     """,
-                    [plan_date],
+                    [plan_date, policy_version],
                 )
                 connection.unregister("incoming_adjusted_backfill_plan")
                 connection.execute("COMMIT")
@@ -208,11 +222,35 @@ class AdjustedBackfillPlanStore:
                 raise
 
     def _ensure_table(self, connection: duckdb.DuckDBPyConnection) -> None:
+        exists = connection.execute(
+            """
+            SELECT COUNT(*) FROM information_schema.tables
+            WHERE table_name = 'adjusted_backfill_plan'
+            """
+        ).fetchone()[0]
+        if exists:
+            columns = {
+                row[1]
+                for row in connection.execute(
+                    "PRAGMA table_info('adjusted_backfill_plan')"
+                ).fetchall()
+            }
+            if "policy_version" not in columns:
+                connection.execute(
+                    """
+                    ALTER TABLE adjusted_backfill_plan
+                    ADD COLUMN policy_version VARCHAR DEFAULT 'legacy-policy-v1'
+                    """
+                )
+            connection.execute(
+                "DROP INDEX IF EXISTS idx_adjusted_backfill_plan_date_ticker"
+            )
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS adjusted_backfill_plan (
                 plan_snapshot_date DATE NOT NULL,
                 source_universe_snapshot_date DATE NOT NULL,
+                policy_version VARCHAR NOT NULL,
                 ticker VARCHAR NOT NULL,
                 name VARCHAR NOT NULL,
                 security_category VARCHAR NOT NULL,
@@ -233,7 +271,7 @@ class AdjustedBackfillPlanStore:
         )
         connection.execute(
             """
-            CREATE UNIQUE INDEX IF NOT EXISTS idx_adjusted_backfill_plan_date_ticker
-            ON adjusted_backfill_plan (plan_snapshot_date, ticker)
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_adjusted_backfill_plan_policy_ticker
+            ON adjusted_backfill_plan (plan_snapshot_date, ticker, policy_version)
             """
         )

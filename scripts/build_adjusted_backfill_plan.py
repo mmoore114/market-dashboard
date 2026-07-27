@@ -21,6 +21,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--source-universe-snapshot-date", required=True)
     parser.add_argument("--start", default=None)
     parser.add_argument("--end", default=None)
+    parser.add_argument("--policy-version", default=None)
     return parser.parse_args()
 
 
@@ -31,6 +32,10 @@ def main() -> int:
     ) as handle:
         settings = yaml.safe_load(handle)
     config = settings["adjusted_backfill"]
+    with (PROJECT_ROOT / settings["swing_universe"]["exposure_policy_config"]).open(
+        "r", encoding="utf-8"
+    ) as handle:
+        exposure_policy = yaml.safe_load(handle)
     try:
         summary = AdjustedBackfillPlanStore(
             duckdb_path=DUCKDB_PATH,
@@ -40,6 +45,7 @@ def main() -> int:
             source_universe_snapshot_date=args.source_universe_snapshot_date,
             planned_history_start=args.start or config["planned_history_start"],
             planned_history_end=args.end,
+            policy_version=args.policy_version or exposure_policy["policy_version"],
         )
     except Exception as exc:  # noqa: BLE001 - CLI boundary.
         print(f"fatal error: {exc}")
