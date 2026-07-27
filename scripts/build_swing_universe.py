@@ -43,6 +43,9 @@ def main() -> int:
         summary = SwingUniverseBuilder(
             duckdb_path=DUCKDB_PATH,
             parquet_directory=PROJECT_ROOT / config["parquet_directory"],
+            exposure_classification_directory=(
+                PROJECT_ROOT / config["exposure_classification_directory"]
+            ),
             thresholds=config["thresholds"],
             maximum_window_sessions=config["recent_window_sessions"],
         ).build(

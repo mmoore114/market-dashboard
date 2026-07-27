@@ -28,6 +28,15 @@ def parse_args() -> argparse.Namespace:
         "--policy-config",
         default="config/exposure_policy.yaml",
     )
+    parser.add_argument(
+        "--recover",
+        action="store_true",
+        help="Repair one incomplete snapshot/policy publication without rebuilding.",
+    )
+    parser.add_argument(
+        "--policy-version",
+        help="Policy identity to recover; required with --recover.",
+    )
     return parser.parse_args()
 
 
@@ -41,6 +50,26 @@ def main() -> int:
         "r", encoding="utf-8"
     ) as handle:
         settings = yaml.safe_load(handle)
+    store = ExposureClassificationStore(
+        duckdb_path=DUCKDB_PATH,
+        parquet_directory=(
+            PROJECT_ROOT
+            / settings["swing_universe"]["exposure_classification_directory"]
+        ),
+    )
+    if args.recover:
+        if not args.policy_version:
+            print("fatal error: --policy-version is required with --recover")
+            return 1
+        try:
+            result = store.recover(snapshot, args.policy_version)
+        except Exception as exc:  # noqa: BLE001 - CLI boundary.
+            print(f"fatal error: {exc}")
+            return 1
+        print("exposure classification recovery summary")
+        for key, value in result.items():
+            print(f"{key.replace('_', ' ')}: {value}")
+        return 0
     with duckdb.connect(str(DUCKDB_PATH), read_only=True) as connection:
         frame = connection.execute(
             """
@@ -55,13 +84,7 @@ def main() -> int:
         print(f"fatal error: security master snapshot not found: {snapshot}")
         return 1
     classified = policy.classify_snapshot(frame, snapshot)
-    output = ExposureClassificationStore(
-        duckdb_path=DUCKDB_PATH,
-        parquet_directory=(
-            PROJECT_ROOT
-            / settings["swing_universe"]["exposure_classification_directory"]
-        ),
-    ).persist(classified)
+    output = store.persist(classified)
     print("exposure classification build summary")
     print(f"snapshot date: {snapshot}")
     print(f"policy version: {policy.policy_version}")

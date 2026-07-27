@@ -9,6 +9,7 @@ from typing import Any
 import duckdb
 import pandas as pd
 
+from market_dashboard.data.exposure_policy import ExposureClassificationStore
 from market_dashboard.data.storage import DUCKDB_PATH, PROCESSED_DIRECTORY
 
 
@@ -71,11 +72,17 @@ class SwingUniverseBuilder:
         *,
         duckdb_path: str | Path = DUCKDB_PATH,
         parquet_directory: str | Path = PROCESSED_DIRECTORY / "swing_universe",
+        exposure_classification_directory: str | Path = (
+            PROCESSED_DIRECTORY / "exposure_classification"
+        ),
         thresholds: dict[str, Any],
         maximum_window_sessions: int = 90,
     ) -> None:
         self.duckdb_path = Path(duckdb_path)
         self.parquet_directory = Path(parquet_directory)
+        self.exposure_classification_directory = Path(
+            exposure_classification_directory
+        )
         self.minimum_latest_close = float(thresholds["minimum_latest_close"])
         self.minimum_average_dollar_volume_20 = float(
             thresholds["minimum_average_dollar_volume_20"]
@@ -107,6 +114,10 @@ class SwingUniverseBuilder:
         if start > end:
             raise ValueError("source_start_date must be on or before source_end_date")
 
+        ExposureClassificationStore(
+            duckdb_path=self.duckdb_path,
+            parquet_directory=self.exposure_classification_directory,
+        ).require_complete(master_snapshot, policy_version)
         master, metrics, expected_sessions = self._read_inputs(
             master_snapshot,
             start,

@@ -212,6 +212,7 @@ def test_versions_coexist_and_validator_reports_conflicts(tmp_path: Path) -> Non
         ).fetchone()[0] == 4
     code, metrics = validate_exposure_classification(
         database,
+        parquet_directory=tmp_path / "classifications",
         snapshot_date="2026-07-26",
         policy_version="exposure-policy-v2",
     )

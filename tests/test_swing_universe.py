@@ -166,6 +166,7 @@ def build_snapshot(
     return SwingUniverseBuilder(
         duckdb_path=duckdb_path,
         parquet_directory=parquet_directory,
+        exposure_classification_directory=duckdb_path.parent / "exposure",
         thresholds=THRESHOLDS,
         maximum_window_sessions=90,
     ).build(
@@ -308,6 +309,7 @@ def test_two_policy_versions_coexist_for_same_universe_date(tmp_path: Path) -> N
     SwingUniverseBuilder(
         duckdb_path=duckdb_path,
         parquet_directory=parquet_directory,
+        exposure_classification_directory=tmp_path / "exposure",
         thresholds=THRESHOLDS,
         maximum_window_sessions=90,
     ).build(
