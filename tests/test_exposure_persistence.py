@@ -367,3 +367,25 @@ def test_downstream_builder_blocks_incomplete_publication_first(
             source_end_date=SNAPSHOT,
             policy_version=POLICY,
         )
+
+
+def test_downstream_builder_blocks_absent_requested_policy(tmp_path: Path) -> None:
+    builder = SwingUniverseBuilder(
+        duckdb_path=tmp_path / "market.duckdb",
+        parquet_directory=tmp_path / "universe",
+        exposure_classification_directory=tmp_path / "classification",
+        thresholds={
+            "minimum_latest_close": 5,
+            "minimum_average_dollar_volume_20": 1,
+            "minimum_valid_observations": 1,
+            "minimum_session_coverage_percent": 1,
+        },
+    )
+    with pytest.raises(ValueError, match="publication absent"):
+        builder.build(
+            snapshot_date=SNAPSHOT,
+            security_master_snapshot_date=SNAPSHOT,
+            source_start_date=SNAPSHOT,
+            source_end_date=SNAPSHOT,
+            policy_version="exposure-policy-v3",
+        )

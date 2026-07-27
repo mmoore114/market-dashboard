@@ -5,8 +5,9 @@ Massive ticker-reference fields are provider facts. In particular, the raw
 as conclusive evidence that a product is or is not tied to one security.
 
 Economic exposure is derived separately and keyed by provider snapshot date,
-ticker, and policy version. The current policy identifier is
-`exposure-policy-v2`.
+ticker, and policy version. The configured default is `exposure-policy-v3`.
+The published `exposure-policy-v2` configuration and output remain immutable
+and explicitly selectable.
 
 ## Exposure scopes
 
@@ -35,10 +36,54 @@ ticker, and policy version. The current policy identifier is
 Issuer identity alone and generic words such as `2X`, `Bull`, `Bear`, `Long`,
 `Short`, or `Daily` are never sufficient for single-security classification.
 
-The maintained registry and overrides live in `config/exposure_policy.yaml`.
+The immutable v2 registry lives in `config/exposure_policy.yaml`. V3 lives in
+`config/exposure_policy_v3.yaml`, explicitly extends v2, and adds only dated
+review resolutions. The generic loader expands those resolution groups into
+ordinary overrides before constructing the policy.
 Overrides require a ticker, effective start, optional effective end, scope,
 reason, and provenance. Overlapping definitions are rejected. Overrides are
 the mechanism for intentional inclusion, exclusion, or review decisions.
+
+## Policy v3 review resolutions
+
+The completed 2026-07-26 review resolved all 136 products that v2 withheld as
+`review_needed`. Mutating v2 would have invalidated its published fingerprint
+and audit history, so the decisions created `exposure-policy-v3`:
+
+- 85 `single_security`
+- 37 `diversified`
+- 14 `non_equity`
+- 0 `review_needed`
+
+Every resolution is effective from 2026-07-26 and records
+`manual_issuer_prospectus_review_2026-07-26` provenance. Single-company
+wrappers carry their validated underlying ticker and remain excluded from the
+core universe, including option-income, WeeklyPay, leveraged, inverse, and
+autocallable wrappers tied to one company.
+
+ETF-on-ETF exposure follows the referenced fund's economic breadth: ARKK,
+DRAM, and XOVR wrappers remain diversified because their reference products
+hold multiple securities. Multi-company option-income funds and portfolios of
+autocallables are also diversified; option-based or leveraged construction
+alone does not make a product single-security. Crypto, commodity, and Treasury
+products are `non_equity`.
+
+The default policy path is configured in `config/settings.yaml`. Commands can
+reproduce v2 or select v3 explicitly:
+
+```bash
+python scripts/build_exposure_classification.py \
+  --snapshot-date YYYY-MM-DD \
+  --policy-config config/exposure_policy.yaml
+
+python scripts/build_exposure_classification.py \
+  --snapshot-date YYYY-MM-DD \
+  --policy-config config/exposure_policy_v3.yaml
+```
+
+Future manual resolutions must create another immutable policy file with a new
+version. They must not edit the meaning of a policy that has already been
+published.
 
 ## Rebuild workflow
 
@@ -93,7 +138,7 @@ Recover exactly one interrupted identity with:
 ```bash
 python scripts/build_exposure_classification.py \
   --snapshot-date YYYY-MM-DD \
-  --policy-version exposure-policy-v2 \
+  --policy-version exposure-policy-v3 \
   --recover
 ```
 
@@ -108,7 +153,7 @@ After recovery, run:
 ```bash
 python scripts/validate_exposure_classification.py \
   --snapshot-date YYYY-MM-DD \
-  --policy-version exposure-policy-v2
+  --policy-version exposure-policy-v3
 ```
 
 The validator resolves only that policy-versioned path and checks publication

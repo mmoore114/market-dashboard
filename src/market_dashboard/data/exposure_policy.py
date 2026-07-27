@@ -11,6 +11,7 @@ from typing import Any, Callable, Iterable
 
 import duckdb
 import pandas as pd
+import yaml
 
 from market_dashboard.data.storage import DUCKDB_PATH, PROCESSED_DIRECTORY
 
@@ -39,6 +40,117 @@ CLASSIFICATION_COLUMNS = [
 PUBLICATION_STATES = {"pending", "complete", "recovery_required"}
 PUBLICATION_KEY = ["snapshot_date", "policy_version"]
 CLASSIFICATION_KEY = ["snapshot_date", "ticker", "policy_version"]
+
+
+def load_exposure_policy_config(
+    path: str | Path,
+    *,
+    _seen: set[Path] | None = None,
+) -> dict[str, Any]:
+    """Load an immutable policy file and expand generic review resolutions."""
+    policy_path = Path(path).resolve()
+    seen = set() if _seen is None else set(_seen)
+    if policy_path in seen:
+        raise ValueError(f"cyclic exposure policy inheritance: {policy_path}")
+    seen.add(policy_path)
+    with policy_path.open("r", encoding="utf-8") as handle:
+        raw = yaml.safe_load(handle) or {}
+    if not isinstance(raw, dict):
+        raise ValueError(f"exposure policy must be a mapping: {policy_path}")
+
+    extends = raw.get("extends")
+    if extends:
+        base = load_exposure_policy_config(
+            policy_path.parent / str(extends),
+            _seen=seen,
+        )
+    else:
+        base = {}
+    merged = {
+        **base,
+        **{
+            key: value
+            for key, value in raw.items()
+            if key not in {"extends", "overrides", "review_resolutions"}
+        },
+    }
+    merged["overrides"] = [
+        *base.get("overrides", []),
+        *raw.get("overrides", []),
+        *_expand_review_resolutions(raw.get("review_resolutions")),
+    ]
+    return merged
+
+
+def load_exposure_policy(path: str | Path) -> ExposurePolicy:
+    return ExposurePolicy(load_exposure_policy_config(path))
+
+
+def _expand_review_resolutions(config: dict[str, Any] | None) -> list[dict[str, Any]]:
+    if not config:
+        return []
+    effective_start = str(config.get("effective_start_date", "")).strip()
+    provenance = str(config.get("provenance", "")).strip()
+    if not effective_start or not provenance:
+        raise ValueError(
+            "review resolutions require effective_start_date and provenance"
+        )
+    date.fromisoformat(effective_start)
+    groups = config.get("groups", {})
+    overrides: list[dict[str, Any]] = []
+    resolved_tickers: set[str] = set()
+    for scope, group in groups.items():
+        if scope not in EXPOSURE_SCOPES - {"review_needed"}:
+            raise ValueError(f"invalid resolved exposure scope: {scope}")
+        reason = str(group.get("reason", "")).strip()
+        if not reason:
+            raise ValueError(f"review resolution {scope} requires a reason")
+        underlyings = {
+            str(ticker).strip().upper(): str(underlying).strip().upper()
+            for ticker, underlying in group.get("underlyings", {}).items()
+        }
+        reference_exposures = {
+            str(ticker).strip().upper(): str(reference).strip()
+            for ticker, reference in group.get("reference_exposures", {}).items()
+        }
+        tickers = [
+            str(ticker).strip().upper() for ticker in group.get("tickers", [])
+        ]
+        if underlyings:
+            tickers.extend(underlyings)
+        for ticker in tickers:
+            if not ticker:
+                raise ValueError("review resolution ticker cannot be empty")
+            if ticker in resolved_tickers:
+                raise ValueError(f"duplicate review resolution: {ticker}")
+            resolved_tickers.add(ticker)
+            reference = reference_exposures.get(ticker)
+            overrides.append(
+                {
+                    "ticker": ticker,
+                    "effective_start_date": effective_start,
+                    "exposure_scope": scope,
+                    "underlying_ticker": underlyings.get(ticker),
+                    "reason": f"{reason}: {reference}" if reference else reason,
+                    "provenance": provenance,
+                }
+            )
+    expected_counts = config.get("expected_counts", {})
+    actual_counts = {
+        scope: sum(row["exposure_scope"] == scope for row in overrides)
+        for scope in ("single_security", "diversified", "non_equity")
+    }
+    for scope, expected in expected_counts.items():
+        if scope == "total":
+            actual = len(overrides)
+        else:
+            actual = actual_counts.get(scope, 0)
+        if actual != int(expected):
+            raise ValueError(
+                f"review resolution count mismatch for {scope}: "
+                f"expected {expected}, found {actual}"
+            )
+    return overrides
 
 
 @dataclass(frozen=True)

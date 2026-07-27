@@ -19,7 +19,7 @@ from market_dashboard.data.security_master import (
 )
 from market_dashboard.data.exposure_policy import (
     ExposureClassificationStore,
-    ExposurePolicy,
+    load_exposure_policy,
 )
 from market_dashboard.data.storage import DUCKDB_PATH
 
@@ -50,10 +50,9 @@ def main() -> int:
         settings = yaml.safe_load(handle)
     config = settings["security_master"]
     swing_config = settings["swing_universe"]
-    with (PROJECT_ROOT / swing_config["exposure_policy_config"]).open(
-        "r", encoding="utf-8"
-    ) as handle:
-        exposure_policy = ExposurePolicy(yaml.safe_load(handle))
+    exposure_policy = load_exposure_policy(
+        PROJECT_ROOT / swing_config["exposure_policy_config"]
+    )
     query = config["reference_query"]
     parquet_directory = PROJECT_ROOT / config["parquet_directory"]
 

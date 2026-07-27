@@ -34,7 +34,7 @@ security_master:
       - Common Stock
       - ETF
     # Provider type is an instrument-shape signal, not exposure truth.
-    # Economic exposure is classified by config/exposure_policy.yaml.
+    # Economic exposure is classified by the configured immutable policy version.
     excluded_security_types: {}
     acquisition_vehicle_name_patterns:
       - acquisition corp
@@ -65,7 +65,7 @@ security_master:
     OTHER: Other Security
 swing_universe:
   parquet_directory: data/processed/swing_universe
-  exposure_policy_config: config/exposure_policy.yaml
+  exposure_policy_config: config/exposure_policy_v3.yaml
   exposure_classification_directory: data/processed/exposure_classification
   recent_window_sessions: 90
   thresholds:

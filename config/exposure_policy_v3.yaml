@@ -1,0 +1,200 @@
+extends: exposure_policy.yaml
+policy_version: exposure-policy-v3
+
+# These decisions are effective-dated policy facts derived from the completed
+# manual issuer/prospectus review. The loader expands them into ordinary dated
+# overrides; product-specific research prose does not live in classifier code.
+review_resolutions:
+  review_date: 2026-07-26
+  classification_source: manual policy review with issuer/prospectus confirmation
+  effective_start_date: 2026-07-26
+  provenance: manual_issuer_prospectus_review_2026-07-26
+  expected_counts:
+    single_security: 85
+    diversified: 37
+    non_equity: 14
+    total: 136
+  groups:
+    single_security:
+      reason: Single-security product excluded from core swing universe
+      underlyings:
+        AAPW: AAPL
+        AAPX: AAPL
+        AHD: HOOD
+        AIYY: AI
+        AMA: AMAT
+        AMDW: AMD
+        AMKL: AMKR
+        AMPU: AMPX
+        AMZW: AMZN
+        ANEL: ANET
+        ANV: NVDA
+        ARMW: ARM
+        ASTN: ASTS
+        ASTY: ASTS
+        ATC: COIN
+        AVGW: AVGO
+        AVGX: AVGO
+        AVXX: AVAV
+        BABW: BABA
+        BRKW: BRK.B
+        COIW: COIN
+        CORD: CRWV
+        COSW: COST
+        CRCD: CRCL
+        DKNX: DKNG
+        GOOW: GOOGL
+        GOOX: GOOGL
+        HIMZ: HIMS
+        HOOW: HOOD
+        HOOX: HOOD
+        HYNX: SKHY
+        INFH: INFQ
+        IONX: IONQ
+        JPO: JPM
+        KEEX: KEEL
+        LMNX: LMND
+        LNOK: NOK
+        LUNL: LUNR
+        METW: META
+        MRA: MARA
+        MSFW: MSFT
+        MSFX: MSFT
+        MSR: MSTR
+        MSTW: MSTR
+        NFLW: NFLX
+        NVDQ: NVDA
+        NVDW: NVDA
+        OKLL: OKLO
+        ONDL: ONDS
+        OSCX: OSCR
+        OSSL: OSS
+        OUSL: OUST
+        PLA: PLTR
+        PLTW: PLTR
+        PLTZ: PLTR
+        PLU: PL
+        POEL: POET
+        PUR: PURR
+        QBTZ: QBTS
+        RCAX: RCAT
+        RGTX: RGTI
+        RGTZ: RGTI
+        RKLZ: RKLB
+        RKTL: RKT
+        SCA: SMCI
+        SMCZ: SMCI
+        SMST: MSTR
+        SOFX: SOFI
+        SOUX: SOUN
+        SPAX: SPCX
+        SPCQ: SPCX
+        SPCU: SPCX
+        STXL: STX
+        TLA: TSLA
+        TOPW: TOP
+        TSLT: TSLA
+        TSLW: TSLA
+        TSLZ: TSLA
+        UBEW: UBER
+        UMAL: UMAC
+        UNHW: UNH
+        VELL: VELO
+        VSTL: VST
+        WYFL: WYFI
+        YSPC: SPCX
+    diversified:
+      reason: Diversified multi-security exposure confirmed by manual issuer/prospectus review
+      tickers:
+        - ACEI
+        - ACII
+        - ACYN
+        - ACYQ
+        - ACYS
+        - ATCL
+        - BIGY
+        - CAGE
+        - CAIE
+        - CAIQ
+        - CHPY
+        - COPZ
+        - DRAL
+        - GDXW
+        - GDXY
+        - GPTY
+        - LFGY
+        - MINY
+        - OARK
+        - PAYH
+        - PAYM
+        - QVOL
+        - RAM
+        - RNTY
+        - SLTY
+        - SOXY
+        - TDAQ
+        - TMGN
+        - TSPY
+        - ULTY
+        - VAIE
+        - WEEL
+        - XOVL
+        - YBST
+        - YMAG
+        - YMAX
+        - YQQQ
+      reference_exposures:
+        ACEI: portfolio of equity-linked autocallables
+        ACYQ: portfolio of equity-linked autocallables
+        ATCL: portfolio of equity-linked autocallables
+        BIGY: portfolio of 50 large U.S. companies
+        CAGE: portfolio of equity-linked autocallables
+        CAIE: portfolio of equity-linked autocallables
+        CAIQ: Nasdaq-linked autocallable portfolio
+        CHPY: portfolio of semiconductor companies
+        COPZ: copper-miner portfolio
+        DRAL: DRAM ETF
+        GDXW: gold-miner portfolio
+        GDXY: gold-miner portfolio
+        OARK: ARKK ETF
+        QVOL: Nasdaq equity portfolio and options
+        RAM: DRAM ETF
+        RNTY: portfolio of real-estate companies
+        SLTY: multi-security option portfolio
+        TSPY: S&P 500
+        ULTY: multi-security option portfolio
+        VAIE: portfolio of equity-linked autocallables
+        WEEL: sector ETFs and multiple securities
+        XOVL: XOVR ETF
+    non_equity:
+      reason: Non-equity reference exposure confirmed by manual issuer/prospectus review
+      tickers:
+        - BITY
+        - BTCL
+        - BTCZ
+        - BUCK
+        - CPXR
+        - ETTY
+        - ETU
+        - GLDW
+        - IETH
+        - SOLM
+        - TLTP
+        - TSYW
+        - XRPM
+        - YBIT
+      reference_exposures:
+        BITY: Bitcoin
+        BTCL: Bitcoin
+        BTCZ: Bitcoin
+        BUCK: U.S. Treasuries
+        CPXR: copper index
+        ETTY: Ether
+        ETU: Ether
+        GLDW: gold
+        IETH: Ethereum
+        SOLM: Solana
+        TLTP: U.S. Treasury bonds
+        TSYW: U.S. Treasury bonds
+        XRPM: XRP
+        YBIT: Bitcoin

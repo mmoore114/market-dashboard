@@ -14,7 +14,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from market_dashboard.data.exposure_policy import (
     ExposureClassificationStore,
-    ExposurePolicy,
+    load_exposure_policy,
 )
 from market_dashboard.data.storage import DUCKDB_PATH
 
@@ -26,7 +26,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--snapshot-date", required=True)
     parser.add_argument(
         "--policy-config",
-        default="config/exposure_policy.yaml",
+        default=None,
+        help="Versioned policy file; defaults to swing_universe.exposure_policy_config.",
     )
     parser.add_argument(
         "--recover",
@@ -43,13 +44,14 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     snapshot = date.fromisoformat(args.snapshot_date)
-    policy_path = PROJECT_ROOT / args.policy_config
-    with policy_path.open("r", encoding="utf-8") as handle:
-        policy = ExposurePolicy(yaml.safe_load(handle))
     with (PROJECT_ROOT / "config" / "settings.yaml").open(
         "r", encoding="utf-8"
     ) as handle:
         settings = yaml.safe_load(handle)
+    policy_path = PROJECT_ROOT / (
+        args.policy_config
+        or settings["swing_universe"]["exposure_policy_config"]
+    )
     store = ExposureClassificationStore(
         duckdb_path=DUCKDB_PATH,
         parquet_directory=(
@@ -70,6 +72,7 @@ def main() -> int:
         for key, value in result.items():
             print(f"{key.replace('_', ' ')}: {value}")
         return 0
+    policy = load_exposure_policy(policy_path)
     with duckdb.connect(str(DUCKDB_PATH), read_only=True) as connection:
         frame = connection.execute(
             """
