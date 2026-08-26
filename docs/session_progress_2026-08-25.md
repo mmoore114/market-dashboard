@@ -318,3 +318,36 @@ No network request occurred, no credential value was printed, and no manifest
 row was created for the dry-run job. Adjusted bars, manifest state, v3 and
 legacy plan artifacts, the v3 swing universe, and the v3 exposure publication
 all remained unchanged. No real ingestion was authorized or started.
+
+## Exposure-policy-v3 ranks 51–100 ingestion checkpoint
+
+The first real v3 adjusted-history batch was explicitly authorized and limited
+to Tier 1 ranks 51–100, with requested history from `2024-01-01` through
+`2026-07-24`. All 6 adjusted-ingestion safety tests passed before execution.
+
+Execution results:
+
+- Selected symbols and planned requests: 50 / 50
+- Completed: 50
+- Failed, no-data, skipped-current, and resumed-terminal: 0
+- Requests completed on one attempt: 50
+- Sanitized HTTP 200 results: 50
+- Manifest records for the job: 50, all `completed`
+- Records with positive rows received: 50
+- Rows added: 31,729
+- Resulting adjusted storage: 63,279 rows across 100 tickers
+- Resulting date range: `2024-01-02` through `2026-07-24`
+
+Three new instruments had legitimately shorter available trading histories
+that begin after the requested start date. Their data was retained unchanged.
+All new histories remained within the authorized date boundaries.
+
+Storage validation passed with zero duplicate ticker/date groups, zero required
+OHLCV nulls, and exact per-ticker DuckDB/Parquet row-count agreement. The
+original ranks 1–50 retained their 31,550 rows, date range, and deterministic
+content fingerprint.
+
+The v3 exposure publication, v3 swing universe, v3 backfill plan, and legacy
+plan identities remained unchanged. The job manifest mapped to exactly ranks
+51–100, and no rank above 100 or outside the authorized range was requested or
+ingested. No additional batch was started.
