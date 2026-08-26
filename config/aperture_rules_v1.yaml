@@ -1,0 +1,71 @@
+rules_version: aperture-rules-v1
+effective_date: 2026-08-25
+status: hypothesis
+exposure_policy_version: exposure-policy-v3
+universe_policy_version: aperture-universe-v1
+feature_definition_version: aperture-features-v1
+state_contract_version: aperture-states-v1
+setup_definition_version: aperture-setups-v1
+regime_version: aperture-regime-v1
+
+market_mapping_universe:
+  required_locale: us
+  active_only: true
+  supported_exchanges: [XNYS, XNAS, ARCX, XASE, BATS]
+  eligible_exposure_scopes: [diversified]
+  allow_benchmark_instruments: true
+  minimum_price: 5.0
+  minimum_average_dollar_volume_20: 50000000.0
+
+equity_research_universe:
+  required_locale: us
+  active_only: true
+  supported_exchanges: [XNYS, XNAS, ARCX, XASE, BATS]
+  eligible_security_categories: [Common Stock, Depositary Receipt]
+  eligible_exposure_scopes: [direct_equity]
+  minimum_price: 5.0
+  minimum_market_cap: 300000000.0
+
+equity_trade_universe:
+  required_locale: us
+  active_only: true
+  supported_exchanges: [XNYS, XNAS, ARCX, XASE, BATS]
+  eligible_security_categories: [Common Stock, Depositary Receipt]
+  eligible_exposure_scopes: [direct_equity]
+  strict_entry:
+    minimum_price: 10.0
+    minimum_market_cap: 1000000000.0
+    minimum_average_dollar_volume_20: 50000000.0
+    minimum_adr_percent_20: 2.5
+  retention:
+    prior_membership_required: true
+    minimum_price: 9.0
+    minimum_market_cap: 850000000.0
+    minimum_average_dollar_volume_20: 42500000.0
+    minimum_adr_percent_20: 2.15
+
+extension:
+  reference: sma_50
+  wilder_atr_period: 14
+  entry_zone:
+    minimum: 0.0
+    maximum_exclusive: 3.0
+  healthy:
+    minimum: 3.0
+    maximum_exclusive: 5.0
+  extended:
+    minimum: 5.0
+    maximum_exclusive: 7.0
+  extreme_minimum: 7.0
+  new_entry_maximum_inclusive: 4.8
+
+risk:
+  account_equity: 25000.0
+  risk_per_idea_fraction: 0.0025
+  pilot_fraction: 0.3333333333333333
+  default_stop_wilder_atr_multiple: 1.6
+  earnings_lockout_sessions: 5
+  regime_multipliers:
+    green: 1.0
+    yellow: 0.5
+    red: 0.0

@@ -351,3 +351,53 @@ The v3 exposure publication, v3 swing universe, v3 backfill plan, and legacy
 plan identities remained unchanged. The job manifest mapped to exactly ranks
 51–100, and no rank above 100 or outside the authorized range was requested or
 ingested. No additional batch was started.
+
+## Aperture Milestone 1 rule-contract checkpoint
+
+Milestone 1 added tracked, pure decision contracts without reading from or
+writing to production market data.
+
+Implemented:
+
+- immutable `aperture-rules-v1` YAML configuration with explicit hypothesis
+  status, version identities, decomposable universe, extension, and risk rules;
+- strict typed loading, cross-field validation, and deterministic logical
+  fingerprinting;
+- separate pure market-mapping, equity-research, and equity-trade membership
+  evaluation with strict/retained/excluded modes and complete reason codes;
+- additive Wilder ATR14, Wilder ATR percentage, SMA200 distance, and Wilder ATR
+  extension features while preserving legacy simple ATR semantics;
+- typed structural, extension, tactical, action, regime, reason, veto, universe,
+  sizing-input, and serializable symbol-snapshot contracts; and
+- exact boundary, missing-data, multi-ticker, immutability, fingerprint, and
+  explicit-null tests.
+
+Changed tracked areas:
+
+- `config/aperture_rules_v1.yaml`
+- `src/market_dashboard/aperture/`
+- additive feature definitions under `src/market_dashboard/features/`
+- focused Aperture and feature tests under `tests/`
+- `README.md` and this progress checkpoint
+
+Verification:
+
+- Pre-change baseline: 218 passed.
+- Focused rule, universe, contract, feature, and pipeline tests: 59 passed.
+- Final full suite: 256 passed.
+- `git diff --check`: passed.
+
+Compatibility evidence:
+
+- Existing `atr_14` and `atr_percent_14` remain simple 14-session rolling
+  means; Wilder definitions use new field names.
+- Existing `trend_stage`, `price_action_state`, Opportunity Score, and
+  Leadership Score remain legacy/research outputs and cannot produce `Act`.
+- The new universe evaluator is not connected to the production swing-universe
+  builder.
+- No stage, setup, regime, or action-promotion formula was invented.
+- Exposure policies v2/v3 and all production builders remained unchanged.
+- No ingestion, Massive.com request, production feature build, DuckDB write,
+  Parquet write, or manifest write occurred during this milestone.
+
+Milestone 2 was not started.

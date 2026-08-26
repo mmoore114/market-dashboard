@@ -37,6 +37,24 @@ def add_trend_features(bars: pd.DataFrame) -> pd.DataFrame:
     frame["distance_from_sma_50_percent"] = (frame["close"] - frame["sma_50"]) / frame[
         "sma_50"
     ] * 100
+    frame["distance_from_sma_200_percent"] = _positive_denominator_ratio(
+        frame["close"] - frame["sma_200"],
+        frame["sma_200"],
+        scale=100,
+    )
+    wilder_atr = (
+        frame["wilder_atr_14"]
+        if "wilder_atr_14" in frame
+        else pd.Series(float("nan"), index=frame.index)
+    )
+    frame["atr_extension_from_sma_20_wilder"] = _positive_denominator_ratio(
+        frame["close"] - frame["sma_20"],
+        wilder_atr,
+    )
+    frame["atr_extension_from_sma_50_wilder"] = _positive_denominator_ratio(
+        frame["close"] - frame["sma_50"],
+        wilder_atr,
+    )
     frame["ema_9_slope_5d_percent"] = _slope_percent(frame, "ema_9", 5)
     frame["sma_20_slope_10d_percent"] = _slope_percent(frame, "sma_20", 10)
     frame["sma_50_slope_20d_percent"] = _slope_percent(frame, "sma_50", 20)
@@ -53,6 +71,19 @@ def add_trend_features(bars: pd.DataFrame) -> pd.DataFrame:
 def _nullable_greater_than(left: pd.Series, right: pd.Series) -> pd.Series:
     result = left > right
     return result.mask(left.isna() | right.isna(), pd.NA)
+
+
+def _positive_denominator_ratio(
+    numerator: pd.Series,
+    denominator: pd.Series,
+    *,
+    scale: float = 1.0,
+) -> pd.Series:
+    result = numerator / denominator * scale
+    return result.mask(
+        numerator.isna() | denominator.isna() | denominator.le(0),
+        pd.NA,
+    )
 
 
 def _slope_percent(frame: pd.DataFrame, column: str, lookback: int) -> pd.Series:

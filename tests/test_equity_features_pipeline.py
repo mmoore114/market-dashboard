@@ -145,6 +145,11 @@ def test_feature_tables_are_created_with_expected_schema(tmp_path: Path) -> None
     assert schema["range_ratio_5_to_20"] == "DOUBLE"
     assert schema["volume_ratio_5_to_20"] == "DOUBLE"
     assert schema["close_location_value"] == "DOUBLE"
+    assert schema["wilder_atr_14"] == "DOUBLE"
+    assert schema["wilder_atr_percent_14"] == "DOUBLE"
+    assert schema["distance_from_sma_200_percent"] == "DOUBLE"
+    assert schema["atr_extension_from_sma_20_wilder"] == "DOUBLE"
+    assert schema["atr_extension_from_sma_50_wilder"] == "DOUBLE"
 
 
 def test_rerun_upserts_without_duplicate_feature_rows(tmp_path: Path) -> None:

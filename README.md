@@ -86,6 +86,10 @@ Feature definitions:
 - `true_range`: max of `high - low`, `abs(high - previous_close)`, and `abs(low - previous_close)`.
 - `atr_14`: 14-day rolling mean of `true_range`.
 - `atr_percent_14`: `atr_14 / close * 100`.
+- `wilder_atr_14`: separately named Wilder ATR14, seeded with the arithmetic
+  mean of the first 14 true ranges and recursively smoothed thereafter.
+- `wilder_atr_percent_14`: `wilder_atr_14 / close * 100`; null when close is
+  missing or nonpositive.
 - `adr_percent_20`: 20-day rolling mean of `(high - low) / close * 100`.
 - `dollar_volume`: `close * volume`.
 - `average_volume_20`: 20-day rolling mean of `volume`.
@@ -99,9 +103,40 @@ Feature definitions:
 - `distance_from_252d_high_percent`: `(close - high_252d) / high_252d * 100`.
 - `ema_9`: 9-day exponential moving average of `close`.
 - `sma_20`, `sma_50`, `sma_200`: 20, 50, and 200-day simple moving averages of `close`.
+- `distance_from_sma_200_percent`: percent distance from SMA200.
+- `atr_extension_from_sma_20_wilder`: `(close - sma_20) / wilder_atr_14`.
+- `atr_extension_from_sma_50_wilder`: `(close - sma_50) / wilder_atr_14`.
 - SPY-relative excess returns: ticker return minus SPY return on the same date for 20, 60, and 120-day returns.
 
 Insufficient lookback history remains null. Long-lookback values are not filled with zero.
+The existing `atr_14` and `atr_percent_14` retain their simple rolling-mean
+semantics; Wilder ATR and extension fields are additive definitions.
+
+## Aperture V1 Rule Contracts
+
+`config/aperture_rules_v1.yaml` contains immutable, versioned V1 candidate
+rules. Its thresholds are hypotheses pending point-in-time empirical
+validation and do not generate `Act` decisions.
+
+Aperture keeps three memberships separate:
+
+- Market mapping covers eligible liquid diversified or benchmark instruments
+  used for tape, sector, industry, theme, breadth, and style context.
+- Equity research covers a broader direct-equity cohort for ranks and group
+  comparisons.
+- Equity trade applies strict direct-equity entry gates, with a separately
+  modeled prior-member retention hypothesis.
+
+The existing policy-versioned swing universe remains a broad research and
+adjusted-data-planning universe using its current $5 price, $50 million ADV,
+observation, and coverage requirements. It is not the stricter Aperture equity
+trade universe, and the new evaluator is not connected to that production
+builder in Milestone 1.
+
+Structural stage, numeric extension, extension state, tactical/setup state,
+regime, action state, reasons, and vetoes are distinct typed contracts. `S2E`
+is not a stored structural stage; it is represented as S2 structure plus a
+separate extension state when applicable.
 
 Trend-stage precedence:
 
@@ -199,6 +234,10 @@ Entry quality meanings:
 - `None`: no actionable setup state.
 
 All thresholds are initial transparent research assumptions and should be reviewed against actual workflow outcomes.
+
+The existing `trend_stage`, `price_action_state`, Opportunity Score, and
+Leadership Score remain legacy or research outputs. None directly promotes a
+symbol to Aperture `Act`.
 
 ## Initial Development Phases
 
