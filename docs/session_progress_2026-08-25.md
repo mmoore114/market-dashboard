@@ -215,3 +215,83 @@ Build and validate a corrected, policy-versioned adjusted-backfill plan from
 the validated v3 swing universe. Identify the corrected next unfilled rank
 range before any bounded dry run. Real ingestion still requires separate,
 explicit approval.
+
+## Exposure-policy-v3 adjusted-backfill plan milestone
+
+A policy-versioned adjusted-history plan was built and validated for plan
+snapshot `2026-08-25` from the validated `2026-07-26` v3 swing universe.
+
+### Test gate
+
+- Targeted adjusted-backfill-plan tests: 4 passed, 0 failed.
+- Full test suite: 218 passed, 0 failed.
+
+### Plan validation
+
+- Policy version: `exposure-policy-v3`
+- Total rows/tickers: 1,787 / 1,787
+- Planned history: `2024-01-01` through `2026-07-24`
+- Tier 1: 500 instruments, ranks 1–500
+- Tier 2: 500 instruments, ranks 501–1,000
+- Tier 3: 787 instruments, ranks 1,001–1,787
+- Continuous ranks: 1–1,787
+- Duplicate plan/ticker/policy groups: 0
+- Symbols duplicated across tiers: 0
+- Required-field nulls: 0
+- SPY occurrences: 1
+- DuckDB-only or Parquet-only rows: 0 / 0 across all 18 plan fields
+- V3 plan Parquet SHA-256:
+  `1824f289e1408e2a290dcb6c598a0ab3469c83c488973d95892a25df35d4f3c8`
+
+Plan membership exactly matched the 1,787 core-eligible members of the v3
+swing universe. Relative to the legacy plan, 1,787 memberships were shared,
+none were added, and 41 were removed.
+
+### Preserved identities
+
+- The v3 exposure publication remained `complete` with logical fingerprint
+  `fbb2e169e9c1e9896192fb0985efbb879c9861ab106b958d57a69276e56881d2`.
+- The v3 swing universe remained at 13,023 rows/tickers with Parquet SHA-256
+  `7bd5687548975e04f901bb02f5e498aa637afad82d62d58eb57b383f9dc0d6c1`.
+- The existing unversioned 1,828-row legacy plan was preserved under
+  `legacy-policy-v1` with exact DuckDB/Parquet agreement.
+- The legacy plan Parquet SHA-256 remained
+  `9b4e4604c13b931704fc405f5cd8dec0203b889d6368297cc15c146dfb1c9cd8`.
+
+### Existing adjusted-history coverage
+
+- All 50 existing adjusted-history tickers remained in the v3 plan.
+- Their corrected ranks span 1–50, all in Tier 1.
+- The longest continuously completed prefix is ranks 1–50.
+- The first unfilled corrected liquidity rank is 51.
+- The first 50 unfilled corrected ranks are 51–100 and are contiguous.
+- Adjusted bars remained at 31,550 rows and 50 tickers, with dates from
+  `2024-01-02` through `2026-07-24`.
+- Duplicate adjusted ticker/date groups and required OHLCV nulls remained zero.
+- The ingestion manifest remained at 50 rows: 45 `completed` and 5
+  `skipped_current`.
+
+No dry run or ingestion ran, and no Massive.com request occurred.
+
+### Next bounded dry run, not yet authorized or executed
+
+The exact bounded command for the next 50 unfilled Tier 1 ranks is:
+
+```bash
+.venv/bin/python scripts/run_adjusted_backfill.py \
+  --plan-snapshot-date 2026-08-25 \
+  --tier 1 \
+  --start-rank 51 \
+  --end-rank 100 \
+  --batch-size 50 \
+  --max-symbols 50 \
+  --job-id policy-v3-tier1-20260825-ranks-51-100 \
+  --start 2024-01-01 \
+  --end 2026-07-24 \
+  --policy-version exposure-policy-v3 \
+  --stop-on-error \
+  --dry-run
+```
+
+The runner evaluates local coverage before any real request and would mark any
+already-current selection accordingly. This command has not been run.
