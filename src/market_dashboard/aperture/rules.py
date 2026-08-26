@@ -9,13 +9,21 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, PositiveFloat, PositiveInt, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PositiveFloat,
+    PositiveInt,
+    field_validator,
+    model_validator,
+)
 
 
 class FrozenModel(BaseModel):
     """Strict immutable base model for public rule contracts."""
 
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(frozen=True, extra="forbid", allow_inf_nan=False)
 
 
 class MappingUniverseRules(FrozenModel):
@@ -23,9 +31,26 @@ class MappingUniverseRules(FrozenModel):
     active_only: bool
     supported_exchanges: tuple[str, ...] = Field(min_length=1)
     eligible_exposure_scopes: tuple[str, ...] = Field(min_length=1)
-    allow_benchmark_instruments: bool
+    benchmark_tickers: tuple[str, ...] = Field(min_length=1)
     minimum_price: PositiveFloat
     minimum_average_dollar_volume_20: PositiveFloat
+
+    @field_validator("benchmark_tickers")
+    @classmethod
+    def benchmark_allowlist_is_canonical(
+        cls,
+        tickers: tuple[str, ...],
+    ) -> tuple[str, ...]:
+        if any(
+            not ticker
+            or ticker != ticker.strip()
+            or ticker != ticker.upper()
+            for ticker in tickers
+        ):
+            raise ValueError("benchmark tickers must be nonempty canonical uppercase values")
+        if len(set(tickers)) != len(tickers):
+            raise ValueError("benchmark tickers must be unique")
+        return tickers
 
 
 class ResearchUniverseRules(FrozenModel):

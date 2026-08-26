@@ -401,3 +401,41 @@ Compatibility evidence:
   Parquet write, or manifest write occurred during this milestone.
 
 Milestone 2 was not started.
+
+## Aperture Milestone 1 hardening checkpoint
+
+A focused correction pass hardened the new contracts before any Milestone 2
+work began.
+
+Corrected:
+
+- all public Aperture rule and metric models reject NaN and positive or
+  negative infinity while preserving explicit nullable `None` values;
+- instrument exchange identity is explicitly `exchange_mic`;
+- market-mapping benchmark exceptions use a validated, versioned uppercase
+  ticker allowlist rather than a caller-controlled boolean;
+- universe membership modes and reasons enforce eligibility, nonempty/equal
+  reason lists, and unique reason codes;
+- retained members include the strict-entry failures that caused retention,
+  while prior-membership reasons appear only when retention could otherwise
+  permit membership;
+- freshness observations require timezone-aware datetimes; and
+- symbol snapshots attribute the exact logical rules fingerprint as well as
+  the named rules version.
+
+NumPy is now declared as a direct project dependency because the volatility
+feature module imports it directly.
+
+Verification:
+
+- Pre-correction baseline: 256 passed.
+- Focused hardening and feature regression tests: 117 passed.
+- Final full suite: 314 passed.
+- `git diff --check`: passed.
+
+Wilder ATR seeding/recursion, legacy simple ATR, extension boundaries and the
+inclusive 4.8 cap, absence of S2E as a structural stage, separate universe
+memberships, and all legacy research outputs remain unchanged. The new
+contracts remain disconnected from the production swing-universe builder. No
+ingestion, production feature build, Massive.com request, or market-data write
+occurred, and Milestone 2 was not started.

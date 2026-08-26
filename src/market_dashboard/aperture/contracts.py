@@ -5,11 +5,16 @@ from __future__ import annotations
 from datetime import date, datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class ContractModel(BaseModel):
-    model_config = ConfigDict(frozen=True, extra="forbid", use_enum_values=False)
+    model_config = ConfigDict(
+        frozen=True,
+        extra="forbid",
+        use_enum_values=False,
+        allow_inf_nan=False,
+    )
 
 
 class StructureStage(StrEnum):
@@ -77,6 +82,22 @@ class UniverseMembership(ContractModel):
     reason_codes: tuple[str, ...]
     reasons: tuple[str, ...]
 
+    @model_validator(mode="after")
+    def membership_is_consistent(self) -> "UniverseMembership":
+        if self.eligible and self.membership_mode is MembershipMode.EXCLUDED:
+            raise ValueError("eligible membership cannot be excluded")
+        if not self.eligible and self.membership_mode is not MembershipMode.EXCLUDED:
+            raise ValueError("ineligible membership must be excluded")
+        if self.membership_mode is MembershipMode.RETAINED and not self.eligible:
+            raise ValueError("retained membership must be eligible")
+        if not self.reason_codes or not self.reasons:
+            raise ValueError("membership reasons cannot be empty")
+        if len(self.reason_codes) != len(self.reasons):
+            raise ValueError("reason codes and reasons must have equal lengths")
+        if len(set(self.reason_codes)) != len(self.reason_codes):
+            raise ValueError("duplicate membership reason codes are not allowed")
+        return self
+
 
 class UniverseMemberships(ContractModel):
     market_mapping: UniverseMembership
@@ -89,9 +110,17 @@ class FreshnessMetadata(ContractModel):
     observed_at: datetime
     is_stale: bool
 
+    @field_validator("observed_at")
+    @classmethod
+    def observed_at_has_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("observed_at must be timezone-aware")
+        return value
+
 
 class VersionIdentifiers(ContractModel):
     rules_version: str = Field(min_length=1)
+    rules_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
     exposure_policy_version: str = Field(min_length=1)
     universe_policy_version: str = Field(min_length=1)
     feature_definition_version: str = Field(min_length=1)

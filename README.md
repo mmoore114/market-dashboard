@@ -121,7 +121,8 @@ validation and do not generate `Act` decisions.
 Aperture keeps three memberships separate:
 
 - Market mapping covers eligible liquid diversified or benchmark instruments
-  used for tape, sector, industry, theme, breadth, and style context.
+  used for tape, sector, industry, theme, breadth, and style context. Benchmark
+  exceptions come from the versioned ticker allowlist in the rules file.
 - Equity research covers a broader direct-equity cohort for ranks and group
   comparisons.
 - Equity trade applies strict direct-equity entry gates, with a separately
@@ -132,6 +133,16 @@ adjusted-data-planning universe using its current $5 price, $50 million ADV,
 observation, and coverage requirements. It is not the stricter Aperture equity
 trade universe, and the new evaluator is not connected to that production
 builder in Milestone 1.
+
+Universe instrument facts use explicit exchange MICs such as `XNAS`, `XNYS`,
+and `ARCX`. Tickers and MICs are normalized to canonical uppercase values;
+benchmark status is never supplied by a caller-controlled boolean.
+
+Public Aperture numeric contracts accept finite values or explicit `null` when
+a metric is nullable. NaN and positive or negative infinity are rejected.
+Snapshot freshness timestamps must include a timezone, and every snapshot
+attributes both the named rules version and the deterministic rules
+fingerprint.
 
 Structural stage, numeric extension, extension state, tactical/setup state,
 regime, action state, reasons, and vetoes are distinct typed contracts. `S2E`

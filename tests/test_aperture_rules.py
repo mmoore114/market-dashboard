@@ -56,3 +56,59 @@ def test_extra_rule_fields_are_rejected() -> None:
 
     with pytest.raises(ValidationError):
         ApertureRules.model_validate(rules)
+
+
+@pytest.mark.parametrize(
+    "tickers",
+    [[], ["SPY", "SPY"], ["spy"], [""], [" SPY"]],
+)
+def test_invalid_benchmark_allowlists_are_rejected(tickers: list[str]) -> None:
+    rules = raw_rules()
+    rules["market_mapping_universe"]["benchmark_tickers"] = tickers
+
+    with pytest.raises(ValidationError):
+        ApertureRules.model_validate(rules)
+
+
+def test_valid_benchmark_allowlist_is_versioned() -> None:
+    rules = load_aperture_rules(RULE_PATH)
+    assert rules.market_mapping_universe.benchmark_tickers == (
+        "SPY",
+        "QQQ",
+        "IWM",
+        "RSP",
+        "QQQE",
+    )
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+@pytest.mark.parametrize(
+    "path",
+    [
+        ("market_mapping_universe", "minimum_price"),
+        ("equity_research_universe", "minimum_market_cap"),
+        ("equity_trade_universe", "strict_entry", "minimum_adr_percent_20"),
+        (
+            "equity_trade_universe",
+            "retention",
+            "minimum_average_dollar_volume_20",
+        ),
+        ("extension", "entry_zone", "minimum"),
+        ("extension", "new_entry_maximum_inclusive"),
+        ("risk", "account_equity"),
+        ("risk", "risk_per_idea_fraction"),
+        ("risk", "regime_multipliers", "yellow"),
+    ],
+)
+def test_all_rule_numeric_sections_reject_nonfinite_values(
+    path: tuple[str, ...],
+    value: float,
+) -> None:
+    rules = raw_rules()
+    target = rules
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+
+    with pytest.raises(ValidationError):
+        ApertureRules.model_validate(rules)

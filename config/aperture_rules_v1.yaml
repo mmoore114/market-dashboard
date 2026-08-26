@@ -13,7 +13,7 @@ market_mapping_universe:
   active_only: true
   supported_exchanges: [XNYS, XNAS, ARCX, XASE, BATS]
   eligible_exposure_scopes: [diversified]
-  allow_benchmark_instruments: true
+  benchmark_tickers: [SPY, QQQ, IWM, RSP, QQQE]
   minimum_price: 5.0
   minimum_average_dollar_volume_20: 50000000.0
 

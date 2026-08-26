@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from market_dashboard.aperture.contracts import (
     ContractModel,
@@ -74,10 +74,17 @@ class InstrumentFacts(ContractModel):
     ticker: str = Field(min_length=1)
     active: bool
     locale: str = Field(min_length=1)
-    exchange: str = Field(min_length=1)
+    exchange_mic: str = Field(min_length=1)
     security_category: str = Field(min_length=1)
     exposure_scope: str = Field(min_length=1)
-    is_benchmark: bool
+
+    @field_validator("ticker", "exchange_mic")
+    @classmethod
+    def normalize_identifiers(cls, value: str) -> str:
+        normalized = value.strip().upper()
+        if not normalized:
+            raise ValueError("identifier cannot be blank")
+        return normalized
 
 
 class CurrentMetrics(ContractModel):
@@ -119,7 +126,7 @@ def _common_failures(
         failures.append(UniverseReasonCode.INACTIVE)
     if facts.locale.lower() != required_locale.lower():
         failures.append(UniverseReasonCode.NON_US_LOCALE)
-    if facts.exchange not in exchanges:
+    if facts.exchange_mic not in exchanges:
         failures.append(UniverseReasonCode.UNSUPPORTED_EXCHANGE)
     return failures
 
@@ -165,7 +172,7 @@ def _evaluate_mapping(
     )
     if not (
         facts.exposure_scope in policy.eligible_exposure_scopes
-        or (policy.allow_benchmark_instruments and facts.is_benchmark)
+        or facts.ticker in policy.benchmark_tickers
     ):
         failures.append(UniverseReasonCode.INELIGIBLE_EXPOSURE)
     failures += _metric_failure(
@@ -277,12 +284,12 @@ def _evaluate_trade(
         return _result(
             True,
             MembershipMode.RETAINED,
-            [UniverseReasonCode.RETAINED_UNDER_HYSTERESIS],
+            [UniverseReasonCode.RETAINED_UNDER_HYSTERESIS, *strict_failures],
         )
 
     failures = [*base, *strict_failures]
-    if prior_trade_member:
+    if prior_trade_member and not base:
         failures.extend(code for code in retention_failures if code not in failures)
-    else:
+    elif not prior_trade_member and not base and not retention_failures:
         failures.append(UniverseReasonCode.PRIOR_MEMBERSHIP_REQUIRED)
     return _result(False, MembershipMode.EXCLUDED, failures)
