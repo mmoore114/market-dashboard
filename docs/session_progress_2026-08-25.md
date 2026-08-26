@@ -295,3 +295,26 @@ The exact bounded command for the next 50 unfilled Tier 1 ranks is:
 
 The runner evaluates local coverage before any real request and would mark any
 already-current selection accordingly. This command has not been run.
+
+## Exposure-policy-v3 ranks 51–100 dry-run checkpoint
+
+The bounded Tier 1 dry run for corrected ranks 51–100 completed successfully
+after all 6 adjusted-ingestion safety tests passed.
+
+Dry-run summary:
+
+- Dry run: true
+- Selected symbols: 50
+- Already current: 0
+- Full backfills: 50
+- Incremental updates: 0
+- Planned requests: 50
+- Completed, no-data, failed, skipped-current, and resumed-terminal counts: 0
+- Requested dates: `2024-01-01` through `2026-07-24`
+- Estimated minimum pacing delay: 12.25 seconds
+
+The dry-run path returned before manifest or Massive.com client construction.
+No network request occurred, no credential value was printed, and no manifest
+row was created for the dry-run job. Adjusted bars, manifest state, v3 and
+legacy plan artifacts, the v3 swing universe, and the v3 exposure publication
+all remained unchanged. No real ingestion was authorized or started.
