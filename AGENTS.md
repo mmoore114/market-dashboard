@@ -28,9 +28,15 @@ Keep equity research in this repository. Do not mix in separate options-tradabil
 Before editing:
 
 1. Run git status --short --branch.
-2. Read README.md, docs/session_progress_2026-07-26.md, docs/aperture_product_contract.md, docs/deepvue_audit.md, and docs/architecture_decision.md.
+2. Read docs/PROJECT_STATE.md first, then README.md, docs/session_progress_2026-07-26.md, docs/session_progress_2026-08-25.md, docs/aperture_product_contract.md, docs/deepvue_audit.md, and docs/architecture_decision.md.
 3. Preserve unrelated or user-owned changes.
 4. Confirm the requested milestone and its acceptance criteria.
+
+For structure/setup work, also read docs/structure-state-engine-v1.md,
+docs/setup-classification-engine-v1.md, and docs/engine-spec-open-issues.md.
+Explicit amendments in those contracts supersede older design candidates and
+the archived sources under docs/reference/. Do not implement unresolved rules
+by assumption. Update docs/PROJECT_STATE.md after meaningful milestones.
 
 ## Required verification
 

@@ -1,5 +1,12 @@
 # Aperture Product Contract
 
+> Historical foundation contract. For current structure/setup semantics, use
+> [PROJECT_STATE.md](PROJECT_STATE.md) and its linked canonical engine contracts.
+> The S1/S2/S3/S4 and setup-candidate sections below are superseded for new engine
+> design; existing code/history remains unchanged. Other candidate policies
+> retain their hypothesis status. Do not infer an approved taxonomy transfer
+> mechanism from this document.
+
 Status: foundation contract for implementation and testing  
 Origin: Aperture V1 prototype, Deepvue account audit, and the existing market-dashboard research engine
 

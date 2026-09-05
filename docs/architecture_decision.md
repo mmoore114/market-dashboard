@@ -1,5 +1,9 @@
 # Architecture Decision: Aperture Hybrid Application
 
+> Read [PROJECT_STATE.md](PROJECT_STATE.md) for current progress and work order.
+> This proposal is not a claim that the frontend/API layout is implemented.
+> Engine contracts and foundation reconciliation now precede engine coding.
+
 Status: proposed foundation decision  
 Decision scope: primary application architecture and division of responsibilities
 

@@ -1,5 +1,11 @@
 # market-dashboard
 
+Current implementation handoff: [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md).
+For new structure/setup work, read the canonical specifications linked there.
+The older stage/setup descriptions below describe legacy research or earlier
+candidates; they do not override the canonical amendments. Engine implementation
+remains gated on the documented specification issues.
+
 Market Dashboard is a Python research repository for equity discovery, ranking, and discretionary market research. The project is intended to collect market data, persist local research datasets, compute opportunity features, and expose a Streamlit dashboard for exploration.
 
 ## Planned Architecture
