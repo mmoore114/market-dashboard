@@ -1,6 +1,6 @@
 # Canonical setup-engine handoff
 
-> Documentation handoff: 2026-09-05. Status: **NOT IMPLEMENTATION-READY** until the applicable blockers in [engine-spec-open-issues.md](engine-spec-open-issues.md) are resolved.
+> Documentation handoff: 2026-09-05. Status: **IMPLEMENTATION-READY** when read with the authoritative [V1 decisions](engine-spec-decisions-v1.md), which close the conflicts recorded in [engine-spec-open-issues.md](engine-spec-open-issues.md).
 > This file preserves the complete recovered design below, with the explicit amendments listed here. Amendments override conflicting inherited prose, examples, and pseudocode. Do not infer missing decisions.
 > Original source: [reference/setup-classification-engine-v1.md](reference/setup-classification-engine-v1.md). The source's V1 label did not mean that this engine had shipped. No engine code or historical output is changed by this document.
 
@@ -11,7 +11,9 @@
 - EP is born `TRIGGERED`; event age is zero. It resolves after five following trading sessions without failure, with failure evaluated before resolution on that session.
 - For session T, evaluate a trigger against geometry committed by T-1. Do not include T's high/low in the reference that T must break, or rebuild that reference with T's bar before evaluating the crossing. Preserve `reference_as_of_session`, reference price, and the inputs used to construct it. Exact per-instance refresh and ATR-buffer timing remain open below.
 - Frozen prior-day levels also apply to range and pullback trigger checks. Current-day measurements can be evidence and help discover tomorrow's geometry; they cannot retroactively move today's trigger.
-- All other numerical rules below are **recovered proposals**, not newly confirmed choices. In particular, the competing EP definitions and non-EP resolution clocks remain unresolved. Do not substitute the parameters from another AI response.
+- Numerical conflicts, including EP, geometry refresh, compatibility, feature
+  definitions, and every lifecycle clock, are settled in the V1 decisions
+  document. It overrides conflicting recovered proposals below.
 - Do not apply pre-trigger contraction/zone predicates automatically as post-trigger failure rules: the distinction requires explicit resolution in the issues register.
 
 ## Recovered specification with confirmed amendments

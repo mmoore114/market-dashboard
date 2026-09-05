@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Updated: 2026-09-05. Current milestone: engine documentation and foundation audit.
+Updated: 2026-09-05. Current milestone: approved engine contracts and Deepvue taxonomy import foundation.
 
 ## Read first
 
@@ -11,13 +11,14 @@ session summaries. Historical checkpoints remain evidence of prior work.
 - [Structure contract](structure-state-engine-v1.md)
 - [Setup contract](setup-classification-engine-v1.md)
 - [Blocking specification decisions](engine-spec-open-issues.md)
+- [Approved V1 engine decisions](engine-spec-decisions-v1.md)
 - [Foundation and taxonomy audit](data-foundation-gap-report.md)
 - [Deepvue audit status](deepvue_audit.md)
 
-The engine specifications are complete recovered documents with confirmed
-amendments, but are **not yet implementation-ready**. Their outstanding conflicts
-are explicit. Codex must not infer missing rules or treat an older “ship V1”
-sentence as implementation authorization.
+The engine specifications are complete recovered documents. The explicit owner
+authorization and exact resolutions in `engine-spec-decisions-v1.md` make them
+implementation-ready. Codex must use that decision overlay rather than infer
+from conflicting recovered prose.
 
 ## Verified repository baseline
 
@@ -63,10 +64,22 @@ milestone. Dates are historical coverage, not a claim of current market freshnes
   them with remembered values from conversations.
 - Massive is the market-data/security foundation. Aperture should own its dated
   classification and theme membership records, with Deepvue as a bootstrap and
-  chart-review reference, not a required runtime dependency. Exact transfer and
-  taxonomy mappings are still to be verified.
+  chart-review reference, not a required runtime dependency. Sub-industry CSV
+  transfer is verified; parent hierarchy and theme membership remain unverified.
 
-## This documentation milestone
+## Current milestone additions
+
+- Completed authenticated Deepvue all-stock export inspection: 11,370 unique
+  symbols, 5,462 meaningful Sub-Industry classifications, 164 labels, and two
+  internally ambiguous group ranks.
+- Added a dry-run-by-default Deepvue taxonomy normalizer and dated DuckDB/Parquet
+  publisher. Raw proprietary exports remain local and uncommitted.
+- Recorded the observed 31-theme catalog; constituent membership is still
+  unverified and must not be invented.
+- Closed S1-S6 and U1-U8 with exact formulas, timing, precedence, missing-data,
+  identity, and lifecycle rules in `engine-spec-decisions-v1.md`.
+
+## Prior documentation milestone
 
 - Preserved both full source specifications verbatim in `docs/reference/`.
 - Added canonical copies with NEUTRAL, RESOLVED and trigger-timing amendments.
@@ -84,15 +97,14 @@ change; the 314 result above remains the recorded baseline.
 
 ## Next work
 
-1. Resolve the specification register against the full final design discussion
-   or explicit owner decisions; do not reconstruct missing decisions from
-   abbreviated memories. Make both contracts implementation-ready.
-2. Perform read-only local data inventory/validation through laptop Codex using
+1. Perform read-only local data inventory/validation through laptop Codex using
    the existing scripts. Confirm actual files, dates, adjustment policy and
    shared feature definitions before any new data build.
-3. Complete authenticated Deepvue inspection: hierarchy labels, constituents,
-   themes, available export/copy paths and symbol mapping. Record provenance and
-   unknowns before building owned classification tables.
+2. Pull the feature branch on the laptop, export the current all-stock Deepvue
+   CSV locally, run the taxonomy importer in dry-run mode, reconcile coverage to
+   the local Massive security-master snapshot, then explicitly publish.
+3. Obtain or curate verified many-to-many theme membership separately; do not
+   treat the observed theme catalog as membership.
 4. Implement the approved shared features and engine contracts on a feature
    branch with boundary, state-path and no-look-ahead tests, preserving legacy
    outputs and version identities.

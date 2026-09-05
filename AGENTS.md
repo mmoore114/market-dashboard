@@ -33,10 +33,11 @@ Before editing:
 4. Confirm the requested milestone and its acceptance criteria.
 
 For structure/setup work, also read docs/structure-state-engine-v1.md,
-docs/setup-classification-engine-v1.md, and docs/engine-spec-open-issues.md.
-Explicit amendments in those contracts supersede older design candidates and
-the archived sources under docs/reference/. Do not implement unresolved rules
-by assumption. Update docs/PROJECT_STATE.md after meaningful milestones.
+docs/setup-classification-engine-v1.md, docs/engine-spec-decisions-v1.md, and
+docs/engine-spec-open-issues.md. The decisions file is the authoritative overlay
+that closes the recovered conflicts. Explicit amendments supersede older design
+candidates and the archived sources under docs/reference/. Update
+docs/PROJECT_STATE.md after meaningful milestones.
 
 ## Required verification
 

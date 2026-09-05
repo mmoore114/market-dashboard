@@ -1,6 +1,6 @@
 # Canonical structure-engine handoff
 
-> Documentation handoff: 2026-09-05. Status: **NOT IMPLEMENTATION-READY** until the applicable blockers in [engine-spec-open-issues.md](engine-spec-open-issues.md) are resolved.
+> Documentation handoff: 2026-09-05. Status: **IMPLEMENTATION-READY** when read with the authoritative [V1 decisions](engine-spec-decisions-v1.md), which close the conflicts recorded in [engine-spec-open-issues.md](engine-spec-open-issues.md).
 > This file preserves the complete recovered design below, with the explicit amendments listed here. Amendments override conflicting inherited prose, examples, and pseudocode. Do not infer missing decisions.
 > Original source: [reference/structure-state-engine-v1.md](reference/structure-state-engine-v1.md). The source's V1 label did not mean that this engine had shipped. No engine code or historical output is changed by this document.
 
@@ -10,7 +10,9 @@
 - The arrows in conversation summaries were illustrative, not a replacement for the legal-transition table below.
 - This draft does not map existing `S1/S2/S3/S4` history onto the new states. Introduce a versioned migration after semantics are resolved; retain legacy outputs.
 - Missing or invalid required features must not silently become `NEUTRAL`.
-- The inherited EMA10 voting, initialization, shock behavior, and transition details require the explicit review recorded in the issues register. Conversation summaries are not authority to drop inputs or invent defaults.
+- The inherited EMA10 voting, initialization, shock behavior, transition details,
+  equality rules, and warmup behavior are settled in the V1 decisions document.
+  That document overrides conflicting recovered prose below.
 
 ## Recovered specification with canonical naming
 

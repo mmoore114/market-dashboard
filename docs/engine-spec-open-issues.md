@@ -1,12 +1,15 @@
 # Engine specification reconciliation
 
-Status: blocking engine implementation, not documentation delivery. Reviewed 2026-09-05.
+Status: **RESOLVED 2026-09-05** by explicit owner authorization to select and
+freeze coherent V1 formulas. The authoritative decisions are recorded in
+[engine-spec-decisions-v1.md](engine-spec-decisions-v1.md). This file remains as
+the audit trail of the conflicts that were closed.
 
 The complete recovered source specifications are preserved under `docs/reference/`.
 The canonical files contain explicit, higher-priority amendments for NEUTRAL,
 RESOLVED, EP's five-session resolution, and prior-day trigger references.
-They do not authorize filling the remaining gaps by intuition. No new numerical
-parameter in this register is an approved rule.
+The recovered sources did not authorize filling gaps by intuition. The later
+owner decision did authorize resolving them; no item below remains open.
 
 ## Structure decisions needed
 
