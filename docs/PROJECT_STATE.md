@@ -65,7 +65,8 @@ milestone. Dates are historical coverage, not a claim of current market freshnes
 - Massive is the market-data/security foundation. Aperture should own its dated
   classification and theme membership records, with Deepvue as a bootstrap and
   chart-review reference, not a required runtime dependency. Sub-industry CSV
-  transfer is verified; parent hierarchy and theme membership remain unverified.
+  transfer and dated theme membership capture are verified; parent hierarchy
+  remains unverified.
 
 ## Current milestone additions
 
@@ -74,8 +75,10 @@ milestone. Dates are historical coverage, not a claim of current market freshnes
   internally ambiguous group ranks.
 - Added a dry-run-by-default Deepvue taxonomy normalizer and dated DuckDB/Parquet
   publisher. Raw proprietary exports remain local and uncommitted.
-- Recorded the observed 31-theme catalog; constituent membership is still
-  unverified and must not be invented.
+- Verified all 31 Theme Tracker lists as a dated many-to-many snapshot: 30
+  populated themes plus Bitcoin with zero displayed stocks. Added a dry-run by
+  default theme normalizer and dated DuckDB/Parquet publisher; raw captures stay
+  local and uncommitted.
 - Closed S1-S6 and U1-U8 with exact formulas, timing, precedence, missing-data,
   identity, and lifecycle rules in `engine-spec-decisions-v1.md`.
 
@@ -103,8 +106,8 @@ change; the 314 result above remains the recorded baseline.
 2. Pull the feature branch on the laptop, export the current all-stock Deepvue
    CSV locally, run the taxonomy importer in dry-run mode, reconcile coverage to
    the local Massive security-master snapshot, then explicitly publish.
-3. Obtain or curate verified many-to-many theme membership separately; do not
-   treat the observed theme catalog as membership.
+3. Reconcile the verified Deepvue theme snapshot to the local Massive security
+   master, review unmatched symbols, then explicitly publish the dated snapshot.
 4. Implement the approved shared features and engine contracts on a feature
    branch with boundary, state-path and no-look-ahead tests, preserving legacy
    outputs and version identities.

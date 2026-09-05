@@ -41,8 +41,12 @@ Silver Miners, Gold Miners, Materials, Banks, Industrials, Transports, HealthCar
 Real Estate, Aerospace, Growth Stocks, Retail, Airlines, Utilities, Robotics,
 Software, Solar, Home Construction, Bitcoin, Medical, Social Media, and China
 Internet. The widget exposed Today/1W/1M/3M/YTD performance. Constituent export
-and complete many-to-many membership were not verified, so these names are a
-catalog observation, not membership data.
+was not offered, but authenticated read-only traversal of every theme's stock
+list verified the complete many-to-many membership shown on 2026-09-05. Counts
+ranged from 0 to 410; the largest lists were HealthCare (410), Biotechnology
+(237), Software (105), and Banks (101). Bitcoin explicitly displayed zero stocks.
+Every captured populated-theme count was reconciled to the count displayed by
+Deepvue. The source capture remains local and uncommitted.
 
 ## Aperture import decision
 
@@ -50,11 +54,12 @@ catalog observation, not membership data.
 persists on explicit `--publish`. The normalized snapshot retains provenance,
 missing classifications, per-symbol ranks, and row fingerprints. A separate
 group snapshot publishes a rank only when all ranked constituents agree.
-Sector, parent industry, and theme membership remain null until sourced; they
-are never reverse-engineered from a label.
+Sector and parent industry remain null until sourced; they are never
+reverse-engineered from a label. Verified theme membership is imported as its
+own dated, many-to-many snapshot with a separately preserved theme catalog.
 
-No API, GICS license/equivalence, complete theme membership, historical taxonomy,
-or revision history was verified. Deepvue remains an adjacent chart-review and
+No API, GICS license/equivalence, historical taxonomy, or revision history was
+verified. Deepvue remains an adjacent chart-review and
 bootstrap reference; Aperture must not depend on authenticated Deepvue at runtime.
 
 Do not commit raw proprietary exports or account information to Git.
