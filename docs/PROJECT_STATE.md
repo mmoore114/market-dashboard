@@ -139,3 +139,28 @@ All 294 inventoried data files remained unchanged. Publication, ingestion,
 engine implementation and PR merging remain paused. The previously reported
 adjusted-volume DuckDB/Parquet discrepancy and partial feature snapshot remain
 open; this correction does not resolve those separate inventory findings.
+
+## Local reference-error diagnostic correction
+
+The bounded reconciliation lookup was a temporary script, separate from the
+tracked paginated reference client. Its HTTP-error branches discarded provider
+response bodies. A reusable pure reference-error capture helper and mocked tests
+now cover bounded JSON/plain-text diagnostics, malformed/oversized bodies, secret
+and query redaction, and unchanged successful responses. The temporary lookup
+uses the helper; no real lookup or retry was run for this correction.
+
+Diagnostics preserve the requested ticker, HTTP status, optional provider error
+code, sanitized message, endpoint path and UTC capture time. Messages are capped
+at 1,024 characters and codes at 128; bodies above 65,536 bytes receive a safe
+summary. Raw bodies, headers, credentials and query strings are not stored.
+Previously discarded provider error messages remain unavailable until a separately
+authorized diagnostic retry. No URL-encoding defect has been established.
+
+NXH to BBBY remains flagged for its exchange difference and SEPQ to TUGN for its
+CIK mismatch. The other 21 dual-FIGI matches remain proposals only. No master,
+crosswalk, snapshot or historical classification was changed. Network retries,
+publication, engine implementation and Git publication remain paused.
+
+Verification: 13 focused mocked tests passed; full suite 346 passed. Repository
+whitespace checks passed. Data, source CSV and machine-settings fingerprints
+remained unchanged; no commit or push was performed.
