@@ -1,3 +1,4 @@
+from hashlib import sha256
 from datetime import date
 from pathlib import Path
 
@@ -8,6 +9,8 @@ import pytest
 from market_dashboard.data.deepvue_taxonomy import (
     DeepvueTaxonomyNormalizer,
     DeepvueTaxonomyStore,
+    _clean_classification,
+    _row_fingerprint,
 )
 
 
@@ -113,3 +116,47 @@ def test_store_is_idempotent_and_keeps_dated_snapshots(tmp_path: Path) -> None:
         ).fetchall()
     assert rows == [(date(2026, 9, 5), "AAA"), (date(2026, 9, 6), "BBB")]
     assert (tmp_path / "deepvue/source_as_of_date=2026-09-05/symbol_classification.parquet").exists()
+
+
+@pytest.mark.parametrize("value", ["", "-", "N/A", "NaN", None, float("nan"), pd.NA, pd.NaT])
+def test_missing_classifications_have_canonical_fingerprints(value: object) -> None:
+    assert _clean_classification(value) is None
+    row = pd.Series({
+        "source_as_of_date": date(2026, 9, 5),
+        "ticker": "AAA",
+        "sub_industry": _clean_classification(value),
+        "industry_rank_3m": pd.NA,
+    }, dtype=object)
+    expected = sha256(b"2026-09-05|AAA||").hexdigest()
+    assert _row_fingerprint(row) == expected
+    for missing in [None, float("nan"), pd.NA, pd.NaT]:
+        row["sub_industry"] = missing
+        fingerprint = _row_fingerprint(row)
+        assert fingerprint == expected == _row_fingerprint(row.copy())
+        assert pd.notna(fingerprint)
+        assert len(fingerprint) == 64
+
+
+@pytest.mark.parametrize("placeholder", ["", "-", "N/A", "NaN"])
+def test_csv_missing_classification_preserves_rank_and_counts(tmp_path: Path, placeholder: str) -> None:
+    source = tmp_path / "missing.csv"
+    write_export(source, [
+        {"Symbol": "AAA", "Industry Rank - 3 Month": "9", "Sub-Industry": placeholder},
+        {"Symbol": "BBB", "Industry Rank - 3 Month": "7", "Sub-Industry": "Software"},
+    ])
+    normalizer = DeepvueTaxonomyNormalizer()
+    first = normalizer.read_csv(source, "2026-09-05")
+    second = normalizer.read_csv(source, "2026-09-05")
+    assert first["source_row_fingerprint"].equals(second["source_row_fingerprint"])
+    assert first["source_row_fingerprint"].notna().all()
+    assert first["source_row_fingerprint"].str.fullmatch(r"[0-9a-f]{64}").all()
+    assert first["classification_status"].tolist() == ["UNCLASSIFIED", "CLASSIFIED"]
+    assert pd.isna(first.loc[0, "sub_industry"])
+    assert first["industry_rank_3m"].tolist() == [9, 7]
+    assert first["source_row_fingerprint"].tolist() == [
+        sha256(b"2026-09-05|AAA||9").hexdigest(),
+        sha256(b"2026-09-05|BBB|Software|7").hexdigest(),
+    ]
+    summary = normalizer.summarize(first, normalizer.build_group_snapshot(first))
+    assert (summary.source_rows, summary.classified_tickers, summary.unclassified_tickers) == (2, 1, 1)
+    assert (summary.ranked_tickers, summary.unique_sub_industries) == (2, 1)

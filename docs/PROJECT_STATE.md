@@ -114,3 +114,28 @@ change; the 314 result above remains the recorded baseline.
 
 Real ingestion still requires a bounded dry run and separate explicit approval.
 Use a pull request. Do not merge into main as part of this documentation task.
+
+## Laptop taxonomy validation correction — 2026-09-05
+
+Fixed missing-value handling in the taxonomy importer for Python/pandas null
+representations. Missing sub-industry values remain unclassified and null in
+storage; only the fingerprint payload uses the canonical empty string. Existing
+classification rules, ranks, schemas and source records are unchanged.
+
+Validation: 16 focused taxonomy tests and all 333 full-suite tests passed.
+The local taxonomy dry run succeeded for 11,370 unique symbols: 5,462 classified,
+5,908 unclassified, 164 groups, 5,465 ranked symbols, 162 consistent group ranks
+and two ambiguous group ranks. Every fingerprint was deterministic, non-null and
+64 hexadecimal characters; all classifications and ranks matched the prior audit.
+The theme dry run also passed (31 themes, 1,794 memberships, 1,323 tickers).
+
+Reconciliation against the dated 2026-07-26 Massive master remains unchanged:
+11,085 taxonomy tickers matched and all 285 unmatched records were preserved for
+review. Themes matched 1,792 memberships across 1,321 tickers; STLN and VMRK remain
+unmatched. Neither reconciliation has ambiguous master ticker keys. The snapshot
+date gap remains relevant; no aliases or identity explanations were inferred.
+
+All 294 inventoried data files remained unchanged. Publication, ingestion,
+engine implementation and PR merging remain paused. The previously reported
+adjusted-volume DuckDB/Parquet discrepancy and partial feature snapshot remain
+open; this correction does not resolve those separate inventory findings.

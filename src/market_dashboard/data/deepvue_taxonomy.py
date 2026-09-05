@@ -104,7 +104,7 @@ class DeepvueTaxonomyNormalizer:
                 "sub_industry": raw["sub_industry"],
                 "industry_rank_3m": rank.astype("Int64"),
                 "classification_status": raw["sub_industry"].map(
-                    lambda value: "CLASSIFIED" if value is not None else "UNCLASSIFIED"
+                    lambda value: "UNCLASSIFIED" if pd.isna(value) else "CLASSIFIED"
                 ),
                 "ingested_at": ingested_at,
             }
@@ -239,6 +239,8 @@ def _clean_ticker(value: object) -> str:
 
 
 def _clean_classification(value: object) -> str | None:
+    if pd.isna(value):
+        return None
     cleaned = str(value).strip()
     if cleaned.lower() in {"", "-", "—", "n/a", "na", "nan", "none"}:
         return None
@@ -247,11 +249,12 @@ def _clean_classification(value: object) -> str | None:
 
 def _row_fingerprint(row: pd.Series) -> str:
     rank = "" if pd.isna(row["industry_rank_3m"]) else str(int(row["industry_rank_3m"]))
+    sub_industry = "" if pd.isna(row["sub_industry"]) else row["sub_industry"]
     payload = "|".join(
         [
             str(row["source_as_of_date"]),
             row["ticker"],
-            row["sub_industry"] or "",
+            sub_industry,
             rank,
         ]
     )
