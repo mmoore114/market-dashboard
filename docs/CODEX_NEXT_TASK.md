@@ -1,12 +1,12 @@
 # Codex Next Task
 
-**Task ID:** AP-LEADERSHIP-001
+**Task ID:** AP-REGIME-001
 
-**Status:** COMPLETE
+**Status:** READY
 
 **Issued:** 2026-09-06
 
-**Base commit:** `3c7ebd9264675dd7d42103c75c5e609625f66a25`
+**Base commit:** `9ba7bfbac17e08992dd8216426a0eef25ae70b6f`
 
 ## Handoff protocol
 
@@ -14,32 +14,31 @@ This file is the single current assignment for VS Code Codex.
 
 1. Read `AGENTS.md`, `docs/PROJECT_STATE.md`, and every authoritative source
    listed below before editing.
-2. Work through the bounded milestone autonomously. Use the exact formulas and
-   boundaries in this assignment where older documents describe only candidates.
-3. Ask the user only if authoritative contracts materially conflict, a required
-   input cannot be represented without changing a protected data contract, or an
-   external/destructive action is required.
+2. Implement the exact V1 hypothesis in this assignment as a new opt-in regime
+   contract. Do not reinterpret legacy regime-like research outputs.
+3. Work autonomously unless contracts materially conflict, a required input
+   cannot be represented safely, or external/destructive action is required.
 4. At completion, mark this task `COMPLETE`, add a concise completion record,
    update `docs/PROJECT_STATE.md`, commit, push, and open a draft PR targeting
-   `codex/setup-engine-v1` so the PR contains only this milestone.
+   `codex/leadership-engine-v1` so it contains only this milestone.
 5. Return only the full commit SHA, focused and complete-suite test totals, PR
    link, and any genuine blocker. Keep detailed evidence in the repository.
 
 Preserve `.vscode/settings.json`, `.env`, credentials, databases, Parquet/CSV
-datasets, staged artifacts, generated reports, and all unrelated user changes.
+datasets, staged artifacts, generated reports, and unrelated user changes.
 
 ## Milestone
 
-Implement deterministic Strength/Leadership and Group Ranking V1 as a pure,
-point-in-time calculation layer.
+Implement a deterministic, point-in-time Market Regime Engine V1 with five
+independently visible sleeves and an auditable `GREEN`, `YELLOW`, `RED`, or
+`UNKNOWN` aggregate state.
 
 Create and work on:
 
-`codex/leadership-engine-v1`
+`codex/regime-engine-v1`
 
-Base it on this handoff branch after pulling the task commit. Preserve Structure
-Engine V1 at `29de3ef5abffe887dcc7d42af7e93feecd370165` and Setup Engine V1 at
-`3c7ebd9264675dd7d42103c75c5e609625f66a25` unchanged.
+Base it on this handoff branch after pulling the task commit. Preserve Structure,
+Setup, and Leadership/Group engines unchanged.
 
 ## Authoritative sources
 
@@ -47,288 +46,230 @@ Read and follow:
 
 - `AGENTS.md`
 - `docs/PROJECT_STATE.md`
-- `docs/aperture_product_contract.md`, especially Strength and research-universe
-  separation
-- `docs/architecture_decision.md`, especially group aggregates, snapshot fields,
-  and point-in-time processing
-- `docs/data-foundation-gap-report.md`
-- `docs/deepvue_audit.md`
-- `docs/security-identity-boundary.md`
-- `docs/structure-engine-implementation-v1.md`
-- `docs/setup-engine-implementation-v1.md`
-- existing feature, benchmark, ranking, taxonomy, theme, universe, and leadership
-  code and tests
+- `docs/aperture_product_contract.md`, especially Market Regime
+- `docs/architecture_decision.md`
+- `config/aperture_rules_v1.yaml` and its immutable loader
+- `docs/leadership-engine-implementation-v1.md`
+- existing index, breadth, volatility, benchmark, feature, universe, and
+  decision-contract code/tests
 
-This milestone creates new opt-in V1 contracts. Do not overwrite or silently
-reinterpret the existing 20/60/120-session SPY-relative features or legacy
-`Leadership Score`.
+The formulas below freeze the initial `market-regime-v1` hypothesis. Keep every
+component visible. Do not hide the result in a machine-learned or master score.
 
-## Layer boundaries
+## Timing and input contract
 
-Keep these outputs distinct:
+Regime for session T uses only completed T data and is eligible to influence new
+risk no earlier than T+1. Use an explicit exchange-session calendar; never count
+weekends/holidays or synthesize missing bars.
 
-- raw multi-window returns;
-- cross-sectional return percentiles;
-- SPY excess returns already present in the repository;
-- beta-adjusted residual strength versus QQQ;
-- individual-stock strength evidence;
-- sector, industry, sub-industry, and theme membership;
-- group aggregate metrics and ordinal ranks;
-- Structure Engine and Setup Engine context.
+Require typed point-in-time inputs for:
 
-Do not implement market regime, extension permission, earnings policy,
-actionability, trade entry policy, risk, sizing, portfolio heat, or an opportunity
-score. Leadership may describe a stock or group; it may not declare it tradable.
+- SPY, QQQ, and IWM daily closes;
+- RSP and QQQE daily closes;
+- VIX close or an explicitly identified equivalent spot-volatility series;
+- the T research universe and its daily close/SMA20/SMA50 values;
+- optional Structure Engine and Leadership/Group evidence from the exact same
+  session, universe, source basis, and version identities.
 
-## Individual strength contract
+All price series must use one documented, internally consistent basis. VIX is a
+market series, not a security-master equity and must retain its own identity.
+Missing hard sleeve inputs produce `UNKNOWN` for that sleeve; they are never zero,
+neutral, or forward-filled.
 
-Use exchange-session rows and point-in-time research-universe membership. For
-session T, compute only from bars and memberships available by T.
+## Sleeve 1 — index structure
 
-### Returns
-
-Use close-to-close simple price returns on the repository's consistent
-split-adjusted price basis:
+For each of SPY, QQQ, and IWM:
 
 ```text
-R5   = Close[T] / Close[T-5]   - 1
-R21  = Close[T] / Close[T-21]  - 1
-R63  = Close[T] / Close[T-63]  - 1
-R126 = Close[T] / Close[T-126] - 1
-R252 = Close[T] / Close[T-252] - 1
+CONSTRUCTIVE = Close > SMA20 > SMA50 and SMA20 > SMA20[T-5]
+DEFENSIVE    = Close < SMA50 and SMA20 < SMA20[T-5]
+MIXED        = otherwise
 ```
 
-These are the V1 trading-session definitions of one week, one month, three
-months, six months, and twelve months. Do not substitute calendar offsets.
-Preserve the actual source/adjustment metadata in evidence.
+Strict comparisons remain strict. Sleeve state:
 
-### Cross-sectional percentiles
+- `GREEN`: at least two CONSTRUCTIVE and zero DEFENSIVE;
+- `RED`: at least two DEFENSIVE;
+- `YELLOW`: every other fully evaluated combination;
+- `UNKNOWN`: any required index feature is unavailable.
 
-Rank each return independently across the point-in-time research universe on T.
-Use average ranks for ties and map deterministically to 0–100:
+Store every index vote, moving-average value, five-session SMA20 change, and
+failed predicate reason.
+
+## Sleeve 2 — breadth
+
+Across the exact point-in-time equity research universe, calculate:
 
 ```text
-percentile = 100 * (average_rank - 1) / (valid_count - 1)
+pct_above_sma20
+pct_above_sma50
+pct_constructive_structure
 ```
 
-Lowest valid value is 0 and highest is 100. When `valid_count == 1`, emit 50.
-Missing values remain null and are excluded from the denominator. Store valid
-counts and universe-policy/snapshot identity for every ranked component.
+`pct_constructive_structure` is the fraction of valid supplied Structure Engine
+states in `EMERGING` or `UPTREND`; store its separate valid denominator. Price
+breadth requires at least 60% universe coverage and at least 100 valid members.
+Structure breadth is evidence-only when unavailable and does not block price
+breadth classification.
 
-### Composite RS
+Price-breadth sleeve state:
 
-Implement the approved initial hypothesis as a new versioned output:
+- `GREEN`: pct_above_sma20 >= 0.55 and pct_above_sma50 >= 0.50;
+- `RED`: pct_above_sma20 < 0.35 and pct_above_sma50 < 0.40;
+- `YELLOW`: otherwise;
+- `UNKNOWN`: coverage/count gate fails.
+
+Equality is included only where the formula uses `>=`; a close exactly on an MA
+counts neither above nor below.
+
+## Sleeve 3 — leadership internals
+
+Use the new Leadership/Group V1 evidence from T. Compute:
 
 ```text
-RS_comp = 0.50 * percentile(R63)
-        + 0.30 * percentile(R126)
-        + 0.20 * percentile(R252)
+strong_leadership_fraction = count(RS_comp >= 80) / valid_RS_comp_count
+strong_rotation_fraction   = count(RS_rotation >= 80) / valid_RS_rotation_count
+positive_rotation_fraction = count(rotation_delta > 0) / valid_rotation_delta_count
+leading_group_fraction     = count(median_RS_comp >= 60) / valid_sub_industry_count
+improving_group_fraction   = count(median_rotation_delta > 0) / valid_sub_industry_count
 ```
 
-All three components are required. Do not renormalize weights around missing
-inputs. Emit explicit insufficient-data reasons.
+Group breadth uses rank-eligible `SUB_INDUSTRY` groups with valid medians only;
+do not use overlapping themes in that denominator. Require at least 100 valid
+symbols with 60% universe coverage and at least five eligible sub-industries.
 
-### Short-term rotation pulse
+Because cross-sectional percentiles make the first fraction relatively stable,
+classification emphasizes rotation participation and group breadth:
 
-Preserve one-week and one-month strength as an independent swing-horizon view:
+- `GREEN`: strong_rotation_fraction >= 0.20,
+  positive_rotation_fraction >= 0.50, leading_group_fraction >= 0.35, and
+  improving_group_fraction >= 0.50;
+- `RED`: strong_rotation_fraction < 0.10,
+  positive_rotation_fraction < 0.35, leading_group_fraction < 0.20, and
+  improving_group_fraction < 0.35;
+- `YELLOW`: otherwise;
+- `UNKNOWN`: any count/coverage gate fails.
+
+Store all denominators and the strong-leadership fraction as context. Do not
+blend RS_comp and RS_rotation into a new stock score.
+
+## Sleeve 4 — volatility
+
+Compute VIX close, SMA20, five-session percent change, and distance from SMA20.
+
+- `GREEN`: VIX close < 20 and VIX close <= 1.05 * VIX SMA20;
+- `RED`: VIX close >= 25 or VIX close >= 1.15 * VIX SMA20;
+- `YELLOW`: otherwise;
+- `UNKNOWN`: current VIX or full SMA20 is unavailable/nonpositive.
+
+Apply RED precedence if a pathological input satisfies both sides. The thresholds
+are hypotheses, not claims of universal optimality.
+
+## Sleeve 5 — style and participation
+
+Use 21-session simple price returns:
 
 ```text
-RS_rotation = 0.40 * percentile(R5)
-            + 0.60 * percentile(R21)
-
-rotation_delta = RS_rotation - RS_comp
+SPY_R21, RSP_R21, QQQ_R21, QQQE_R21
+broad_equal_weight_gap = RSP_R21 - SPY_R21
+nasdaq_equal_weight_gap = QQQE_R21 - QQQ_R21
 ```
 
-Both short-term components are required for `RS_rotation`. Do not fold them into
-`RS_comp`; the slow composite should continue to describe established leadership
-while `RS_rotation` and `rotation_delta` reveal recent acceleration or
-deceleration. Do not turn rotation_delta into an entry signal or an uncalibrated
-categorical label. Store the raw returns, percentiles, denominators, pulse, and
-delta so the UI can sort and display them transparently.
+- `GREEN`: RSP_R21 > 0, QQQE_R21 > 0, and both gaps >= -0.03;
+- `RED`: RSP_R21 <= 0, QQQE_R21 <= 0, and both gaps < -0.03;
+- `YELLOW`: otherwise;
+- `UNKNOWN`: any required endpoint is unavailable.
 
-### Residual RS versus QQQ
+This sleeve measures participation, not whether growth or cap weighting is
+morally preferable. Store all four returns and both gaps.
 
-Estimate beta using the most recent 252 close-to-close daily returns ending at T,
-with at least 126 overlapping finite observations:
+## Aggregate candidate and hysteresis
+
+Map sleeve states to `GREEN=+1`, `YELLOW=0`, `RED=-1`; UNKNOWN has no score.
+The normal aggregate candidate requires all five sleeves evaluated:
+
+- `GREEN` candidate: index and breadth are GREEN, volatility is not RED, no
+  sleeve is RED, and at least three sleeves are GREEN;
+- `RED` candidate: index is RED and either breadth or volatility is RED, or at
+  least three sleeves are RED;
+- `YELLOW` candidate: every other fully evaluated combination;
+- `UNKNOWN`: one or more sleeves are UNKNOWN.
+
+State transitions:
+
+- First fully evaluated session initializes `YELLOW`.
+- `YELLOW -> GREEN` requires two consecutive GREEN candidates.
+- `YELLOW -> RED` requires two consecutive RED candidates.
+- `GREEN -> YELLOW` and `RED -> YELLOW` occur immediately on a YELLOW candidate.
+- `GREEN -> RED` and `RED -> GREEN` are forbidden direct transitions; the first
+  opposite candidate moves to YELLOW and resets the candidate streak.
+- Remaining same-state candidates hold immediately.
+- UNKNOWN emits no aggregate state for that session, retains the last confirmed
+  state only as memory, and resets candidate continuity.
+
+Same-day risk-off override:
 
 ```text
-beta_252_qqq = covariance(stock_daily_return, qqq_daily_return)
-               / variance(qqq_daily_return)
-residual_R63_qqq = R63_stock - beta_252_qqq * R63_QQQ
+(at least two DEFENSIVE indexes and pct_above_sma20 < 0.30) or VIX close >= 30
 ```
 
-Use sample covariance and sample variance on the exact overlapping sessions.
-If QQQ variance is zero/nonfinite, overlap is insufficient, or R63 is missing,
-emit null with a specific reason. Then percentile-rank valid residuals across the
-same point-in-time research universe using the exact percentile method above.
-Store beta, overlap count, benchmark return, raw residual, residual percentile,
-and benchmark identity. Do not winsorize, neutralize by sector, or replace QQQ
-with SPY in V1.
+When all inputs needed by the selected override branch are valid, it moves any
+confirmed state directly to RED, sets `risk_off_override=true`, and resets the
+candidate streak. It does not manufacture missing inputs for the other branch.
 
-### Evidence-only context
+Expose previous state, entered date, sessions in state, candidate, candidate
+streak, transition reason, sleeve counts, override flag, and all component
+evidence.
 
-Include, without folding it into RS_comp:
+## Versioning, identity, and APIs
 
-- distance from the 63-session and 252-session closing high;
-- existing 20/60/120-session return and SPY-excess fields when supplied;
-- current Structure Engine state when supplied;
-- active Setup Engine families/statuses when supplied.
+Deliver frozen, finite-or-null, extra-field-forbidding input/evidence/output
+schemas; immutable threshold policy; deterministic rule fingerprint; pure
+feature calculators; and an explicit adapter from existing bar, universe,
+Structure, and Leadership contracts.
 
-Missing optional context must not suppress valid strength calculations.
+Require exact session/source/universe alignment. Use explicit MarketDataSymbol
+boundaries for ETFs and the versioned non-security identity for VIX. Reject
+duplicate symbol/session observations, calendar inconsistencies, mixed basis,
+future-effective universe evidence, and optional context from a mismatched T.
 
-## Group membership and aggregation
-
-Accept explicit dated membership rows with a versioned group type:
-
-- `SECTOR`
-- `INDUSTRY`
-- `SUB_INDUSTRY`
-- `THEME`
-
-Never infer a parent sector or industry from a Deepvue sub-industry label.
-Deepvue currently supplies verified `SUB_INDUSTRY` and many-to-many `THEME`
-snapshots; sector/industry calculations remain empty until explicit memberships
-are supplied. A stock may contribute independently to every dated theme to which
-it belongs.
-
-For each `(session_date, group_type, group_id)`, emit:
-
-- total point-in-time member count;
-- valid RS_comp count and coverage fraction;
-- median and 75th percentile RS_comp;
-- valid RS_rotation count and coverage fraction;
-- median RS_rotation and median rotation_delta;
-- fraction of valid members with RS_comp >= 80;
-- median residual-RS percentile and its valid count;
-- fraction UPTREND and fraction UPTREND-or-EMERGING when structure is supplied;
-- triggered-setup member count by family when setup evidence is supplied;
-- explicit missing-context fields/reasons.
-
-Coverage is valid RS_comp count divided by total point-in-time members. Medians
-use the arithmetic midpoint for an even valid count; 75th percentiles use linear
-interpolation between ordered observations. Structure fractions use only members
-with valid supplied structure context and must also report that denominator.
-Triggered-setup counts are integer member counts, not fractions and not instance
-counts when one member has overlapping instances of the same family.
-
-Group rank V1 is deliberately narrow and decomposable. Rank groups within the
-same type and session by median RS_comp, descending, with average ordinal rank
-for ties. A group is rank-eligible only when it has at least five valid RS_comp
-members and at least 60% member coverage. Noneligible groups retain metrics but
-receive null rank and explicit reasons. Do not create an opaque group score.
-
-Also emit a separate `group_rotation_rank` by median RS_rotation using the same
-five-valid-member and 60%-coverage gates. This is a short-horizon rotation rank,
-not a replacement for the established-leadership group rank. Preserve both and
-store `rotation_rank_advantage = leadership_rank - rotation_rank`, so positive
-means the group is ranking better short term. Do not blend them into one score.
-
-For supplied consecutive group snapshots, also emit:
-
-- rank change from five sessions earlier;
-- rank change from twenty sessions earlier;
-- consecutive sessions in the top quintile of eligible groups;
-- the exact membership snapshot/effective date used on each session.
-
-Define rank change as `prior_rank - current_rank`, so positive means improvement.
-Top quintile means average ordinal rank less than or equal to
-`ceil(0.20 * eligible_group_count)`. A streak resets when the group is ineligible,
-outside that boundary, or the supplied exchange-session output has a gap.
-
-Do not forward-fill across absent trading-session outputs. A changed membership
-snapshot applies only from its effective session forward; historical group
-outputs retain the membership version used then.
-
-## Identity, schemas, and reproducibility
-
-Deliver frozen, extra-field-forbidding, finite-or-null schemas for:
-
-- calculation source and universe provenance;
-- per-symbol strength input/evidence;
-- membership input;
-- group evidence and rank history;
-- complete daily output.
-
-Use uppercase `MarketDataSymbol` only at the bar/feature boundary. Reference
-identity conversion must remain explicit through the existing compatibility
-boundary. Preserve exact source taxonomy/theme symbols and the 29-record
-non-security disposition. Do not apply any of the 23 crosswalk proposals.
-
-Version formulas and thresholds separately and include deterministic rule
-fingerprints. Reject duplicate symbol/session bars, duplicate membership keys,
-non-monotonic or ambiguous effective dates, mixed source bases, future-effective
-memberships, and universe membership that is not valid as of the ranked session.
-
-The pure APIs must perform no I/O, network calls, publication, or mutation of
-input frames/objects. Provide adapters for existing bar, universe, taxonomy,
-theme, Structure Engine, and Setup Engine contracts without changing them.
+No provider client, I/O, publication, production writer, UI, actionability,
+position sizing, or broker behavior belongs in this milestone.
 
 ## Verification
 
-Add focused synthetic tests covering at minimum:
+Add synthetic focused tests covering at minimum:
 
-- exact 5/21/63/126/252 return boundaries and insufficient history;
-- point-in-time and future-mutation invariance;
-- average-rank ties, singleton populations, missing-value denominators, and
-  deterministic 0–100 endpoints;
-- complete and missing-component RS_comp behavior;
-- complete and missing-component RS_rotation behavior, rotation_delta, and proof
-  that short-term inputs never change RS_comp;
-- beta overlap alignment, sample covariance/variance, zero benchmark variance,
-  minimum 126 observations, and QQQ residual calculation;
-- cross-sectional residual percentiles without look-ahead;
-- exact membership effective dating and revision/version preservation;
-- many-to-many themes and no invented parent hierarchy;
-- group medians, 75th percentiles, breadth fractions, coverage, and five-member/
-  60%-coverage rank boundaries;
-- independent group leadership and rotation ranks, including newly strong groups
-  whose long-term rank remains weak;
-- group tie ranks, five-/twenty-session rank changes, and top-quintile streaks;
-- optional structure/setup context never changing RS values;
-- exact reference versus market-data identity behavior;
-- no mutation, no network access, and no production/staged writes;
-- preservation of all legacy Leadership Score, Structure Engine, and Setup Engine
-  tests.
+- every strict/inclusive threshold boundary in all five sleeves;
+- all index-vote combinations and sleeve precedence;
+- breadth coverage/count denominators and equality-to-MA handling;
+- leadership/internal count gates, leading/improving sub-industry breadth,
+  non-overlapping sub-industry denominators, and proof that themes cannot affect
+  the internals sleeve;
+- VIX 20/25/30 levels and 1.05/1.15 SMA ratios;
+- style return/gap boundaries and exact 21-session endpoints;
+- every aggregate candidate combination needed to prove precedence;
+- initialization, all legal/forbidden transitions, interrupted streaks, UNKNOWN
+  sessions, and same-day risk-off overrides;
+- future mutation/no-look-ahead and T+1 eligibility semantics;
+- exact identity, source, universe, and session alignment;
+- frozen schema/threshold/fingerprint behavior;
+- no input mutation, network access, production/staged writes, or changes to
+  legacy outputs;
+- complete regression coverage for Structure, Setup, and Leadership engines.
 
-Run the smallest focused tests during development, then:
+Run focused tests, then:
 
 `.venv/bin/python -m pytest`
 
 `git diff --check`
 
-Document formulas, versions, schemas, point-in-time semantics, missing-data
-behavior, representative symbol/group outputs, and the explicit distinction from
-legacy Leadership Score.
+Document formulas, timing, thresholds, transition graph, missing-data behavior,
+version identities, and representative synthetic paths. Label this V1
+`experimental_uncalibrated` until later point-in-time empirical evaluation.
 
 ## Deferred work
 
-Do not ingest new bars or memberships, publish snapshots, run universe-wide
-calibration, or implement the UI in this milestone. The validated September
-security-master timestamp-precision publication blocker remains deferred and is
-outside this task.
-
-
-## AP-LEADERSHIP-001 completion record
-
-Completed on `codex/leadership-engine-v1` from the requested handoff commit
-`28be4e88acc49610e04749f9487c1dbdc6bf3e40`. The new opt-in pure layer includes
-5/21/63/126/252-session returns, independent slow RS and 5/21-session rotation,
-QQQ residual percentiles, explicit dated membership adapters, independent group
-ranks and gap-aware history. Frozen evidence preserves denominators, source and
-universe provenance, exact identities, missing context and rule versions.
-
-Verification: **165 focused tests passed** (49 features, 32 ranking, 36 groups,
-48 adapters); **1,058 complete-suite tests passed**. `git diff --check` passed.
-All 336 protected production/staging/settings files match their pre-work hashes.
-Legacy Leadership Score, Structure Engine and Setup Engine source/tests remain
-unchanged. The exact 29 non-security identifiers stay preserved and excluded
-from security denominators; all 23 crosswalks remain unapplied.
-
-See [the implementation contract](leadership-engine-implementation-v1.md) for
-formulas, APIs, missing-data semantics, examples and reproducibility, and
-[PROJECT_STATE](PROJECT_STATE.md#ap-leadership-001-completion-record) for the
-complete milestone file inventory. No AP-LEADERSHIP-001 blocker remains.
-The separate September master timestamp-precision publication issue is deferred.
-No provider request, ingestion, publication, exposure build, calibration or
-trading-policy work occurred. Draft PR target remains `codex/setup-engine-v1`;
-no merge is authorized by this completion.
+Do not implement Watch/Trade/Act, extension integration, earnings vetoes, risk
+sizing, portfolio heat, UI, ingestion, or publication. The validated September
+security-master timestamp-precision publication blocker remains outside this task.
