@@ -1,44 +1,45 @@
 # Codex Next Task
 
-**Task ID:** AP-SETUP-001
+**Task ID:** AP-LEADERSHIP-001
 
-**Status:** COMPLETE
+**Status:** READY
 
 **Issued:** 2026-09-06
 
-**Base commit:** `29de3ef5abffe887dcc7d42af7e93feecd370165`
+**Base commit:** `3c7ebd9264675dd7d42103c75c5e609625f66a25`
 
 ## Handoff protocol
 
 This file is the single current assignment for VS Code Codex.
 
-1. Read `AGENTS.md`, `docs/PROJECT_STATE.md`, and every authoritative contract
-   referenced below before editing.
-2. Work through the entire bounded milestone autonomously. Do not stop for
-   routine implementation choices already settled by repository contracts.
-3. Ask the user only when authoritative contracts materially conflict, a
-   required rule is genuinely absent, or an external/destructive action would
-   be required.
-4. At completion, change this task's status to `COMPLETE`, add a concise
-   completion record, update `docs/PROJECT_STATE.md`, commit, and push the
-   milestone branch.
-5. The user-facing completion response should be short: full commit SHA, focused
-   and complete-suite test totals, and any genuine blocker. Detailed evidence
-   belongs in the repository.
+1. Read `AGENTS.md`, `docs/PROJECT_STATE.md`, and every authoritative source
+   listed below before editing.
+2. Work through the bounded milestone autonomously. Use the exact formulas and
+   boundaries in this assignment where older documents describe only candidates.
+3. Ask the user only if authoritative contracts materially conflict, a required
+   input cannot be represented without changing a protected data contract, or an
+   external/destructive action is required.
+4. At completion, mark this task `COMPLETE`, add a concise completion record,
+   update `docs/PROJECT_STATE.md`, commit, push, and open a draft PR targeting
+   `codex/setup-engine-v1` so the PR contains only this milestone.
+5. Return only the full commit SHA, focused and complete-suite test totals, PR
+   link, and any genuine blocker. Keep detailed evidence in the repository.
 
 Preserve `.vscode/settings.json`, `.env`, credentials, databases, Parquet/CSV
 datasets, staged artifacts, generated reports, and all unrelated user changes.
 
 ## Milestone
 
-Implement the complete deterministic Aperture Setup Engine V1.
+Implement deterministic Strength/Leadership and Group Ranking V1 as a pure,
+point-in-time calculation layer.
 
 Create and work on:
 
-`codex/setup-engine-v1`
+`codex/leadership-engine-v1`
 
-Base it on this handoff branch after pulling the task-file commit. Preserve the
-completed Structure Engine V1 at `29de3ef5abffe887dcc7d42af7e93feecd370165`.
+Base it on this handoff branch after pulling the task commit. Preserve Structure
+Engine V1 at `29de3ef5abffe887dcc7d42af7e93feecd370165` and Setup Engine V1 at
+`3c7ebd9264675dd7d42103c75c5e609625f66a25` unchanged.
 
 ## Authoritative sources
 
@@ -46,213 +47,230 @@ Read and follow:
 
 - `AGENTS.md`
 - `docs/PROJECT_STATE.md`
-- `docs/aperture_product_contract.md`
-- `docs/architecture_decision.md`
-- `docs/setup-classification-engine-v1.md`
-- `docs/structure-state-engine-v1.md` only to preserve the structure/setup
-  boundary and consume the new typed Structure Engine output where required
-- `docs/engine-spec-decisions-v1.md`
-- `docs/engine-spec-open-issues.md`
+- `docs/aperture_product_contract.md`, especially Strength and research-universe
+  separation
+- `docs/architecture_decision.md`, especially group aggregates, snapshot fields,
+  and point-in-time processing
+- `docs/data-foundation-gap-report.md`
+- `docs/deepvue_audit.md`
+- `docs/security-identity-boundary.md`
 - `docs/structure-engine-implementation-v1.md`
+- `docs/setup-engine-implementation-v1.md`
+- existing feature, benchmark, ranking, taxonomy, theme, universe, and leadership
+  code and tests
 
-The approved decision overlay supersedes conflicting recovered prose, examples,
-and archived sources. Implement U1-U8 exactly. Do not reconstruct rules from
-chat history or redesign settled formulas.
+This milestone creates new opt-in V1 contracts. Do not overwrite or silently
+reinterpret the existing 20/60/120-session SPY-relative features or legacy
+`Leadership Score`.
 
-## Required taxonomy and lifecycle
+## Layer boundaries
 
-The only setup families are:
+Keep these outputs distinct:
 
-- `EP`
-- `CONTRACTION`
-- `TREND_PULLBACK`
-- `RANGE`
+- raw multi-window returns;
+- cross-sectional return percentiles;
+- SPY excess returns already present in the repository;
+- beta-adjusted residual strength versus QQQ;
+- individual-stock strength evidence;
+- sector, industry, sub-industry, and theme membership;
+- group aggregate metrics and ordinal ranks;
+- Structure Engine and Setup Engine context.
 
-Multiple valid setup instances may coexist. Do not rank them as primary or
-secondary. `RECLAIM` is evidence, never a fifth setup family.
+Do not implement market regime, extension permission, earnings policy,
+actionability, trade entry policy, risk, sizing, portfolio heat, or an opportunity
+score. Leadership may describe a stock or group; it may not declare it tradable.
 
-The only lifecycle statuses are:
+## Individual strength contract
 
-- `FORMING`
-- `NEAR_TRIGGER`
-- `TRIGGERED`
-- `RESOLVED`
-- `FAILED`
-- `STALE`
+Use exchange-session rows and point-in-time research-universe membership. For
+session T, compute only from bars and memberships available by T.
 
-`STALE` is pre-trigger only. Terminal instances never reactivate. `RESOLVED`
-means the observation window completed without setup failure; it does not assert
-trade profitability.
+### Returns
 
-## Implementation scope
+Use close-to-close simple price returns on the repository's consistent
+split-adjusted price basis:
 
-Deliver:
+```text
+R63  = Close[T] / Close[T-63]  - 1
+R126 = Close[T] / Close[T-126] - 1
+R252 = Close[T] / Close[T-252] - 1
+```
 
-- pure production feature and setup-calculation logic;
-- explicit, frozen, versioned input, instance, evidence, and output schemas;
-- deterministic detection for all four families and both directions;
-- the complete stateful lifecycle for multiple concurrent instances;
-- stable setup identity and committed T-1 geometry with stored
-  `reference_as_of_session`, reference price, reference ATR, controlling
-  boundaries, window, and reference kind;
-- exact per-session event order: input/corporate-action validation, failure,
-  trigger, resolution, pre-trigger staleness, then tomorrow's geometry;
-- explicit geometry refresh/rebuild behavior and terminal history retention;
-- deterministic reason codes, passed/failed rules, contradictions, and flags;
-- rejected EP-candidate diagnostics without emitting invalid setup objects;
-- point-in-time replay using only information available at the evaluated
-  session;
-- an explicit adapter from the existing daily-bar and Structure Engine V1
-  contracts without I/O or implicit identity conversion;
-- missing-data, nonpositive-input, volume, corporate-action, and insufficient-
-  history behavior exactly as specified;
-- concise implementation documentation with formulas, event ordering,
-  lifecycle transitions, version identities, and representative outputs.
+These are the V1 trading-session definitions of three, six, and twelve months.
+Do not substitute calendar offsets. Preserve the actual source/adjustment
+metadata in evidence.
 
-Keep setup classification separate from market regime, group/industry/theme
-leadership, relative strength, extension permission, earnings policy,
-actionability, trade entry policy, stops, position sizing, portfolio heat, and
-opportunity scoring. A setup invalidation level is not a trade stop.
+### Cross-sectional percentiles
 
-Do not modify or relabel legacy setup or structure history. New consumers must
-opt into the new V1 contracts.
+Rank each return independently across the point-in-time research universe on T.
+Use average ranks for ties and map deterministically to 0–100:
 
-## Non-negotiable decision details
+```text
+percentile = 100 * (average_rank - 1) / (valid_count - 1)
+```
 
-- EP uses the approved conjunction: GapPct, GapATR, ShockATR, prior-20-session
-  median-volume RVOL, and CLV. It does not require Close versus Open or a new
-  high/low. EP is born `TRIGGERED`, event day is age zero, and failure precedes
-  resolution on following session five.
-- Horizontal triggers use geometry committed by T-1. Current-session highs,
-  lows, moving averages, or ranges may not move the reference before today's
-  trigger decision.
-- Exact setup identity is
-  `symbol|type|direction|detected_at|reference_kind`; a price hash is evidence,
-  not identity.
-- Contraction pre-trigger predicate loss uses the approved two-session
-  `GEOMETRY_CEASED` staleness rule. Use the independent post-trigger failure
-  rules; do not restore the impossible `R5 > 1.15*R10` rule.
-- Only TREND_PULLBACK uses structure as a detection gate. Other structure/setup
-  compatibility is display context and may warn, but may not suppress EP,
-  CONTRACTION, or RANGE.
-- Pullback triggers use the frozen T-1 moving average and ATR correction. A
-  same-day reclaim flag alone is not a trigger.
-- RANGE tries the trimmed 30-session box first and uses 20 only when 30 fails
-  and 20 passes. Trigger, depth, drift, location, and touches use the selected
-  trimmed box. Reject degenerate geometry.
-- ATR5, ATR14, and ATR20 are Wilder ATRs. EP uniquely requires current and 20
-  prior volume observations; volume remains evidence-only for the other three
-  families.
-- Preserve split/corporate-action quarantine behavior. A provider-confirmed or
-  factor-explained split discontinuity cannot emit an EP.
+Lowest valid value is 0 and highest is 100. When `valid_count == 1`, emit 50.
+Missing values remain null and are excluded from the denominator. Store valid
+counts and universe-policy/snapshot identity for every ranked component.
 
-## Required verification
+### Composite RS
 
-Add focused tests covering, at minimum:
+Implement the approved initial hypothesis as a new versioned output:
 
-- every equality and threshold boundary for all four families and directions;
-- all lifecycle transitions, clocks, precedence rules, and terminal
-  non-reactivation;
-- multiple coexisting instances and stable identity;
-- T-1 committed trigger geometry and future-bar mutation/no-look-ahead tests;
-- simultaneous failure versus trigger or resolution, with failure winning;
-- geometry shift, geometry ceased, reference change, expiry, and new-instance
-  behavior;
-- EP median-volume denominator using exactly T-20 through T-1;
-- missing/nonpositive ATR and family-specific volume behavior;
-- range 30/20 precedence, trimmed boundaries, touches, drift, and degenerate
-  geometry;
-- pullback deepest-reference selection, structure gates, frozen-MA trigger, and
-  incompatible-structure failure;
-- contraction post-trigger failure and eight-session resolution;
-- EP and pullback five-session resolution and range eight-session resolution;
-- corporate-action EP quarantine;
-- exact reference versus uppercase market-data identity behavior;
-- preservation of legacy outputs and the completed Structure Engine tests;
-- zero network calls in setup calculation and replay tests.
+```text
+RS_comp = 0.50 * percentile(R63)
+        + 0.30 * percentile(R126)
+        + 0.20 * percentile(R252)
+```
 
-Run focused tests during development. At the end run:
+All three components are required. Do not renormalize weights around missing
+inputs. Emit explicit insufficient-data reasons.
+
+### Residual RS versus QQQ
+
+Estimate beta using the most recent 252 close-to-close daily returns ending at T,
+with at least 126 overlapping finite observations:
+
+```text
+beta_252_qqq = covariance(stock_daily_return, qqq_daily_return)
+               / variance(qqq_daily_return)
+residual_R63_qqq = R63_stock - beta_252_qqq * R63_QQQ
+```
+
+Use sample covariance and sample variance on the exact overlapping sessions.
+If QQQ variance is zero/nonfinite, overlap is insufficient, or R63 is missing,
+emit null with a specific reason. Then percentile-rank valid residuals across the
+same point-in-time research universe using the exact percentile method above.
+Store beta, overlap count, benchmark return, raw residual, residual percentile,
+and benchmark identity. Do not winsorize, neutralize by sector, or replace QQQ
+with SPY in V1.
+
+### Evidence-only context
+
+Include, without folding it into RS_comp:
+
+- distance from the 63-session and 252-session closing high;
+- existing 20/60/120-session return and SPY-excess fields when supplied;
+- current Structure Engine state when supplied;
+- active Setup Engine families/statuses when supplied.
+
+Missing optional context must not suppress valid strength calculations.
+
+## Group membership and aggregation
+
+Accept explicit dated membership rows with a versioned group type:
+
+- `SECTOR`
+- `INDUSTRY`
+- `SUB_INDUSTRY`
+- `THEME`
+
+Never infer a parent sector or industry from a Deepvue sub-industry label.
+Deepvue currently supplies verified `SUB_INDUSTRY` and many-to-many `THEME`
+snapshots; sector/industry calculations remain empty until explicit memberships
+are supplied. A stock may contribute independently to every dated theme to which
+it belongs.
+
+For each `(session_date, group_type, group_id)`, emit:
+
+- total point-in-time member count;
+- valid RS_comp count and coverage fraction;
+- median and 75th percentile RS_comp;
+- fraction of valid members with RS_comp >= 80;
+- median residual-RS percentile and its valid count;
+- fraction UPTREND and fraction UPTREND-or-EMERGING when structure is supplied;
+- triggered-setup member count by family when setup evidence is supplied;
+- explicit missing-context fields/reasons.
+
+Coverage is valid RS_comp count divided by total point-in-time members. Medians
+use the arithmetic midpoint for an even valid count; 75th percentiles use linear
+interpolation between ordered observations. Structure fractions use only members
+with valid supplied structure context and must also report that denominator.
+Triggered-setup counts are integer member counts, not fractions and not instance
+counts when one member has overlapping instances of the same family.
+
+Group rank V1 is deliberately narrow and decomposable. Rank groups within the
+same type and session by median RS_comp, descending, with average ordinal rank
+for ties. A group is rank-eligible only when it has at least five valid RS_comp
+members and at least 60% member coverage. Noneligible groups retain metrics but
+receive null rank and explicit reasons. Do not create an opaque group score.
+
+For supplied consecutive group snapshots, also emit:
+
+- rank change from five sessions earlier;
+- rank change from twenty sessions earlier;
+- consecutive sessions in the top quintile of eligible groups;
+- the exact membership snapshot/effective date used on each session.
+
+Define rank change as `prior_rank - current_rank`, so positive means improvement.
+Top quintile means average ordinal rank less than or equal to
+`ceil(0.20 * eligible_group_count)`. A streak resets when the group is ineligible,
+outside that boundary, or the supplied exchange-session output has a gap.
+
+Do not forward-fill across absent trading-session outputs. A changed membership
+snapshot applies only from its effective session forward; historical group
+outputs retain the membership version used then.
+
+## Identity, schemas, and reproducibility
+
+Deliver frozen, extra-field-forbidding, finite-or-null schemas for:
+
+- calculation source and universe provenance;
+- per-symbol strength input/evidence;
+- membership input;
+- group evidence and rank history;
+- complete daily output.
+
+Use uppercase `MarketDataSymbol` only at the bar/feature boundary. Reference
+identity conversion must remain explicit through the existing compatibility
+boundary. Preserve exact source taxonomy/theme symbols and the 29-record
+non-security disposition. Do not apply any of the 23 crosswalk proposals.
+
+Version formulas and thresholds separately and include deterministic rule
+fingerprints. Reject duplicate symbol/session bars, duplicate membership keys,
+non-monotonic or ambiguous effective dates, mixed source bases, future-effective
+memberships, and universe membership that is not valid as of the ranked session.
+
+The pure APIs must perform no I/O, network calls, publication, or mutation of
+input frames/objects. Provide adapters for existing bar, universe, taxonomy,
+theme, Structure Engine, and Setup Engine contracts without changing them.
+
+## Verification
+
+Add focused synthetic tests covering at minimum:
+
+- exact 63/126/252 return boundaries and insufficient history;
+- point-in-time and future-mutation invariance;
+- average-rank ties, singleton populations, missing-value denominators, and
+  deterministic 0–100 endpoints;
+- complete and missing-component RS_comp behavior;
+- beta overlap alignment, sample covariance/variance, zero benchmark variance,
+  minimum 126 observations, and QQQ residual calculation;
+- cross-sectional residual percentiles without look-ahead;
+- exact membership effective dating and revision/version preservation;
+- many-to-many themes and no invented parent hierarchy;
+- group medians, 75th percentiles, breadth fractions, coverage, and five-member/
+  60%-coverage rank boundaries;
+- group tie ranks, five-/twenty-session rank changes, and top-quintile streaks;
+- optional structure/setup context never changing RS values;
+- exact reference versus market-data identity behavior;
+- no mutation, no network access, and no production/staged writes;
+- preservation of all legacy Leadership Score, Structure Engine, and Setup Engine
+  tests.
+
+Run the smallest focused tests during development, then:
 
 `.venv/bin/python -m pytest`
 
 `git diff --check`
 
-Commit only reviewed source, configuration, documentation, and tests. Push
-`codex/setup-engine-v1`. Do not merge, publish data, or open a production writer.
+Document formulas, versions, schemas, point-in-time semantics, missing-data
+behavior, representative symbol/group outputs, and the explicit distinction from
+legacy Leadership Score.
 
-## Deferred work and publication blocker
+## Deferred work
 
-The 2026-09-05 staged security-master artifact remains valid but production
-publication is separately blocked by nanosecond Parquet versus microsecond
-DuckDB timestamp precision. Do not fix or publish it during AP-SETUP-001.
-
-Do not build leadership, groups, themes, regime, actionability, risk, UI, or
-portfolio layers during this milestone. Do not apply crosswalk proposals, build
-exposure classification, make provider requests, or alter staged/production
-data.
-
-## Completion report
-
-At completion, record in this file and `docs/PROJECT_STATE.md`:
-
-- implemented behavior and version identities;
-- exact files changed;
-- representative setup and lifecycle paths;
-- focused and complete-suite test totals;
-- any genuine unresolved decision or blocker;
-- confirmation that protected data, settings, legacy outputs, and the Structure
-  Engine remained unchanged.
-
-
-## AP-SETUP-001 completion record
-
-Implemented on `codex/setup-engine-v1` from handoff commit `68b0b93`.
-Engine/feature/threshold identities are `setup-engine-v1`, `setup-features-v1`
-and `setup-thresholds-v1`. Frozen input, instance, evidence and output contracts
-cover EP, CONTRACTION, TREND_PULLBACK and RANGE in both directions. The pure
-adapter consumes unchanged Structure Engine evidence and the exact reference to
-market-data compatibility boundary.
-
-Implemented stable identity, committed T-1 geometry, failure-first lifecycle
-processing, independent observation clocks, geometry/reference replacement,
-terminal retention, rejected EP diagnostics and corporate-action quarantine.
-The owner clarified that an unobservable failure session requires corrected-data
-replay rather than a later inferred resolution; that clarification is recorded
-in the authoritative decisions file.
-
-Representative paths: EP TRIGGERED at age zero resolves after five following
-sessions, with day-five failure taking precedence. Contraction and range may
-coexist at the same pivot, trigger independently and resolve after eight following
-sessions. Two consecutive contraction predicate losses stale the untriggered
-instance. A deeper MA replaces an untriggered pullback with a new ID; terminal
-instances remain non-reactivatable. Detailed formulas and evidence are in
-[the implementation contract](setup-engine-implementation-v1.md).
-
-Final verification: **485 focused tests passed** (336 setup tests and all 149
-Structure Engine tests), followed by **893 complete-suite tests passed**.
-`git diff --check` passed. Every setup test blocks socket/httpx requests. All
-336 protected production/staging/settings files matched their pre-work SHA-256
-inventory. Structure Engine source/tests and legacy source/output contracts were
-unchanged. No proprietary data, reports, credentials or machine settings are
-included in the commit.
-
-No unresolved AP-SETUP-001 decision remains. The separate security-master
-nanosecond/microsecond publication blocker remains deferred. No provider request,
-production data write, exposure build, crosswalk application or PR merge occurred.
-Production materialization and empirical setup calibration remain separately scoped.
-
-Exact milestone file inventory:
-
-- `README.md`
-- `docs/CODEX_NEXT_TASK.md`
-- `docs/PROJECT_STATE.md`
-- `docs/engine-spec-decisions-v1.md`
-- `docs/setup-engine-implementation-v1.md`
-- `src/market_dashboard/aperture/setup.py`
-- `src/market_dashboard/aperture/setup_contracts.py`
-- `src/market_dashboard/aperture/setup_detection.py`
-- `src/market_dashboard/features/setup_features.py`
-- `tests/setup_fixtures.py`
-- `tests/test_setup_detection.py`
-- `tests/test_setup_features.py`
-- `tests/test_setup_lifecycle.py`
+Do not ingest new bars or memberships, publish snapshots, run universe-wide
+calibration, or implement the UI in this milestone. The validated September
+security-master timestamp-precision publication blocker remains deferred and is
+outside this task.
