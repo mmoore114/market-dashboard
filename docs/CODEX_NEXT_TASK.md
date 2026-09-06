@@ -2,13 +2,34 @@
 
 **Task ID:** AP-FOUNDATION-RECONCILE-001
 
-**Status:** READY
+**Status:** COMPLETE — reconciled offline; workstation build remains blocked
 
 **Issued:** 2026-09-06
 
 **Product baseline:** `c5e696ddeb0be2a2fb8befa91ad2adc292ee49e9`
 
 **Handoff branch:** `codex/foundation-reconciliation-handoff`
+
+## Completion and next boundary
+
+The assignment below is retained as the acceptance record. The eight original
+findings now have a private, independently validated disposition ledger: one
+resolved by verified DATE equivalence, four requiring local review, one requiring
+publication after prerequisites, and two requiring separately bounded acquisition.
+An additional rules-effective-date mismatch is reported separately.
+
+Verification: 76 focused / 2,810 complete Python tests, 11 frontend tests, and two
+desktop/mobile fixture browser tests passed. API/schema/type checks, build,
+lint/format and whitespace checks passed. All 344 protected files are unchanged.
+See [the complete evidence contract](foundation-reconciliation-v1.md) and the
+PROJECT_STATE completion record. No real snapshot or source publication occurred.
+
+**Exact next bounded action:** offline operator review of the staged volume and
+provenance evidence matrix, plus selection of a pinned authoritative XNYS calendar
+implementation. Unsupported fields remain UNKNOWN. Any dependency/source
+acquisition, volume repair, identity/population acquisition, universe publication
+or market-history request needs separately bounded authority. Do not rerun a real
+snapshot build or consume the unpublished September master.
 
 ## Goal
 

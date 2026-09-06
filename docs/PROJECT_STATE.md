@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-FOUNDATION-RECONCILE-001 ready; reconcile the eight local materializer foundation findings offline. AP-LOCAL-MATERIALIZER-001 is complete and no real snapshot was built.
+Current milestone: AP-FOUNDATION-RECONCILE-001 complete; one original finding resolved by verified evidence and seven retained with bounded next actions. No real snapshot was built.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
@@ -770,3 +770,63 @@ UI redesign or PR merge occurred.
 next bounded offline foundation reconciliation](local-materializer-v1.md) are
 recorded. The September timestamp-precision publication issue remains deferred;
 no unpublished source was consumed or repaired.
+
+
+## AP-FOUNDATION-RECONCILE-001 completion record — 2026-09-06
+
+Implemented on `codex/foundation-reconciliation-v1` from remote handoff
+`c6746c16e91bdcf0b4ef0792f865d00078322aba`, verified to descend from product
+baseline `c5e696ddeb0be2a2fb8befa91ad2adc292ee49e9`. Draft PR base is
+`codex/local-materializer-v1`; no merge is included.
+
+The new offline reconciliation command has zero-I/O planning, exact original
+audit/plan/source binding, read-only DuckDB and explicit Parquet comparisons,
+conserved finding identities, staged candidate/UNKNOWN evidence, no-clobber
+outputs and independent offline validation by recomputation. Versioned DATE
+equivalence is confined to reconciliation; original materializer fingerprints,
+engine contracts and historical audit receipts are unchanged. Exact numeric
+comparison also avoids integer-to-float precision loss above `2**53`.
+
+The actual 100-copy bar comparison found the same 63,279 keys and only 11,607
+volume differences, consistent with the writer's BIGINT coercion. No canonical
+volume source was inferred. Legacy-universe copies agree across all 13,023 keys
+and fields under lossless DATE equivalence: that original finding is resolved.
+Seven original findings remain: volume authority, calendar, provenance, spot,
+Aperture schedule publication, identity/time alignment and missing QQQE.
+The original eight are never combined or replaced. A separate rules-effective-
+date finding records August 25 rules versus candidate T=July 24.
+
+July master/exposure copies agree; native exposure-policy-v3 publication count
+and fingerprint verify. All bar sessions precede the selected July 26 identities,
+so there are zero feasible T/T+1 pairs. Dated market cap and other population
+prerequisites are absent; no candidate research/trade schedule was fabricated.
+SPY, QQQ, IWM and RSP each have 642 observed rows; QQQE is absent in both stores.
+No authoritative calendar implementation/artifact or spot identity/source is
+available locally. Calendar gaps, exact warmup and research denominator stay
+UNKNOWN. The 100-record ingestion receipt and configuration hints cannot attest
+dividend treatment, matching volume basis or complete source publication.
+
+The private plan and independent validation succeeded with network calls blocked.
+Evidence fingerprint:
+`15e72badc9e2456a861a11b3bf4ba4d21fe05a1aa2a17cc2ced43586cfe5cd00`.
+All 344 protected files retained their pre-work hashes, with no added/removed
+production or provider-staging files. User VS Code settings remain uncommitted.
+The [complete reconciliation contract](foundation-reconciliation-v1.md) records
+the exact ledger, source distinctions, command forms, private receipt fingerprints
+and conditional acquisition caps.
+
+Observed verification: **76 focused Python tests passed**, including 30 new
+reconciliation tests, followed by **2,810 full-suite tests passed**. Frontend components (11),
+desktop/mobile fixture browsers (2), API/schema/type synchronization, TypeScript,
+build, lint/format and whitespace checks passed. The existing Starlette TestClient
+httpx deprecation warning remains nonblocking. Sandbox TestClient/loopback limits
+required local execution for the passing integration/browser runs.
+
+Next bounded action: offline operator review of the staged volume/provenance
+matrix and selection of a pinned XNYS calendar implementation. Unsupported source
+semantics stay UNKNOWN. Dependency/source acquisition, any recoverable data
+correction, identity/population input acquisition, schedule publication and market
+history fetch require separately bounded authority. No real snapshot build,
+production API startup, provider request, source mutation/publication, exposure
+rebuild, crosswalk application or PR merge occurred. The September master
+publication issue remains deferred.

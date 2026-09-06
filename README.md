@@ -6,7 +6,10 @@ Rules through React/TypeScript and FastAPI. Start with the
 Development defaults to visibly labeled synthetic fixtures. The
 [offline local materializer](docs/local-materializer-v1.md) now audits explicitly
 selected publications and builds only when all foundational gates pass. The actual
-local audit is blocked; no real snapshot was produced. The [normalized V2 snapshot](docs/workstation-snapshot-v2.md)
+local audit is blocked; no real snapshot was produced. The
+[offline foundation reconciliation](docs/foundation-reconciliation-v1.md) explains
+all eight findings, resolving one with verified evidence and retaining seven
+bounded next actions. The [normalized V2 snapshot](docs/workstation-snapshot-v2.md)
 retains complete audit evidence while fitting 2,000 synthetic records in 17.96 MiB.
 
 Current implementation handoff: [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md).
