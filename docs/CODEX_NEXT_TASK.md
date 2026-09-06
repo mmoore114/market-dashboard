@@ -52,14 +52,47 @@ Authorized:
 
 Not authorized:
 
-- Massive or any other provider/market-data request;
+- unbounded provider access, any endpoint/identity outside the conditional staging
+  authority below, or any fetch before its prerequisites pass;
 - production DuckDB, Parquet, manifest, calendar, master, exposure, universe, or
   workstation snapshot writes;
 - applying a schema migration or publishing a provenance/calendar artifact;
-- QQQE, VIX, security-master, market-cap, taxonomy, earnings, or other acquisition;
+- VIX, security-master, market-cap, taxonomy, earnings, or other acquisition
+  outside the exact conditional scope below;
 - security-master publication, exposure rebuild, Aperture schedule publication,
   crosswalk application, real snapshot build, production API startup, merge,
   brokerage behavior, or `.vscode/settings.json` changes.
+
+## Conditional bounded current-data authority
+
+Current data may be fetched only if the offline calendar, adjusted-volume writer,
+path safety, and staging validator pass first and the exact missing range is
+resolved deterministically. A fetch is optional; do not perform it merely because
+it is authorized.
+
+If those gates pass, one staged Massive adjusted-aggregate update is authorized:
+
+- endpoint only: `GET /v2/aggs/ticker/{ticker}/range/1/day/{from}/{to}`;
+- `adjusted=true`, `sort=asc`, `limit=50000`;
+- symbols only: the exact tickers in the existing reviewed 100-symbol adjusted-
+  backfill plan, plus deduplicated SPY, QQQ, IWM, RSP, and QQQE;
+- for existing symbols, start at the first missing session after verified local
+  coverage; for absent QQQE, no earlier than 2024-01-02;
+- end at the last completed XNYS session established by the pinned calendar;
+- maximum 125 total HTTP attempts and 25,000 returned records;
+- every failed request counts; one attempt per request with no automatic retry;
+- reject redirects, cross-origin URLs, unexpected pagination, schema/basis
+  disagreement, or any cap breach before writing the affected page;
+- write exact provider-returned values only beneath a new explicit staging
+  subdirectory; never invoke the existing immediate production writer;
+- preserve sanitized per-request receipts and completed evidence after failure;
+- validate the complete staged candidate offline with exact keys, fractional
+  volume, session coverage, hashes, and logical fingerprints.
+
+No spot/VIX request is authorized until its exact non-security provider identity,
+dataset, endpoint, and entitlement are reviewed. No security-master refetch is
+needed. A successful staged bar fetch still does not authorize database/Parquet
+publication, universe construction, exposure rebuild, or a real snapshot build.
 
 ## Reviewed authority decisions
 
