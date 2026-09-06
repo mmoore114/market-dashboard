@@ -30,6 +30,25 @@ for (const viewport of [
     await page
       .getByRole("button", { name: "Sort by Price", exact: true })
       .click();
+    await expect(
+      page.getByRole("columnheader", { name: "5 sessions", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("columnheader", { name: "21 sessions", exact: true }),
+    ).toBeVisible();
+    if (viewport.width === 390) {
+      const scroll = page.locator(".table-scroll");
+      expect(
+        await scroll.evaluate((el) => el.scrollWidth > el.clientWidth),
+      ).toBe(true);
+      await page
+        .getByRole("columnheader", { name: "Veto / status", exact: true })
+        .scrollIntoViewIfNeeded();
+      expect(await scroll.evaluate((el) => el.scrollLeft > 0)).toBe(true);
+      await page
+        .getByRole("columnheader", { name: /Symbol/ })
+        .scrollIntoViewIfNeeded();
+    }
     await page.screenshot({
       path: `../docs/workstation-evidence/tape-${viewport.width}.png`,
       fullPage: true,

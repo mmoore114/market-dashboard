@@ -239,7 +239,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "0360d9f682d21448e374094c67c6dcc6d2dc9d34acf225fa31392aff8b802926",
+      "fingerprint": "7be2c3b0214ac6c9b74e34431c649164db0cecc7c7bc44f895ca4967eb434c29",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -324,7 +324,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "0360d9f682d21448e374094c67c6dcc6d2dc9d34acf225fa31392aff8b802926",
+      "fingerprint": "7be2c3b0214ac6c9b74e34431c649164db0cecc7c7bc44f895ca4967eb434c29",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -18564,7 +18564,7 @@
                     "sma20": 105.0,
                     "sma20_5_ago": 104.0,
                     "sma50": 100.0,
-                    "symbol": "SPY"
+                    "symbol": "IWM"
                   },
                   {
                     "close": 110.0,
@@ -18578,7 +18578,7 @@
                     "sma20": 105.0,
                     "sma20_5_ago": 104.0,
                     "sma50": 100.0,
-                    "symbol": "IWM"
+                    "symbol": "SPY"
                   }
                 ],
                 "leadership": {
@@ -35029,7 +35029,11 @@
                 "style": [
                   {
                     "R21": 0.05,
-                    "symbol": "SPY"
+                    "symbol": "QQQ"
+                  },
+                  {
+                    "R21": 0.05,
+                    "symbol": "QQQE"
                   },
                   {
                     "R21": 0.05,
@@ -35037,11 +35041,7 @@
                   },
                   {
                     "R21": 0.05,
-                    "symbol": "QQQ"
-                  },
-                  {
-                    "R21": 0.05,
-                    "symbol": "QQQE"
+                    "symbol": "SPY"
                   }
                 ],
                 "universe": {
@@ -37142,7 +37142,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "0360d9f682d21448e374094c67c6dcc6d2dc9d34acf225fa31392aff8b802926",
+      "fingerprint": "7be2c3b0214ac6c9b74e34431c649164db0cecc7c7bc44f895ca4967eb434c29",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -37162,7 +37162,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "0360d9f682d21448e374094c67c6dcc6d2dc9d34acf225fa31392aff8b802926",
+      "fingerprint": "7be2c3b0214ac6c9b74e34431c649164db0cecc7c7bc44f895ca4967eb434c29",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -37289,7 +37289,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "0360d9f682d21448e374094c67c6dcc6d2dc9d34acf225fa31392aff8b802926",
+      "fingerprint": "7be2c3b0214ac6c9b74e34431c649164db0cecc7c7bc44f895ca4967eb434c29",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -37400,7 +37400,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "0360d9f682d21448e374094c67c6dcc6d2dc9d34acf225fa31392aff8b802926",
+      "fingerprint": "7be2c3b0214ac6c9b74e34431c649164db0cecc7c7bc44f895ca4967eb434c29",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -37527,7 +37527,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "0360d9f682d21448e374094c67c6dcc6d2dc9d34acf225fa31392aff8b802926",
+      "fingerprint": "7be2c3b0214ac6c9b74e34431c649164db0cecc7c7bc44f895ca4967eb434c29",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",

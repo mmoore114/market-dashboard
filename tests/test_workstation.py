@@ -14,7 +14,7 @@ from market_dashboard.aperture import decision_components
 from market_dashboard.aperture.leadership import fingerprint
 from market_dashboard.aperture.rules import load_aperture_rules
 from market_dashboard.workstation.fixtures import build_fixture
-from market_dashboard.workstation.models import WorkstationSnapshotV1
+from market_dashboard.workstation.snapshot_v2 import WorkstationSnapshotV2
 from market_dashboard.workstation.store import SnapshotStore
 
 
@@ -47,34 +47,34 @@ def test_frozen_deterministic_nulls(snapshot):
     payload = snapshot.model_dump(mode="json")
     payload["generated_at"] = (snapshot.generated_at + timedelta(seconds=1)).isoformat()
     assert (
-        WorkstationSnapshotV1.model_validate(payload).logical_fingerprint
+        WorkstationSnapshotV2.model_validate(payload).logical_fingerprint
         == snapshot.logical_fingerprint
     )
-    payload["records"][0]["volume"] = None
-    payload["records"][0]["volume_reason"] = "SYNTHETIC_MISSING_VOLUME"
-    changed = WorkstationSnapshotV1.model_validate(reseal(payload))
+    payload["record_index"][0]["volume"] = None
+    payload["record_index"][0]["volume_reason"] = "SYNTHETIC_MISSING_VOLUME"
+    changed = WorkstationSnapshotV2.model_validate(reseal(payload))
     assert changed.logical_fingerprint != snapshot.logical_fingerprint
     assert changed.records[0].volume is None
     payload["extra"] = "forbidden"
     with pytest.raises(ValidationError):
-        WorkstationSnapshotV1.model_validate(reseal(payload))
+        WorkstationSnapshotV2.model_validate(reseal(payload))
 
 
 @pytest.mark.parametrize("change", ["duplicate", "funnel", "action", "source", "rules"])
 def test_cross_record_consistency(snapshot, change):
     p = snapshot.model_dump(mode="json")
     if change == "duplicate":
-        p["records"].append(p["records"][0])
+        p["record_index"].append(p["record_index"][0])
     if change == "funnel":
         p["funnel"]["ACT"] += 1
     if change == "action":
         p["action_session"] = p["as_of_session"]
     if change == "source":
-        p["source"]["dataset_id"] = "contradiction"
+        p["shared"]["source_ref"] = len(p["evidence"])
     if change == "rules":
-        p["rules"]["unexpected"] = True
+        p["shared"]["unexpected"] = True
     with pytest.raises(ValidationError):
-        WorkstationSnapshotV1.model_validate(reseal(p))
+        WorkstationSnapshotV2.model_validate(reseal(p))
 
 
 def test_representative_fixture(snapshot, client):
@@ -229,6 +229,12 @@ def test_sizer_delegates_immutable(snapshot, client, direction, entry, stop):
                 "stop": stop,
             },
         )
+        if direction == "SHORT":
+            assert response.status_code == 422
+            assert response.json()["code"] == "SIZER_DIRECTION_UNAVAILABLE"
+            assert spy.call_count == 0
+            assert snapshot.model_dump_json() == before
+            return
         assert response.status_code == 200
         assert spy.call_count == 1
         inputs, rules = spy.call_args.args

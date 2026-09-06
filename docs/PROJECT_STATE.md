@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-WORKSTATION-SLICE-001 complete; local React/TypeScript workstation, typed FastAPI and strict frozen snapshot boundary over the preserved engines.
+Current milestone: AP-WORKSTATION-SNAPSHOT-002 complete; normalized immutable snapshot V2 preserves the workstation API/UI and fits 2,000 synthetic records in 17.96 MiB.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
@@ -662,3 +662,53 @@ publication, exposure rebuild, crosswalk application, calibration, broker
 interaction or PR merge occurred. No workstation blocker remains; real
 materialization, portfolio workflows and the unrelated September security-master
 timestamp-precision publication correction remain separate future work.
+
+## AP-WORKSTATION-SNAPSHOT-002 completion record — 2026-09-06
+
+Implemented on `codex/workstation-snapshot-v2` from exact handoff
+`8a128abebb1e10c19be316cc6e50985cb925e133`, targeting
+`codex/workstation-slice-v1` for the milestone draft PR.
+
+The prior 12-row snapshot repeated full Leadership/Regime populations per record.
+`workstation-snapshot-v2` stores a typed content-addressed evidence table once,
+with deterministic integer references bound to full SHA-256 IDs. A frozen
+registry/catalog binds all canonical field types and column order. Complete
+Structure, Setup, raw/ranked strength, memberships, groups, extension, earnings,
+regime gates, decision ladders and sizing evidence remain losslessly resolvable.
+Exact-source equality, duplicate/dangling/wrong-type references, contradictory
+shared copies, cross-direction consistency and point-in-time alignment are tested.
+
+The pure materializer accepts streamed canonical engine outputs and explicit
+shared context. SnapshotStore accepts V2 only; V1 keeps its historical meaning
+and is retained only for explicit parity tests. Sizer uses exact key context and
+canonical `size_idea`, returning typed refusal for an absent direction. Existing
+OpenAPI/TypeScript transport schemas, frontend design and engine/configuration
+files are unchanged. Synthetic UI fixtures and desktop/mobile screenshots were
+regenerated from V2; mobile Tape scrolling is explicitly verified.
+
+Observed verification: **93 focused Python tests**, **2,734 full-suite tests**,
+**11 frontend component tests**, and **two Chromium desktop/mobile tests passed**.
+Typecheck, production build, OpenAPI/type synchronization, snapshot-schema/catalog
+determinism, Python/frontend lint/format and whitespace checks passed. One existing
+Starlette httpx TestClient deprecation warning remains nonblocking.
+
+Measured GREEN fixture: **480,251 bytes**, **94.51% smaller** than the supplied
+8,739,961-byte V1 baseline. Measured scale: **2,000 records**, **18,834,442 compact
+uncompressed bytes (17.96 MiB)**, **9,417.221 bytes/record**, below the hard 24 MiB
+ceiling and unchanged 32 MiB loader bound. Final diagnostic build/load/rebuild
+times: **86.41 / 13.18 / 24.68 seconds**. Timing is diagnostic, not a hard test.
+Reordered inputs rebuilt byte-identically; first/middle/last detail and Sizer
+contexts matched independent canonical engine evaluations. The scale funnel is
+1,226 NONE / 5 WATCH / 268 TRADE / 501 ACT.
+
+Scale fingerprint:
+`866c148e05a11d5553fcc9d5a7571c83018cce0f0e8c11f4dc0e085bac712e40`.
+
+[Schema, migration, exact commands and measured evidence](workstation-snapshot-v2.md)
+are documented with a generated standalone JSON Schema/column catalog. Generated
+scale files stay in temporary test storage. The pre-existing
+`.vscode/settings.json` change is preserved and excluded from the commit. No
+provider/event retrieval, real data materialization, database/staged publication,
+exposure rebuild, crosswalk, portfolio workflow, UI redesign, hosting, brokerage
+or PR merge occurred. No snapshot-correction blocker remains. The separate
+September security-master timestamp-precision publication issue is unchanged.

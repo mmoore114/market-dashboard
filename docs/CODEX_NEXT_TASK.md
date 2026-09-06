@@ -2,7 +2,7 @@
 
 **Task ID:** AP-WORKSTATION-SNAPSHOT-002
 
-**Status:** READY
+**Status:** COMPLETE
 
 **Issued:** 2026-09-06
 
@@ -225,3 +225,34 @@ broker connections, or order execution.
 
 The separate September security-master timestamp-precision publication blocker
 remains deferred and does not authorize publication here.
+
+## Completion record — 2026-09-06
+
+Completed AP-WORKSTATION-SNAPSHOT-002 on `codex/workstation-snapshot-v2` from
+exact handoff `8a128abebb1e10c19be316cc6e50985cb925e133`. V2 stores complete
+canonical evidence in one immutable typed index, with shared SHA-256 identity
+binding, strict cross-record/reference validation and deterministic ordering.
+V1 snapshot files are explicitly refused; existing API schemas and UI are
+preserved. Sizer now refuses absent exact directions rather than borrowing
+direction-specific context.
+
+Observed verification: **93 focused Python tests** (58 existing workstation,
+34 V2 integrity, one scale test), **2,734 full-suite tests**, **11 frontend
+component tests**, and **two Chromium desktop/mobile tests** passed. OpenAPI/
+TypeScript and standalone snapshot-schema checks, typecheck, production build,
+Python/frontend lint/format and whitespace checks passed. One existing upstream
+Starlette httpx TestClient deprecation warning remains nonblocking.
+
+The GREEN fixture is **480,251 compact bytes**, a **94.51% reduction**.
+The 2,000-record scale snapshot is **18,834,442 uncompressed bytes (17.96 MiB)**,
+below the hard 24 MiB ceiling. Final-run diagnostic build/load/rebuild times were
+**86.41 / 13.18 / 24.68 seconds**; reversed input records rebuilt byte-identically.
+First/middle/last API and canonical engine checks passed. The scale artifact is
+reproducible in temporary storage and is not committed.
+
+See [the V2 contract and evidence](workstation-snapshot-v2.md) and
+[generated typed column catalog](workstation-snapshot-v2.schema.json).
+No provider access, production/staged write, real materialization, engine/config
+change, UI redesign or merge occurred. User settings remain uncommitted.
+Draft PR targets `codex/workstation-slice-v1`. No correction blocker remains;
+the unrelated September publication timestamp issue stays deferred.

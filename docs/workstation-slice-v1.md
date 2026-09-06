@@ -4,6 +4,10 @@ AP-WORKSTATION-SLICE-001 adds a local, single-user React interface over the
 completed Python engines. All thresholds remain `experimental_uncalibrated`.
 ACT means discretionary review; the workstation cannot submit orders.
 
+The active storage format is now `workstation-snapshot-v2`. See
+[the normalization contract, migration and measured scale evidence](workstation-snapshot-v2.md).
+V1 below names the product/API slice; V1 snapshot files are no longer accepted.
+
 ## Local development
 
 Use Python 3.11+ and Node 22.12+ from the repository root:
@@ -64,19 +68,18 @@ reasons, and the UI shell retains navigation. The caller explicitly supplies
 
 The later real materializer must construct this complete contract from verified,
 point-in-time published inputs, provide a real exchange calendar and attested
-freshness, preserve every version identity, and use `seal_snapshot`. This
+freshness, preserve every version identity, and use `materialize_v2`. This
 milestone deliberately does not implement that materializer. Relabeling a fixture
 does not make it real market evidence.
 
 ## Snapshot and transport contracts
 
-`src/market_dashboard/workstation/models.py` owns frozen, extra-field-forbidding
-Pydantic contracts. `WorkstationSnapshotV1` retains the source and calendar,
-security-master/exposure/universe/feature/engine/rules identities, full regime
-evidence, group evidence, funnel counts and one complete Decision/Risk output
-per exact symbol/direction. That output retains all canonical inputs, components,
-setup instances, gates, reasons and sizing context. Volume is separately nullable
-with an explicit reason. Missing values remain null throughout the API.
+`models.py` preserves the original frozen transport and V1 snapshot schemas.
+The active `snapshot_v2.py` contract stores shared populations once in a typed,
+content-addressed evidence table. It preserves every canonical component, input,
+setup, gate, reason and sizing field; the API resolves references into its existing
+view models. Volume remains separately nullable with an explicit reason. The
+original nested `WorkstationSnapshotV1` remains a parity-test source only.
 
 The SHA-256 logical fingerprint covers JSON logical content except the top-level
 generation timestamp and the fingerprint field itself. All nested evidence
@@ -114,7 +117,9 @@ Errors use `workstation-error-v1` with code, message and optional field details;
 raw request values, file contents, absolute paths and stack traces are not echoed.
 
 Sizer accepts exact symbol, LONG/SHORT, equity, buying power, entry and stop.
-Nullable numbers reach canonical refusal handling. It does not select a stop
+Nullable numbers reach canonical refusal handling. A direction without an exact
+snapshot record returns typed 422 `SIZER_DIRECTION_UNAVAILABLE`; context is never
+borrowed from another direction. It does not select a stop
 from setup invalidation or duplicate share math in JavaScript. Both theoretical
 and capital-constrained full/pilot amounts remain visible on refused results,
 clearly labeled unavailable. SHORT illustrations do not enable SHORT promotion.
@@ -130,7 +135,7 @@ HTTP requests time out after 15 seconds and views expose retry/error states.
 The shell refreshes health every 30 seconds and blocks content on expiry.
 
 ```bash
-.venv/bin/python -m pytest tests/test_workstation.py
+.venv/bin/python -m pytest tests/test_workstation.py tests/test_workstation_v2.py tests/test_workstation_scale.py
 .venv/bin/python -m pytest
 .venv/bin/python -m api.export_openapi --check
 .venv/bin/ruff check api src/market_dashboard/workstation tests/test_workstation.py

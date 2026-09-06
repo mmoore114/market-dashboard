@@ -116,6 +116,11 @@ def provenance():
 def strength(universe, i=T):
     inputs = []
     for j, s in enumerate(universe.symbols):
+        slot = (
+            j
+            if len(universe.symbols) == 120
+            else (j * 6 // len(universe.symbols)) * 20 + (j % 2) * 10
+        )
         inputs.append(
             StrengthInputV1(
                 symbol=s,
@@ -125,8 +130,12 @@ def strength(universe, i=T):
                     RawReturnV1(
                         horizon=h,
                         value=None
-                        if j == 10
-                        else (0.50 if j == 60 and h in (5, 21) else j / 1000),
+                        if j % 120 == 10
+                        else (
+                            0.50
+                            if j == len(universe.symbols) // 2 and h in (5, 21)
+                            else slot / 1000
+                        ),
                     )
                     for h in (5, 21, 63, 126, 252)
                 ),
@@ -134,7 +143,7 @@ def strength(universe, i=T):
                     beta_252_qqq=1.1,
                     overlap_count=252,
                     benchmark_R63=0.08,
-                    residual_R63_qqq=j / 2000,
+                    residual_R63_qqq=slot / 2000,
                 ),
                 distance_from_closing_high_63=-0.01,
                 distance_from_closing_high_252=-0.03,
@@ -143,7 +152,9 @@ def strength(universe, i=T):
     ranked = rank_strength(inputs, universe, CALENDAR[i])
     members = []
     for j, s in enumerate(universe.symbols):
-        group = GROUPS[0 if j == 118 else j // 20]
+        group = GROUPS[
+            0 if j % 120 == 118 else j * len(GROUPS) // len(universe.symbols)
+        ]
         members.append(
             GroupMemberV1(
                 group_id=group,
@@ -170,7 +181,7 @@ def strength(universe, i=T):
                 market_data_symbol=s,
                 identity_reason="SYNTHETIC_EXACT_IDENTITY",
             )
-            for s in universe.symbols[60:]
+            for s in universe.symbols[len(universe.symbols) // 2 :]
         ),
         identity_version="synthetic-security-master-v1",
     )
@@ -339,7 +350,7 @@ def engine_rows(symbol, number):
     return structures[-1], evaluate_setups(setup_rows)[-1]
 
 
-def build_fixture(rules, scenario="GREEN"):
+def fixture_arguments(rules, scenario="GREEN"):
     if scenario not in ("GREEN", "YELLOW", "RED"):
         raise ValueError("Unknown synthetic scenario")
     universe = ResearchUniverseV1(
@@ -431,13 +442,13 @@ def build_fixture(rules, scenario="GREEN"):
         state: sum(r.output.decision.state == state for r in records)
         for state in ("NONE", "WATCH", "TRADE", "ACT")
     }
-    return seal_snapshot(
-        snapshot_id=f"aperture-synthetic-v1-{scenario.lower()}",
-        generated_at=clock(),
-        as_of_session=CALENDAR[T],
-        action_session=CALENDAR[T + 1],
-        mode="FIXTURE",
-        freshness=FreshnessV1(
+    return {
+        "snapshot_id": f"aperture-synthetic-v1-{scenario.lower()}",
+        "generated_at": clock(),
+        "as_of_session": CALENDAR[T],
+        "action_session": CALENDAR[T + 1],
+        "mode": "FIXTURE",
+        "freshness": FreshnessV1(
             state="FRESH",
             valid_until=clock(T + 5),
             reasons=(
@@ -447,12 +458,28 @@ def build_fixture(rules, scenario="GREEN"):
                 ),
             ),
         ),
-        source=SOURCE,
-        calendar=CALENDAR,
-        versions=VersionsV1(security_master="synthetic-security-master-v1"),
-        rules=rules,
-        regime=regime,
-        funnel=FunnelV1(**counts),
-        groups=leadership.groups,
-        records=tuple(records),
+        "source": SOURCE,
+        "calendar": CALENDAR,
+        "versions": VersionsV1(security_master="synthetic-security-master-v1"),
+        "rules": rules,
+        "regime": regime,
+        "funnel": FunnelV1(**counts),
+        "groups": leadership.groups,
+        "records": tuple(records),
+    }
+
+
+def build_fixture_v1(rules, scenario="GREEN"):
+    """Historical contract fixture, only for migration/equality regression tests."""
+    return seal_snapshot(**fixture_arguments(rules, scenario))
+
+
+def build_fixture(rules, scenario="GREEN"):
+    from market_dashboard.workstation.snapshot_v2 import materialize_v2
+
+    values = fixture_arguments(rules, scenario)
+    return materialize_v2(
+        **values,
+        universe=values["regime"].inputs.universe,
+        leadership=values["records"][0].output.inputs.leadership,
     )

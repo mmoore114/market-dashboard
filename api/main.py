@@ -27,6 +27,7 @@ from market_dashboard.workstation.models import (
     SymbolDetailV1,
     TapeV1,
 )
+from market_dashboard.workstation.snapshot_v2 import sizing_input
 from market_dashboard.workstation.store import SnapshotStore, SnapshotUnavailable
 
 
@@ -217,20 +218,21 @@ def create_app(store=None):
     @app.post("/api/v1/sizer", response_model=SizerResponseV1)
     def sizer(body: SizerRequestV1):
         snapshot = store.require()
-        rows = exact_records(body.symbol, snapshot)
-        record = next(
-            (r for r in rows if r.output.decision.direction == body.direction), rows[0]
-        )
-        original = record.output.sizing.inputs
+        exact_records(body.symbol, snapshot)
         proposal = SizingProposalV1(
             account_equity=body.account_equity,
             available_buying_power=body.available_buying_power,
             entry=body.entry,
             stop=body.stop,
         )
-        inputs = original.model_copy(
-            update={"proposal": proposal, "direction": body.direction}
-        )
+        try:
+            inputs = sizing_input(snapshot, body.symbol, body.direction, proposal)
+        except ValueError:
+            raise ApiError(
+                422,
+                "SIZER_DIRECTION_UNAVAILABLE",
+                "No exact symbol/direction record exists in this snapshot.",
+            ) from None
         return SizerResponseV1(
             meta=store.meta(),
             result=decision_components.size_idea(inputs, snapshot.rules),

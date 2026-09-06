@@ -5,7 +5,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from market_dashboard.aperture.decision_components import reason
-from market_dashboard.workstation.models import ViewMetaV1, WorkstationSnapshotV1
+from market_dashboard.workstation.models import ViewMetaV1
+from market_dashboard.workstation.snapshot_v2 import WorkstationSnapshotV2
 
 MAX_SNAPSHOT_BYTES = 32 * 1024 * 1024
 
@@ -33,7 +34,10 @@ class SnapshotStore:
                     "MODE_INVALID", "Choose FIXTURE or LOCAL_SNAPSHOT explicitly."
                 )
             if mode == "FIXTURE":
-                if fixture is None or fixture.mode != "FIXTURE":
+                if (
+                    not isinstance(fixture, WorkstationSnapshotV2)
+                    or fixture.mode != "FIXTURE"
+                ):
                     raise SnapshotUnavailable(
                         "FIXTURE_UNAVAILABLE",
                         "The synthetic fixture could not be constructed.",
@@ -83,7 +87,7 @@ class SnapshotStore:
                     "SNAPSHOT_INVALID",
                     "The local snapshot does not match the required contract.",
                 )
-            if payload.get("schema_version") != "workstation-snapshot-v1":
+            if payload.get("schema_version") != "workstation-snapshot-v2":
                 raise SnapshotUnavailable(
                     "SNAPSHOT_VERSION_UNSUPPORTED",
                     "The local snapshot schema version is unsupported.",
@@ -100,7 +104,7 @@ class SnapshotStore:
                     "SNAPSHOT_FINGERPRINT_MISMATCH",
                     "The local snapshot failed its logical fingerprint check.",
                 )
-            snapshot = WorkstationSnapshotV1.model_validate(payload)
+            snapshot = WorkstationSnapshotV2.model_validate(payload)
             if snapshot.mode != "LOCAL_SNAPSHOT":
                 raise SnapshotUnavailable(
                     "SNAPSHOT_MODE_MISMATCH",
