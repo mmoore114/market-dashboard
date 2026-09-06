@@ -1,6 +1,7 @@
 # Aperture — authoritative project state
 
-Updated: 2026-09-05. Current milestone: approved engine contracts and Deepvue taxonomy import foundation.
+Current milestone: AP-STRUCTURE-001 complete; deterministic daily Structure Engine V1.
+Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
 
@@ -99,6 +100,10 @@ preservation exception. Python tests were not rerun for this documentation-only
 change; the 314 result above remains the recorded baseline.
 
 ## Next work
+
+The historical sequence below is superseded by `CODEX_NEXT_TASK.md` and the
+AP-STRUCTURE-001 completion record at the end of this file. Publication and setup
+implementation require their own next assignments.
 
 1. Perform read-only local data inventory/validation through laptop Codex using
    the existing scripts. Confirm actual files, dates, adjustment policy and
@@ -328,3 +333,34 @@ implementation is ready for a single reviewed source/configuration/documentation
 test commit, excluding machine settings and all staged data/reports. No network,
 publication, exposure publication, crosswalk application, ingestion, engine work,
 commit, push or merge occurred.
+
+## AP-STRUCTURE-001 — complete
+
+Implemented the approved Structure Engine V1 on `codex/structure-engine-v1`,
+branching from the pulled handoff task commit `b846d2a`. The pure calculation API
+has five exact states, frozen thresholds and transition rules, explicit versioned
+input/evidence schemas, full reason/measurement output and a bar adapter requiring
+250 prior sessions. The decision overlay governs initialization, persistence,
+strict equality counts, BROKEN_UP and every shock path.
+
+The adapter consumes uppercase market-data symbols without normalizing reference
+identities; reference access uses explicit compatibility conversion. It preserves
+the existing EMA9/simple ATR and all legacy state histories. No setup families,
+regime, leadership, actionability, risk, sizing or opportunity scores were added.
+See [implementation formulas, transitions and synthetic examples](structure-engine-implementation-v1.md).
+
+Observed verification: 176 focused tests passed, including all 149 new structure
+tests and 27 existing feature/identity regression tests. The complete suite
+passed 557 tests. Whitespace checks passed. Network calls are forbidden by the
+bar-adapter acceptance fixtures; no provider client or production builder ran.
+Protected production/staging files and `.vscode/settings.json` matched their
+pre-work SHA-256 inventories. Only source, tests and documentation are included
+in the milestone commit; no market data, credentials or generated reports.
+
+The September security-master publication issue is explicitly **deferred**:
+Parquet retains nanosecond `last_updated_utc` values while DuckDB TIMESTAMP loses
+precision in 13,146 rows. Staged validation does not authorize publication.
+No security-master publication, exposure build or crosswalk application occurred;
+all 23 mapping proposals remain unapplied. No snapshot, raw data, or July
+partition was changed. No merge occurred. Setup implementation and empirical
+universe-wide structure calibration remain separate future work.

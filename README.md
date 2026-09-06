@@ -3,8 +3,10 @@
 Current implementation handoff: [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md).
 For new structure/setup work, read the canonical specifications linked there.
 The older stage/setup descriptions below describe legacy research or earlier
-candidates; they do not override the canonical amendments. Engine implementation
-remains gated on the documented specification issues.
+candidates; they do not override the canonical amendments. The daily Structure
+Engine V1 is implemented as a separate pure API; see
+[its contract, formulas, and usage](docs/structure-engine-implementation-v1.md).
+Setup implementation remains a separate milestone.
 
 Market Dashboard is a Python research repository for equity discovery, ranking, and discretionary market research. The project is intended to collect market data, persist local research datasets, compute opportunity features, and expose a Streamlit dashboard for exploration.
 

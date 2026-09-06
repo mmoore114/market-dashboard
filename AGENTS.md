@@ -28,7 +28,7 @@ Keep equity research in this repository. Do not mix in separate options-tradabil
 Before editing:
 
 1. Run git status --short --branch.
-2. Read docs/PROJECT_STATE.md first, then README.md, docs/session_progress_2026-07-26.md, docs/session_progress_2026-08-25.md, docs/aperture_product_contract.md, docs/deepvue_audit.md, and docs/architecture_decision.md.
+2. Read docs/PROJECT_STATE.md first, then docs/CODEX_NEXT_TASK.md immediately afterward, followed by README.md, docs/session_progress_2026-07-26.md, docs/session_progress_2026-08-25.md, docs/aperture_product_contract.md, docs/deepvue_audit.md, and docs/architecture_decision.md.
 3. Preserve unrelated or user-owned changes.
 4. Confirm the requested milestone and its acceptance criteria.
 

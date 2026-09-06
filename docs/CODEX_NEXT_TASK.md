@@ -1,7 +1,7 @@
 # Codex Next Task
 
 **Task ID:** AP-STRUCTURE-001  
-**Status:** READY  
+**Status:** COMPLETE\
 **Issued:** 2026-09-06  
 **Base commit:** `f2a16e311682e974dd1243f4f7733378dbe8aaa1`
 
@@ -89,3 +89,18 @@ Commit only reviewed source, configuration, documentation, and tests. Push `code
 The 2026-09-05 staged security-master artifact is valid but production publication is separately blocked because Parquet `last_updated_utc` preserves nanoseconds while the current DuckDB `TIMESTAMP` column stores microseconds, producing 13,146 post-publication field differences.
 
 Record this as deferred. Do not fix it during AP-STRUCTURE-001. Do not publish the security master, build exposure classification, apply any of the 23 crosswalk proposals, make provider requests, or alter staged/production data.
+
+## Completion record
+
+Implemented on `codex/structure-engine-v1`, based on handoff commit `b846d2a`.
+The new pure engine, strict versioned schemas, daily-bar adapter and explicit
+reference boundary implement the approved S1–S6 rules independently of legacy
+classifiers. See [implementation and acceptance evidence](structure-engine-implementation-v1.md).
+AGENTS now requires reading this assignment immediately after PROJECT_STATE.
+
+Validation: 176 focused tests passed (149 new structure tests plus 27 existing
+feature/identity regressions); the complete suite passed all 557 tests.
+Whitespace checks passed. Production/staging contents and machine settings were
+verified unchanged. The nanosecond publication blocker remains deferred;
+no provider requests, data publication, exposure build or crosswalk application
+occurred. Commit identity is the milestone commit containing this record.
