@@ -1,32 +1,44 @@
 # Codex Next Task
 
-**Task ID:** AP-STRUCTURE-001  
-**Status:** COMPLETE\
-**Issued:** 2026-09-06  
-**Base commit:** `f2a16e311682e974dd1243f4f7733378dbe8aaa1`
+**Task ID:** AP-SETUP-001
+
+**Status:** READY
+
+**Issued:** 2026-09-06
+
+**Base commit:** `29de3ef5abffe887dcc7d42af7e93feecd370165`
 
 ## Handoff protocol
 
 This file is the single current assignment for VS Code Codex.
 
-1. Read `AGENTS.md`, `docs/PROJECT_STATE.md`, and every authoritative contract referenced below before editing.
-2. On this first task, update `AGENTS.md` so future Codex sessions always read `docs/CODEX_NEXT_TASK.md` immediately after `docs/PROJECT_STATE.md`.
-3. Work through the entire bounded milestone autonomously. Do not stop for routine implementation choices already settled by repository contracts.
-4. Ask the user only when authoritative contracts materially conflict, a required rule is genuinely absent, or an external/destructive action would be required.
-5. At completion, change this task's status to `COMPLETE`, add a concise completion record, update `docs/PROJECT_STATE.md`, commit, and push the milestone branch.
-6. The user-facing completion response should be short: full commit SHA, test totals, and any genuine blocker. Detailed evidence belongs in the repository.
+1. Read `AGENTS.md`, `docs/PROJECT_STATE.md`, and every authoritative contract
+   referenced below before editing.
+2. Work through the entire bounded milestone autonomously. Do not stop for
+   routine implementation choices already settled by repository contracts.
+3. Ask the user only when authoritative contracts materially conflict, a
+   required rule is genuinely absent, or an external/destructive action would
+   be required.
+4. At completion, change this task's status to `COMPLETE`, add a concise
+   completion record, update `docs/PROJECT_STATE.md`, commit, and push the
+   milestone branch.
+5. The user-facing completion response should be short: full commit SHA, focused
+   and complete-suite test totals, and any genuine blocker. Detailed evidence
+   belongs in the repository.
 
-Preserve `.vscode/settings.json`, `.env`, credentials, databases, Parquet/CSV datasets, staged artifacts, generated reports, and all unrelated user changes.
+Preserve `.vscode/settings.json`, `.env`, credentials, databases, Parquet/CSV
+datasets, staged artifacts, generated reports, and all unrelated user changes.
 
 ## Milestone
 
-Implement the complete deterministic Aperture Structure Engine V1.
+Implement the complete deterministic Aperture Setup Engine V1.
 
 Create and work on:
 
-`codex/structure-engine-v1`
+`codex/setup-engine-v1`
 
-Base it on the current handoff branch after pulling this task-file commit.
+Base it on this handoff branch after pulling the task-file commit. Preserve the
+completed Structure Engine V1 at `29de3ef5abffe887dcc7d42af7e93feecd370165`.
 
 ## Authoritative sources
 
@@ -36,45 +48,128 @@ Read and follow:
 - `docs/PROJECT_STATE.md`
 - `docs/aperture_product_contract.md`
 - `docs/architecture_decision.md`
-- `docs/structure-state-engine-v1.md`
-- `docs/setup-classification-engine-v1.md` only to preserve the structure/setup boundary
+- `docs/setup-classification-engine-v1.md`
+- `docs/structure-state-engine-v1.md` only to preserve the structure/setup
+  boundary and consume the new typed Structure Engine output where required
 - `docs/engine-spec-decisions-v1.md`
 - `docs/engine-spec-open-issues.md`
+- `docs/structure-engine-implementation-v1.md`
 
-The decision overlay supersedes older candidates and archived sources. Do not reconstruct rules from chat history or redesign settled formulas.
+The approved decision overlay supersedes conflicting recovered prose, examples,
+and archived sources. Implement U1-U8 exactly. Do not reconstruct rules from
+chat history or redesign settled formulas.
 
-## Required terminology
+## Required taxonomy and lifecycle
 
-The only Structure Engine V1 states are:
+The only setup families are:
 
-- `NEUTRAL`
-- `EMERGING`
-- `UPTREND`
-- `DETERIORATING`
-- `DECLINE`
+- `EP`
+- `CONTRACTION`
+- `TREND_PULLBACK`
+- `RANGE`
 
-`BASE` is obsolete. Do not introduce, restore, or emit it.
+Multiple valid setup instances may coexist. Do not rank them as primary or
+secondary. `RECLAIM` is evidence, never a fifth setup family.
+
+The only lifecycle statuses are:
+
+- `FORMING`
+- `NEAR_TRIGGER`
+- `TRIGGERED`
+- `RESOLVED`
+- `FAILED`
+- `STALE`
+
+`STALE` is pre-trigger only. Terminal instances never reactivate. `RESOLVED`
+means the observation window completed without setup failure; it does not assert
+trade profitability.
 
 ## Implementation scope
 
 Deliver:
 
-- pure production calculation logic;
-- explicit, versioned input and output schemas;
-- deterministic state classification;
-- documented hysteresis and transition behavior;
-- insufficient-history and missing-data behavior;
-- reason codes and evidence fields explaining every classification;
-- point-in-time evaluation using only information available at the evaluated session;
-- integration with existing market-data and security-identity boundaries;
-- unit, threshold-boundary, transition, missing-data, point-in-time, and regression tests;
-- concise implementation documentation with formulas, transition rules, and representative outputs.
+- pure production feature and setup-calculation logic;
+- explicit, frozen, versioned input, instance, evidence, and output schemas;
+- deterministic detection for all four families and both directions;
+- the complete stateful lifecycle for multiple concurrent instances;
+- stable setup identity and committed T-1 geometry with stored
+  `reference_as_of_session`, reference price, reference ATR, controlling
+  boundaries, window, and reference kind;
+- exact per-session event order: input/corporate-action validation, failure,
+  trigger, resolution, pre-trigger staleness, then tomorrow's geometry;
+- explicit geometry refresh/rebuild behavior and terminal history retention;
+- deterministic reason codes, passed/failed rules, contradictions, and flags;
+- rejected EP-candidate diagnostics without emitting invalid setup objects;
+- point-in-time replay using only information available at the evaluated
+  session;
+- an explicit adapter from the existing daily-bar and Structure Engine V1
+  contracts without I/O or implicit identity conversion;
+- missing-data, nonpositive-input, volume, corporate-action, and insufficient-
+  history behavior exactly as specified;
+- concise implementation documentation with formulas, event ordering,
+  lifecycle transitions, version identities, and representative outputs.
 
-Keep structure separate from setup classification, market regime, group/industry/theme leadership, actionability, risk, position sizing, and composite opportunity scoring.
+Keep setup classification separate from market regime, group/industry/theme
+leadership, relative strength, extension permission, earnings policy,
+actionability, trade entry policy, stops, position sizing, portfolio heat, and
+opportunity scoring. A setup invalidation level is not a trade stop.
 
-Do not implement EP, CONTRACTION, TREND_PULLBACK, or RANGE in this milestone.
+Do not modify or relabel legacy setup or structure history. New consumers must
+opt into the new V1 contracts.
 
-## Verification and completion
+## Non-negotiable decision details
+
+- EP uses the approved conjunction: GapPct, GapATR, ShockATR, prior-20-session
+  median-volume RVOL, and CLV. It does not require Close versus Open or a new
+  high/low. EP is born `TRIGGERED`, event day is age zero, and failure precedes
+  resolution on following session five.
+- Horizontal triggers use geometry committed by T-1. Current-session highs,
+  lows, moving averages, or ranges may not move the reference before today's
+  trigger decision.
+- Exact setup identity is
+  `symbol|type|direction|detected_at|reference_kind`; a price hash is evidence,
+  not identity.
+- Contraction pre-trigger predicate loss uses the approved two-session
+  `GEOMETRY_CEASED` staleness rule. Use the independent post-trigger failure
+  rules; do not restore the impossible `R5 > 1.15*R10` rule.
+- Only TREND_PULLBACK uses structure as a detection gate. Other structure/setup
+  compatibility is display context and may warn, but may not suppress EP,
+  CONTRACTION, or RANGE.
+- Pullback triggers use the frozen T-1 moving average and ATR correction. A
+  same-day reclaim flag alone is not a trigger.
+- RANGE tries the trimmed 30-session box first and uses 20 only when 30 fails
+  and 20 passes. Trigger, depth, drift, location, and touches use the selected
+  trimmed box. Reject degenerate geometry.
+- ATR5, ATR14, and ATR20 are Wilder ATRs. EP uniquely requires current and 20
+  prior volume observations; volume remains evidence-only for the other three
+  families.
+- Preserve split/corporate-action quarantine behavior. A provider-confirmed or
+  factor-explained split discontinuity cannot emit an EP.
+
+## Required verification
+
+Add focused tests covering, at minimum:
+
+- every equality and threshold boundary for all four families and directions;
+- all lifecycle transitions, clocks, precedence rules, and terminal
+  non-reactivation;
+- multiple coexisting instances and stable identity;
+- T-1 committed trigger geometry and future-bar mutation/no-look-ahead tests;
+- simultaneous failure versus trigger or resolution, with failure winning;
+- geometry shift, geometry ceased, reference change, expiry, and new-instance
+  behavior;
+- EP median-volume denominator using exactly T-20 through T-1;
+- missing/nonpositive ATR and family-specific volume behavior;
+- range 30/20 precedence, trimmed boundaries, touches, drift, and degenerate
+  geometry;
+- pullback deepest-reference selection, structure gates, frozen-MA trigger, and
+  incompatible-structure failure;
+- contraction post-trigger failure and eight-session resolution;
+- EP and pullback five-session resolution and range eight-session resolution;
+- corporate-action EP quarantine;
+- exact reference versus uppercase market-data identity behavior;
+- preservation of legacy outputs and the completed Structure Engine tests;
+- zero network calls in setup calculation and replay tests.
 
 Run focused tests during development. At the end run:
 
@@ -82,25 +177,28 @@ Run focused tests during development. At the end run:
 
 `git diff --check`
 
-Commit only reviewed source, configuration, documentation, and tests. Push `codex/structure-engine-v1`. Do not merge or publish externally.
+Commit only reviewed source, configuration, documentation, and tests. Push
+`codex/setup-engine-v1`. Do not merge, publish data, or open a production writer.
 
-## Deferred publication blocker
+## Deferred work and publication blocker
 
-The 2026-09-05 staged security-master artifact is valid but production publication is separately blocked because Parquet `last_updated_utc` preserves nanoseconds while the current DuckDB `TIMESTAMP` column stores microseconds, producing 13,146 post-publication field differences.
+The 2026-09-05 staged security-master artifact remains valid but production
+publication is separately blocked by nanosecond Parquet versus microsecond
+DuckDB timestamp precision. Do not fix or publish it during AP-SETUP-001.
 
-Record this as deferred. Do not fix it during AP-STRUCTURE-001. Do not publish the security master, build exposure classification, apply any of the 23 crosswalk proposals, make provider requests, or alter staged/production data.
+Do not build leadership, groups, themes, regime, actionability, risk, UI, or
+portfolio layers during this milestone. Do not apply crosswalk proposals, build
+exposure classification, make provider requests, or alter staged/production
+data.
 
-## Completion record
+## Completion report
 
-Implemented on `codex/structure-engine-v1`, based on handoff commit `b846d2a`.
-The new pure engine, strict versioned schemas, daily-bar adapter and explicit
-reference boundary implement the approved S1–S6 rules independently of legacy
-classifiers. See [implementation and acceptance evidence](structure-engine-implementation-v1.md).
-AGENTS now requires reading this assignment immediately after PROJECT_STATE.
+At completion, record in this file and `docs/PROJECT_STATE.md`:
 
-Validation: 176 focused tests passed (149 new structure tests plus 27 existing
-feature/identity regressions); the complete suite passed all 557 tests.
-Whitespace checks passed. Production/staging contents and machine settings were
-verified unchanged. The nanosecond publication blocker remains deferred;
-no provider requests, data publication, exposure build or crosswalk application
-occurred. Commit identity is the milestone commit containing this record.
+- implemented behavior and version identities;
+- exact files changed;
+- representative setup and lifecycle paths;
+- focused and complete-suite test totals;
+- any genuine unresolved decision or blocker;
+- confirmation that protected data, settings, legacy outputs, and the Structure
+  Engine remained unchanged.
