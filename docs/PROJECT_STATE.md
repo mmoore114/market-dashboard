@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-LOCAL-MATERIALIZER-001 complete; the offline materializer is implemented and verified. Actual local readiness is BLOCKED by eight foundational findings; no real snapshot was built.
+Current milestone: AP-FOUNDATION-RECONCILE-001 ready; reconcile the eight local materializer foundation findings offline. AP-LOCAL-MATERIALIZER-001 is complete and no real snapshot was built.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
