@@ -1,328 +1,227 @@
 # Codex Next Task
 
-**Task ID:** AP-WORKSTATION-SLICE-001
+**Task ID:** AP-WORKSTATION-SNAPSHOT-002
 
-**Status:** COMPLETE
+**Status:** READY
 
 **Issued:** 2026-09-06
 
-**Base commit:** `e81994aa9f561439f5c2dd970e5d2d6a4e2358e3`
+**Base commit:** `dc3b9e21688c7a3fffd37b621ee74cd5555c01dc`
 
 ## Handoff protocol
 
 This file is the single current assignment for VS Code Codex.
 
-1. Read `AGENTS.md`, `docs/PROJECT_STATE.md`, and every authoritative source
-   listed below before editing.
-2. Build the complete bounded vertical slice autonomously. Preserve all completed
-   engine contracts and legacy behavior.
-3. Stop only for a material contract contradiction, a required unavailable
-   dependency, or an external/destructive action.
+1. Read `AGENTS.md`, `docs/PROJECT_STATE.md`,
+   `docs/workstation-slice-v1.md`, and the completed engine contracts before
+   editing.
+2. Correct the bounded snapshot scalability defect without redesigning the
+   approved UI or canonical engines.
+3. Work autonomously unless a material contract contradiction, destructive
+   action, or external publication would be required.
 4. At completion, mark this task `COMPLETE`, add a concise completion record,
    update `docs/PROJECT_STATE.md`, commit, push, and open a draft PR targeting
-   `codex/decision-risk-v1` so it contains only this milestone.
-5. Return only the full commit SHA, Python focused/full-suite totals, frontend test
-   and build results, PR link, and any genuine blocker. Keep detailed evidence in
-   the repository.
+   `codex/workstation-slice-v1` so it contains only this correction.
+5. Return only the full commit SHA, focused/full Python totals, frontend and
+   browser totals, typecheck/build/contract results, PR link, and any blocker.
 
 Preserve `.vscode/settings.json`, `.env`, credentials, databases, Parquet/CSV
-datasets, staged artifacts, generated reports, and unrelated user changes.
+datasets, staged artifacts, generated local reports, and unrelated user changes.
 
-## Milestone
+## Defect and required outcome
 
-Build the first usable local Aperture Workstation vertical slice:
+The first Workstation slice is visually and functionally sound, but its canonical
+snapshot cannot scale to the real research universe.
 
-- a versioned snapshot/read-model boundary;
-- a small typed FastAPI service;
-- a React/TypeScript primary interface;
-- Brief, Tape, symbol detail, Sizer, and Rules experiences;
-- deterministic synthetic-fixture mode and an explicit local-snapshot mode.
+Observed independently from the committed GREEN fixture:
+
+- 12 symbol/direction records serialize to approximately 8,739,961 compact JSON
+  bytes;
+- the average is approximately 728 KB per record;
+- each record's nested `DecisionRiskOutputV1.inputs` repeats roughly 317 KB of
+  cross-sectional Leadership output and 332 KB of Regime input/output;
+- the current 32 MiB loader limit would therefore fail after only a few dozen
+  records, far short of the approximately 1,787-name research universe.
 
 Create and work on:
 
-`codex/workstation-slice-v1`
+`codex/workstation-snapshot-v2`
 
-Base it on this handoff branch after pulling the task commit. This is the first
-user-facing product milestone. It remains a local, single-user, decision-support
-application. It must not place trades, contact providers, publish data, or claim
-that synthetic fixture data is live.
+The required outcome is a normalized, immutable snapshot that preserves every
+user-visible canonical value and audit reason while storing shared cross-sectional
+evidence once. Prove that at least 2,000 realistic symbol/direction records fit
+comfortably inside the bounded standalone JSON contract.
 
-## Authoritative sources
+Do not begin real data materialization in this correction.
 
-Read and follow:
+## Normalized snapshot V2
 
-- `AGENTS.md`
-- `docs/PROJECT_STATE.md`
-- `docs/architecture_decision.md`, especially repository layout, snapshot/API
-  boundaries, frontend decision, testing, and Milestone 3
-- `docs/aperture_product_contract.md`, especially product principles, primary
-  interface, symbol detail, scoring policy, and risk contract
-- all completed Universe, Structure, Setup, Leadership, Regime, and Decision &
-  Risk implementation contracts
-- `config/aperture_rules_v1.yaml` and its immutable loader
-- current diagnostic Streamlit application only as legacy context, not as the
-  primary interface design
+Introduce a new schema identity, `workstation-snapshot-v2`. Do not silently change
+the meaning of `workstation-snapshot-v1`.
 
-Do not redesign canonical trading logic in the UI or API. The existing engines
-remain the sole authority for states, eligibility, reasons, extension, earnings,
-and sizing.
+V2 must separate:
 
-## Architecture freeze
+### Shared snapshot evidence — stored once
 
-Use the gradual target layout already approved:
+- snapshot identity, mode, dates, freshness, source and calendar;
+- every version and rules fingerprint;
+- immutable Aperture rules;
+- research-universe identity and provenance, with its symbol membership stored
+  once if required for audit;
+- complete Regime output and its shared inputs, stored once;
+- cross-sectional Leadership/group context needed for audit and Brief/Groups,
+  stored once or normalized into nonduplicated indexed records;
+- group evidence and funnel counts;
+- deterministic logical fingerprint.
 
-- `src/market_dashboard/workstation/` for frozen snapshot/read models,
-  projections, fixture construction, and local snapshot loading;
-- `api/` for the FastAPI application and entry point;
-- `web/` for the React/TypeScript application;
-- `tests/` for Python snapshot/API tests;
-- colocated frontend tests under `web/`.
+### Per-symbol/direction evidence — stored once per key
 
-Use FastAPI with Pydantic contracts. Add only the Python dependencies required to
-run and test the typed local API.
+Retain only evidence specific to that exact symbol/direction, including:
 
-Use React, TypeScript, and Vite for this V1 slice. Use TanStack Query for server
-state and TanStack Table or an equivalently focused table primitive for the Tape.
-Keep the component layer restrained and owned in-repository; do not import a large
-dashboard template or reproduce another trading platform.
+- exact symbol, direction, display name and nullable price/volume context;
+- universe memberships and their reasons;
+- Structure evidence for the symbol;
+- Setup output/instances for the symbol;
+- symbol Strength evidence, including raw 5/21/63/126/252 components,
+  `RS_comp`, `RS_rotation`, and `rotation_delta`;
+- sub-industry and theme references plus the evaluated group gate;
+- direction-aware extension evidence;
+- earnings coverage/event evidence;
+- evaluated Regime gate referencing the shared Regime identity;
+- complete decision ladder gates, setup action evidence, veto/reason codes and
+  final NONE/WATCH/TRADE/ACT state;
+- sizing input context/result needed for display and canonical what-if sizing.
 
-The API and UI run as separate local development processes. CORS must default to
-the exact local frontend origin(s), never wildcard with credentials. Bind locally
-by default. No authentication or remote hosting belongs in this milestone.
+Do not retain a complete nested `DecisionRiskOutputV1` if it recursively duplicates
+shared Leadership, Regime, Universe, rules, or group populations. A compact frozen
+record may be projected from that engine output, but every copied field must have
+an explicit source and equality test.
 
-## Snapshot and read-model boundary
+Use stable IDs/fingerprints to bind each compact record to the exact shared
+calendar, source, universe, Leadership, Regime, rules, and version context. Reject
+missing, mismatched, dangling, duplicate, or contradictory references.
 
-Create a frozen, extra-field-forbidding `WorkstationSnapshotV1` contract with:
+Do not solve this by gzip alone, by raising the size limit, or by deleting audit
+evidence the Workstation contract requires. Normalization must remove structural
+duplication before any optional transport compression is considered.
 
-- snapshot ID, schema version, generated-at timestamp, as-of session, action
-  session, and explicit mode (`FIXTURE` or `LOCAL_SNAPSHOT`);
-- freshness state and machine-readable reasons;
-- source, calendar, security-master, exposure, universe, feature, Structure,
-  Setup, Leadership, Regime, Decision/Risk, and rules version identities;
-- complete current regime/sleeve evidence;
-- explicit funnel counts for NONE/WATCH/TRADE/ACT;
-- group summaries needed by Brief and symbol context;
-- one canonical per-symbol/direction record retaining component values, setup
-  evidence, every gate, veto/reason codes, and sizing context;
-- a deterministic logical fingerprint excluding only generation timestamps.
+## Conversion and validation
 
-Define compact versioned API view models projected from that canonical snapshot.
-The projection may omit nested implementation detail from list responses but must
-never recalculate, rename, merge, or contradict canonical engine states. Preserve
-explicit nulls and reasons. Missing is never zero, false, neutral, or clear.
+Provide a pure V1-engine-output-to-V2 materialization function that accepts the
+completed canonical engine outputs and shared evidence explicitly. It must:
 
-Snapshot loading rules:
+- validate exact symbol/session/action/source/calendar/universe/version alignment;
+- prove projected values equal their canonical source fields;
+- preserve explicit nulls and all machine/human reasons;
+- store shared evidence once regardless of input row order;
+- sort symbol/direction and indexed shared records deterministically;
+- reject inconsistent repeated copies rather than choosing first/last;
+- leave every input object unchanged;
+- produce the same logical fingerprint under input reordering and generation-time
+  changes, while exact logical-content changes alter it.
 
-- `FIXTURE` is the default development mode and uses a committed deterministic,
-  fully synthetic fixture constructed without importing from `tests/`;
-- fixture rows must cover NONE, WATCH, TRADE, ACT, Green/Yellow/Red context,
-  established and new-rotation strength, each setup family, earnings veto/unknown,
-  extension refusal, missing-data reasons, and capital-constrained sizing;
-- every fixture response and UI surface must visibly say `SYNTHETIC FIXTURE`;
-- `LOCAL_SNAPSHOT` loads only an explicitly configured local JSON snapshot file,
-  validates the complete frozen contract and fingerprint, and performs no database
-  query or fallback;
-- missing, malformed, stale, wrong-version, or wrong-fingerprint local snapshots
-  fail closed with typed health/freshness evidence; never silently fall back to the
-  fixture while labeled local/live;
-- do not implement DuckDB/Parquet materialization in this milestone.
+The logical fingerprint must cover normalized logical content except the existing
+top-level generation timestamp and fingerprint field. It must not depend on JSON
+whitespace, dictionary insertion order, or source row order.
 
-No runtime mode may read proprietary Deepvue exports or staging directories.
+Update `SnapshotStore` to accept V2 only for newly generated local snapshots. If
+V1 remains readable for an explicit compatibility reason, it must be clearly
+bounded and must never be relabeled V2. Fixture development and all API views must
+use V2 after this task.
 
-## Typed API V1
+## API and Sizer preservation
 
-Provide versioned routes under `/api/v1`:
+Keep the existing `/api/v1` transport behavior unless a schema correction is
+strictly necessary. Brief, Tape, exact-symbol detail, Rules, errors, filters,
+sorting and pagination must remain behaviorally compatible.
 
-- `GET /health` — service, mode, snapshot availability, as-of/action sessions,
-  freshness, version, and reason codes;
-- `GET /brief` — regime sleeves, funnel counts, leading/weakening group context,
-  ACT candidates, data freshness, and explicit unavailable portfolio-heat status;
-- `GET /tape` — typed paginated/sorted/filterable candidate rows;
-- `GET /symbols/{symbol}` — exact-symbol detail with checklist, component
-  evidence, all setup instances, vetoes, price/volume context, and sizing context;
-- `POST /sizer` — a what-if calculation that calls the existing canonical sizing
-  function with snapshot regime/earnings context and caller entry/stop/equity/
-  buying power; it must not duplicate sizing math;
-- `GET /rules` — effective human-readable thresholds plus exact rule/version
-  metadata and `experimental_uncalibrated` status.
+`POST /sizer` must continue to call the canonical Python `size_idea` function.
+Construct its `SizingInputV1` from the compact record plus referenced shared
+Regime/rules context; do not duplicate sizing formulas or accept a mismatched
+symbol/direction/session.
 
-Tape query behavior must be explicit and tested:
+If a requested Sizer direction has no exact record, either construct only the
+direction-independent context through an explicitly tested adapter or return a
+typed refusal. Never silently borrow direction-specific evidence from another
+record.
 
-- stable exact-symbol tie-break ordering;
-- sort allowlist rather than arbitrary field access;
-- filters for action state, Structure state, setup family, minimum RS composite,
-  minimum RS rotation, group, and veto presence;
-- bounded page size and deterministic pagination metadata;
-- invalid filters/sorts return typed 4xx responses;
-- exact case-sensitive MarketDataSymbol path resolution.
+Regenerate deterministic OpenAPI and generated TypeScript types only if the
+public transport contract actually changes. Contract drift must continue to fail.
 
-Return a versioned error envelope with machine-readable code, human message, and
-optional field details. Do not expose stack traces, local absolute paths, secrets,
-environment values, or raw file contents.
+## UI preservation
 
-Generate and check in the OpenAPI document deterministically. Generate or validate
-frontend API types from it so contract drift fails tests. Do not maintain a second
-handwritten set of contradictory transport types.
+The existing Workstation passed visual review. Preserve its information
+architecture, responsive layout, fixture labels, accessibility, session-only
+preferences, and designed failure states.
 
-## React Workstation V1
+Regenerate the synthetic fixture and screenshots from normalized V2. Verify:
 
-Create a polished, dense, responsive interface intended primarily for the user's
-Chromebook/desktop browser, with a useful compact mobile fallback.
+- Brief, Tape, detail, Sizer, and Rules render the same canonical values;
+- 5-session/1-week and 21-session/1-month strength remain visible;
+- every gate, setup and veto remains inspectable;
+- mobile Tape remains intentionally scrollable/usable rather than clipping
+  inaccessible columns;
+- no canonical calculation moves into TypeScript.
 
-Use a restrained dark terminal/workstation visual language with accessible text,
-focus states, and labels in addition to color. Do not use generic oversized cards,
-marketing-page styling, gradients everywhere, or fake candlestick charts.
+Do not add Groups, Book, Journal, portfolio heat, charts, or unrelated styling in
+this correction.
 
-Persistent navigation must expose:
+## Required scale and integrity evidence
 
-- Brief
-- Tape
-- Sizer
-- Rules
+Add a deterministic synthetic scale test with at least 2,000 distinct
+symbol/direction records and realistic variation in states, setup counts, reasons,
+groups, event evidence, and missing values.
 
-Groups, Book, and Journal may appear only as clearly disabled future destinations;
-do not fabricate those workflows.
+The committed or generated compact V2 JSON for that test must:
 
-### Brief
+- remain below 24 MiB uncompressed, leaving operational headroom under the current
+  32 MiB loader limit;
+- contain no duplicated full Leadership or Regime object per symbol;
+- load and validate through `SnapshotStore` within a documented reasonable local
+  bound without loosening validation;
+- return correct Brief totals, Tape pagination/filters, symbol detail and Sizer
+  context for first, middle and last keys;
+- have deterministic bytes or canonical digest across repeated builds.
 
-Render:
+Do not commit the 2,000-record generated scale artifact if it is reproducible in a
+temporary test directory. Record measured bytes, bytes per record, build time and
+validation/load time in the completion documentation. Timing is diagnostic and
+must not become a flaky hard assertion; the byte-size ceiling is a hard test.
 
-- current confirmed regime and five separately visible sleeves;
-- as-of/action sessions and data freshness;
-- Watch/Trade/Act funnel counts;
-- leading and weakening groups supplied by the snapshot;
-- compact ACT review queue with symbol, setup(s), strength, extension, group, and
-  first visible veto/status context;
-- portfolio heat as `Unavailable — portfolio context not implemented`, never 0%.
-
-### Tape
-
-Build a dense sortable/filterable table showing at minimum:
-
-- exact symbol and price;
-- Structure;
-- RS composite, 1-week/5-session rotation, 1-month/21-session rotation context,
-  `RS_rotation`, and `rotation_delta` where supplied;
-- sub-industry and group rank;
-- setup families/statuses;
-- extension ATR;
-- decision state;
-- earnings status;
-- veto/reason indicator.
-
-Filters must survive navigation within the session. Selecting a row opens a
-responsive symbol detail drawer or route without losing Tape state.
-
-### Symbol detail
-
-Show the transparent funnel rather than a master opportunity score:
-
-- every Watch/Trade/Act gate with pass/fail/unknown and reason;
-- Structure, strength/rotation, sub-industry, regime, extension, earnings, and
-  setup evidence as separate sections;
-- all setup instances without choosing a primary setup;
-- current sizing evidence and an obvious path to the Sizer what-if;
-- a clearly labeled manual `Review chart in Deepvue` handoff affordance that does
-  not scrape, embed, or require Deepvue. If no safe documented deep link exists,
-  provide a copy-symbol/manual-review interaction instead of inventing one.
-
-### Sizer
-
-Provide an interactive form for exact symbol, direction, account equity, available
-buying power, proposed entry, and proposed stop. Submit to `POST /sizer` and render
-all canonical results: base/allowed risk, stop distance dollars/percent/ATR, full
-and pilot shares, capital-constrained shares, costs, planned risk, unused risk,
-and every refusal reason. Never calculate an authoritative share count solely in
-the browser.
-
-### Rules
-
-Render live API rule/version metadata and human-readable current hypotheses for
-universe, strength/rotation, group gate, regime, extension, earnings, and sizing.
-Clearly label uncalibrated hypotheses. Do not hardcode a visually different copy
-of the formulas that can drift from the API response.
-
-## State, accessibility, and failure behavior
-
-Every view must provide designed loading, empty, unavailable, stale, and error
-states. No blank white page or infinite spinner. A local-snapshot failure must
-leave the shell usable while clearly blocking research content.
-
-Meet practical keyboard navigation and semantic-label requirements. State chips
-must include text; red/green alone cannot convey meaning. Respect reduced motion.
-Avoid tooltips as the only place a reason is available.
-
-Local UI preferences may persist filters, table density, and drawer state only.
-Never store credentials, provider data, portfolio values, or snapshot payloads in
-browser storage.
+Also record the normalized size of the existing 12-record GREEN fixture and the
+percentage reduction from approximately 8,739,961 compact bytes.
 
 ## Verification
 
-Add Python tests covering at minimum:
+Add focused Python tests for:
 
-- frozen snapshot and API schemas, deterministic fingerprints, and explicit nulls;
-- fixture coverage for every required representative state;
-- strict local-snapshot validation and no fixture fallback under a local label;
-- health, Brief, Tape, symbol, Sizer, Rules, and error endpoints;
-- all Tape filters, stable sorts, pagination bounds, and exact-case symbols;
-- Sizer delegation to canonical sizing and refusal propagation;
-- OpenAPI determinism/type synchronization;
-- no network/provider access, no database access, no production/staged writes,
-  and no input mutation;
-- complete regressions for all existing engines.
+- V2 frozen/extra-field-forbidding schemas;
+- shared-evidence deduplication and exact reference binding;
+- equality of every V2 projected field to canonical engine output;
+- mismatched/dangling/duplicate shared identities;
+- stable ordering and fingerprint determinism;
+- explicit null and full reason preservation;
+- compact Sizer adapter and canonical delegation;
+- V1/V2 version refusal or explicitly documented compatibility;
+- malformed, oversized, stale and future local snapshots;
+- 2,000-record size/integrity/API behavior;
+- no network/provider/database access and no production/staged writes;
+- all completed-engine regressions.
 
-Add frontend tests covering at minimum:
+Run the full existing Python, frontend component, and Chromium desktop/mobile
+suites. Run OpenAPI/type synchronization, TypeScript typecheck, production build,
+Python/frontend lint/format, and `git diff --check`.
 
-- route rendering and navigation;
-- fixture-mode banner and freshness display;
-- regime sleeves and funnel counts;
-- Tape sorting/filtering, persistence, and row-to-detail flow;
-- explicit null/unknown/veto rendering;
-- Sizer request/results/refusals;
-- loading, empty, stale, API-error, and unavailable-snapshot states;
-- keyboard-accessible interactions and labels;
-- API contract/type drift.
-
-Run:
-
-- focused Python tests;
-- `.venv/bin/python -m pytest`;
-- frontend unit/component tests;
-- TypeScript typecheck;
-- production frontend build;
-- lint/format checks for both stacks;
-- `git diff --check`.
-
-Document exact local development commands, fixture/local-snapshot selection,
-snapshot/API contracts, route behavior, screenshots or rendered-state evidence,
-and the boundary for the later real materializer.
+Update `docs/workstation-slice-v1.md` or add a focused V2 document explaining the
+normalized schema, reference integrity, migration, measured sizes, exact commands,
+and why this correction is required before real local materialization.
 
 ## Deferred work
 
-Do not implement real DuckDB/Parquet snapshot materialization, data ingestion,
-provider/event retrieval, security-master publication, exposure publication,
-portfolio positions/heat, Book, Journal, outcomes, backtests, remote hosting,
-authentication, broker connections, or order execution.
+Do not implement real DuckDB/Parquet snapshot materialization, provider/event
+retrieval, security-master or exposure publication, production data writes,
+portfolio positions/heat, Groups, Book, Journal, remote hosting, authentication,
+broker connections, or order execution.
 
-The September security-master nanosecond/microsecond publication mismatch remains
-a separate deferred blocker and does not block this fixture-backed vertical slice.
-
-## Completion record — 2026-09-06
-
-Implemented AP-WORKSTATION-SLICE-001 on `codex/workstation-slice-v1` from
-`3b46db79f7ad9530606b98632af18bbe0ddc16bb`. Frozen snapshots, strict explicit
-local loading, typed FastAPI routes, generated OpenAPI/TypeScript and the complete
-React Brief/Tape/detail/Sizer/Rules flow are implemented. See
-[the local setup and contract](workstation-slice-v1.md) and
-[synthetic browser evidence](workstation-evidence/brief-1366.png).
-
-Observed validation: 58 focused Python tests, 2,699 full-suite tests, 11 frontend
-component tests and two real-browser desktop/mobile tests passed. TypeScript,
-production build, API type drift, Python/frontend lint/format and whitespace
-checks passed. The existing Starlette TestClient emits one httpx deprecation
-warning; tests pass. No provider access, ingestion, production publication,
-engine/config changes, portfolio implementation or merge occurred. User settings
-remain uncommitted. Draft PR targets `codex/decision-risk-v1`.
-
-No workstation implementation blocker remains. The unrelated September
-security-master timestamp-precision publication issue remains deferred.
+The separate September security-master timestamp-precision publication blocker
+remains deferred and does not authorize publication here.
