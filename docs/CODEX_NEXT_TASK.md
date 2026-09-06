@@ -2,7 +2,7 @@
 
 **Task ID:** AP-LEADERSHIP-001
 
-**Status:** READY
+**Status:** COMPLETE
 
 **Issued:** 2026-09-06
 
@@ -306,3 +306,29 @@ Do not ingest new bars or memberships, publish snapshots, run universe-wide
 calibration, or implement the UI in this milestone. The validated September
 security-master timestamp-precision publication blocker remains deferred and is
 outside this task.
+
+
+## AP-LEADERSHIP-001 completion record
+
+Completed on `codex/leadership-engine-v1` from the requested handoff commit
+`28be4e88acc49610e04749f9487c1dbdc6bf3e40`. The new opt-in pure layer includes
+5/21/63/126/252-session returns, independent slow RS and 5/21-session rotation,
+QQQ residual percentiles, explicit dated membership adapters, independent group
+ranks and gap-aware history. Frozen evidence preserves denominators, source and
+universe provenance, exact identities, missing context and rule versions.
+
+Verification: **165 focused tests passed** (49 features, 32 ranking, 36 groups,
+48 adapters); **1,058 complete-suite tests passed**. `git diff --check` passed.
+All 336 protected production/staging/settings files match their pre-work hashes.
+Legacy Leadership Score, Structure Engine and Setup Engine source/tests remain
+unchanged. The exact 29 non-security identifiers stay preserved and excluded
+from security denominators; all 23 crosswalks remain unapplied.
+
+See [the implementation contract](leadership-engine-implementation-v1.md) for
+formulas, APIs, missing-data semantics, examples and reproducibility, and
+[PROJECT_STATE](PROJECT_STATE.md#ap-leadership-001-completion-record) for the
+complete milestone file inventory. No AP-LEADERSHIP-001 blocker remains.
+The separate September master timestamp-precision publication issue is deferred.
+No provider request, ingestion, publication, exposure build, calibration or
+trading-policy work occurred. Draft PR target remains `codex/setup-engine-v1`;
+no merge is authorized by this completion.

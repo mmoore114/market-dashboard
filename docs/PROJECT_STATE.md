@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-SETUP-001 complete; deterministic daily Setup Engine V1 alongside the preserved Structure Engine V1.
+Current milestone: AP-LEADERSHIP-001 complete; pure Strength/Leadership and Group Ranking V1 with independent one-week/one-month rotation, alongside preserved Structure and Setup engines.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
@@ -418,3 +418,69 @@ Exact milestone file inventory:
 - `tests/test_setup_detection.py`
 - `tests/test_setup_features.py`
 - `tests/test_setup_lifecycle.py`
+
+
+## AP-LEADERSHIP-001 completion record
+
+Implemented on `codex/leadership-engine-v1` from exact handoff commit
+`28be4e88acc49610e04749f9487c1dbdc6bf3e40`, with draft PR base
+`codex/setup-engine-v1`. The new opt-in layer is explicitly experimental and
+uncalibrated. It preserves legacy Leadership Score and 20/60/120 SPY features.
+
+Individual evidence contains fractional 5/21/63/126/252-session returns and
+independent average-rank percentiles, the .50/.30/.20 slow composite, the .40/.60
+5/21-session rotation pulse and its delta, sample-covariance QQQ beta/residual
+strength, closing-high distances and optional Structure/Setup/legacy context.
+Every denominator and dated research-universe identity remains visible. Missing
+components never cause weight renormalization or a substitute universe.
+
+Explicit effective snapshots support SUB_INDUSTRY, many-to-many THEME, and
+separately supplied SECTOR/INDUSTRY membership. Group metrics preserve missing
+coverage, valid context denominators and distinct triggered-member counts.
+Independent median-based leadership and rotation ranks enforce five-valid-member
+and 60%-coverage gates. Both have five-/twenty-session changes and top-quintile
+streaks, with no forward fill across missing exchange-session outputs.
+
+The pure adapters use the existing exact reference-identity boundary and the
+versioned 29-record non-security disposition. Mixed-case identities remain
+preserved without automatic conversion. Crosswalk proposals are never read as
+mappings or applied. No current taxonomy is projected backwards in time.
+The caller supplies the calendar, dated universe, complete boundary and source
+metadata; the pure layer performs no data loading or production materialization.
+
+Formula version: `leadership-formulas-v1`; threshold version:
+`leadership-thresholds-v1`. Rules fingerprint:
+`30178a5ec7822b97a2341f74b5965f1db3997c72a181f02eb421ded492923485`.
+[The implementation contract](leadership-engine-implementation-v1.md) documents
+schemas, exact formulas, examples, adapter responsibilities and missing-data rules.
+
+Final verification: **165 focused tests passed** (49 features, 32 ranking,
+36 groups, 48 adapters), then **1,058 complete-suite tests passed**.
+`git diff --check` passed. All new tests prohibit socket/httpx access; the complete
+pure pipeline additionally runs with file-open APIs forbidden. All **336**
+protected production/staging/settings files matched their pre-work SHA-256
+inventory, with no added protected files. `.vscode/settings.json` remains the
+same uncommitted user change. Legacy rankings and all Structure/Setup engine
+source/tests remain unchanged; the full suite includes their regression tests.
+
+No AP-LEADERSHIP-001 blocker remains. The unrelated September security-master
+nanosecond/microsecond publication blocker remains deferred. No provider request,
+ingestion, exposure build, publication, crosswalk application, empirical
+calibration, trading-policy implementation or PR merge occurred. Production
+integration and empirical calibration require separate work and approval.
+
+Exact milestone file inventory (13 files; no data, reports or machine settings):
+
+- `README.md`
+- `docs/CODEX_NEXT_TASK.md`
+- `docs/PROJECT_STATE.md`
+- `docs/leadership-engine-implementation-v1.md`
+- `src/market_dashboard/aperture/leadership.py`
+- `src/market_dashboard/aperture/leadership_adapters.py`
+- `src/market_dashboard/aperture/leadership_contracts.py`
+- `src/market_dashboard/features/leadership_features.py`
+- `tests/leadership_fixtures.py`
+- `tests/test_leadership_adapters.py`
+- `tests/test_leadership_features.py`
+- `tests/test_leadership_groups.py`
+- `tests/test_leadership_ranking.py`

@@ -1,0 +1,240 @@
+"""Opt-in, frozen strength and group-ranking contracts, independent of legacy scores."""
+from datetime import date
+from enum import StrEnum
+from typing import Literal
+
+from pydantic import Field, field_validator, model_validator
+
+from market_dashboard.aperture.contracts import ContractModel
+from market_dashboard.aperture.structure_contracts import StructureSourceV1, StructureState
+from market_dashboard.aperture.setup_contracts import Family, Status
+from market_dashboard.data.security_identity import MarketDataSymbol, ReferenceTicker
+
+HORIZONS = (5, 21, 63, 126, 252)
+Horizon = Literal[5, 21, 63, 126, 252]
+
+
+class StrengthSourceV1(StructureSourceV1):
+    schema_version: Literal['strength-source-v1'] = 'strength-source-v1'
+    calendar_id: str = Field(min_length=1)
+
+
+class DatedProvenanceV1(ContractModel):
+    snapshot_id: str = Field(min_length=1)
+    version: str = Field(min_length=1)
+    source_as_of_date: date
+    effective_session: date
+    known_session: date
+    valid_through: date
+
+    @model_validator(mode='after')
+    def dates(self):
+        if max(self.source_as_of_date, self.known_session) > self.effective_session or self.valid_through < self.effective_session:
+            raise ValueError('Ambiguous/backdated effective interval')
+        return self
+
+
+class ResearchUniverseV1(ContractModel):
+    schema_version: Literal['research-universe-input-v1'] = 'research-universe-input-v1'
+    provenance: DatedProvenanceV1
+    policy_version: str = Field(min_length=1)
+    domain: Literal['equity_research'] = 'equity_research'
+    symbols: tuple[str, ...]
+
+    @field_validator('symbols')
+    @classmethod
+    def members(cls, values):
+        for v in values:
+            MarketDataSymbol(v)
+        if len(set(values)) != len(values):
+            raise ValueError('Duplicate universe symbol')
+        return values
+
+
+class GroupType(StrEnum):
+    SECTOR = 'SECTOR'
+    INDUSTRY = 'INDUSTRY'
+    SUB_INDUSTRY = 'SUB_INDUSTRY'
+    THEME = 'THEME'
+
+
+class GroupMemberV1(ContractModel):
+    group_id: str = Field(min_length=1)
+    source_symbol: str
+    market_data_symbol: str | None
+    identity_reason: str = Field(min_length=1)
+    non_security: bool = False
+
+    @model_validator(mode='after')
+    def identity(self):
+        ReferenceTicker(self.source_symbol)
+        if self.market_data_symbol is not None:
+            MarketDataSymbol(self.market_data_symbol)
+            if self.market_data_symbol != self.source_symbol or self.non_security:
+                raise ValueError('No implicit identity or crosswalk conversion permitted')
+        if self.non_security and self.identity_reason not in ('NON_SECURITY_MARKET_SERIES','DEEPVUE_BREADTH_INDICATOR'):
+            raise ValueError('Exact non-security disposition required')
+        return self
+
+
+class GroupMembershipV1(ContractModel):
+    schema_version: Literal['group-membership-v1'] = 'group-membership-v1'
+    provenance: DatedProvenanceV1
+    group_type: GroupType
+    group_ids: tuple[str, ...]
+    members: tuple[GroupMemberV1, ...]
+    identity_version: str = Field(min_length=1)
+    disposition_version: str | None = None
+
+    @model_validator(mode='after')
+    def unique_membership(self):
+        if len(set(self.group_ids)) != len(self.group_ids) or any(not x.strip() for x in self.group_ids):
+            raise ValueError('Duplicate or blank group catalog key')
+        keys = [(m.group_id, m.source_symbol) for m in self.members]
+        if len(set(keys)) != len(keys):
+            raise ValueError('Duplicate membership key')
+        if any(m.group_id not in self.group_ids for m in self.members):
+            raise ValueError('Membership has no explicit catalog group')
+        return self
+
+
+class RawReturnV1(ContractModel):
+    horizon: Horizon
+    value: float | None
+    reason: str | None = None
+
+
+class RankedReturnV1(RawReturnV1):
+    percentile: float | None = Field(ge=0, le=100)
+    valid_count: int = Field(ge=0)
+    universe_snapshot_id: str
+    universe_policy_version: str
+
+
+class ResidualV1(ContractModel):
+    benchmark: Literal['QQQ'] = 'QQQ'
+    beta_252_qqq: float | None
+    overlap_count: int = Field(ge=0, le=252)
+    benchmark_R63: float | None
+    residual_R63_qqq: float | None
+    reasons: tuple[str, ...] = ()
+
+
+class LegacyStrengthContextV1(ContractModel):
+    return_20d_percent: float | None = None
+    return_60d_percent: float | None = None
+    return_120d_percent: float | None = None
+    return_20d_excess_vs_spy: float | None = None
+    return_60d_excess_vs_spy: float | None = None
+    return_120d_excess_vs_spy: float | None = None
+
+
+class SetupStrengthContextV1(ContractModel):
+    family: Family
+    status: Literal[Status.FORMING, Status.NEAR_TRIGGER, Status.TRIGGERED]
+
+
+class StrengthContextV1(ContractModel):
+    legacy: LegacyStrengthContextV1 | None = None
+    structure_state: StructureState | None = None
+    setups: tuple[SetupStrengthContextV1, ...] | None = None
+
+
+class StrengthInputV1(ContractModel):
+    schema_version: Literal['strength-input-v1'] = 'strength-input-v1'
+    symbol: str
+    session_date: date
+    source: StrengthSourceV1
+    returns: tuple[RawReturnV1, ...]
+    residual: ResidualV1
+    distance_from_closing_high_63: float | None
+    distance_from_closing_high_252: float | None
+    context: StrengthContextV1 = StrengthContextV1()
+
+    @field_validator('symbol')
+    @classmethod
+    def symbol_valid(cls, v):
+        return MarketDataSymbol(v).value
+
+    @field_validator('returns')
+    @classmethod
+    def horizons(cls, values):
+        if sorted(r.horizon for r in values) != list(HORIZONS):
+            raise ValueError('Exactly one return for each V1 horizon required')
+        return values
+
+
+class StrengthEvidenceV1(ContractModel):
+    schema_version: Literal['strength-evidence-v1'] = 'strength-evidence-v1'
+    inputs: StrengthInputV1
+    components: tuple[RankedReturnV1, ...]
+    universe: DatedProvenanceV1
+    universe_policy_version: str
+    RS_comp: float | None
+    RS_rotation: float | None
+    rotation_delta: float | None
+    residual_percentile: float | None
+    residual_valid_count: int = Field(ge=0)
+    reason_codes: tuple[str, ...]
+
+
+class SetupMemberCountV1(ContractModel):
+    family: Family
+    member_count: int | None = Field(ge=0)
+
+
+class GroupEvidenceV1(ContractModel):
+    schema_version: Literal['group-evidence-v1'] = 'group-evidence-v1'
+    session_date: date
+    group_type: GroupType
+    group_id: str
+    membership: DatedProvenanceV1
+    members: tuple[GroupMemberV1, ...]
+    total_members: int = Field(ge=0)
+    excluded_non_security_count: int = Field(ge=0)
+    outside_universe_count: int = Field(ge=0)
+    valid_RS_comp_count: int = Field(ge=0)
+    coverage: float = Field(ge=0, le=1)
+    median_RS_comp: float | None
+    p75_RS_comp: float | None
+    valid_RS_rotation_count: int = Field(ge=0)
+    rotation_coverage: float = Field(ge=0, le=1)
+    median_RS_rotation: float | None
+    median_rotation_delta: float | None
+    rotation_delta_valid_count: int = Field(ge=0)
+    fraction_RS_comp_ge80: float | None
+    median_residual_percentile: float | None
+    residual_valid_count: int = Field(ge=0)
+    structure_valid_count: int = Field(ge=0)
+    fraction_UPTREND: float | None
+    fraction_UPTREND_or_EMERGING: float | None
+    setup_context_count: int = Field(ge=0)
+    triggered_setup_members: tuple[SetupMemberCountV1, ...]
+    leadership_rank: float | None = None
+    group_rotation_rank: float | None = None
+    rotation_rank_advantage: float | None = None
+    eligible_group_count: int = Field(ge=0, default=0)
+    rotation_eligible_group_count: int = Field(ge=0, default=0)
+    rank_change_5: float | None = None
+    rank_change_20: float | None = None
+    rotation_rank_change_5: float | None = None
+    rotation_rank_change_20: float | None = None
+    top_quintile_streak: int = Field(ge=0, default=0)
+    rotation_top_quintile_streak: int = Field(ge=0, default=0)
+    leadership_rank_reasons: tuple[str, ...]
+    rotation_rank_reasons: tuple[str, ...]
+    missing_context_reasons: tuple[str, ...]
+
+
+class LeadershipOutputV1(ContractModel):
+    schema_version: Literal['leadership-output-v1'] = 'leadership-output-v1'
+    research_status: Literal['experimental_uncalibrated'] = 'experimental_uncalibrated'
+    formula_version: Literal['leadership-formulas-v1'] = 'leadership-formulas-v1'
+    threshold_version: Literal['leadership-thresholds-v1'] = 'leadership-thresholds-v1'
+    rules_fingerprint: str = Field(pattern=r'^[0-9a-f]{64}$')
+    session_date: date
+    source: StrengthSourceV1
+    universe: ResearchUniverseV1
+    calendar_fingerprint: str = Field(pattern=r'^[0-9a-f]{64}$')
+    symbols: tuple[StrengthEvidenceV1, ...]
+    groups: tuple[GroupEvidenceV1, ...]
