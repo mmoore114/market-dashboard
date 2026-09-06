@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-FOUNDATION-RECONCILE-001 complete; one original finding resolved by verified evidence and seven retained with bounded next actions. No real snapshot was built.
+Current milestone: AP-FOUNDATION-AUTHORITY-001 ready; implement the reviewed XNYS calendar, adjusted-volume, and provenance authority boundary offline. AP-FOUNDATION-RECONCILE-001 is complete and no real snapshot was built.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
