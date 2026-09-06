@@ -6,7 +6,9 @@
 
 **Issued:** 2026-09-06
 
-**Base commit:** `c5e696ddeb0be2a2fb8befa91ad2adc292ee49e9`
+**Product baseline:** `c5e696ddeb0be2a2fb8befa91ad2adc292ee49e9`
+
+**Handoff branch:** `codex/foundation-reconciliation-handoff`
 
 ## Goal
 
@@ -21,8 +23,9 @@ blocked with an exact bounded next action; never infer or manufacture readiness.
 
 ## Branch and handoff
 
-1. Begin from the exact base commit above on a new branch named
-   `codex/foundation-reconciliation-v1`.
+1. Fetch origin and create `codex/foundation-reconciliation-v1` from the current
+   remote head of the handoff branch above. Verify that it descends from the exact
+   product baseline before editing.
 2. Target a draft PR to `codex/local-materializer-v1`.
 3. Read `AGENTS.md`, `docs/PROJECT_STATE.md`, this file,
    `docs/local-materializer-v1.md`, the snapshot V2 contract, and the existing
