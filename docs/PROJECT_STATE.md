@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-DECISION-RISK-001 complete; pure direction-aware extension, earnings coverage, WATCH/TRADE/ACT evidence and per-idea sizing, alongside preserved Universe, Structure, Setup, Leadership and Regime engines.
+Current milestone: AP-WORKSTATION-SLICE-001 complete; local React/TypeScript workstation, typed FastAPI and strict frozen snapshot boundary over the preserved engines.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
@@ -617,3 +617,48 @@ Milestone file inventory (15 files; synthetic tests, source and documentation on
 - `tests/test_decision_components.py`
 - `tests/test_decision_events.py`
 - `tests/test_decision_ladder.py`
+
+## AP-WORKSTATION-SLICE-001 completion record — 2026-09-06
+
+Recovered the interrupted workstation implementation on
+`codex/workstation-slice-v1`, based on exact handoff
+`3b46db79f7ad9530606b98632af18bbe0ddc16bb`. The milestone draft PR targets
+`codex/decision-risk-v1`; no merge is included.
+
+Added frozen `workstation-snapshot-v1` and `workstation-api-v1` contracts,
+canonical evidence projections, deterministic synthetic GREEN/YELLOW/RED
+scenarios, and explicit fail-closed standalone local JSON loading. API routes
+cover health, Brief, Tape, exact-case symbol detail, canonical what-if sizing
+and current rules. Local errors are sanitized; CORS and process commands use
+loopback defaults. No production materializer is implemented.
+
+The primary React interface includes the five regime sleeves, transparent funnel,
+group context and ACT queue; sortable/filterable Tape; every setup and gate in a
+responsive detail dialog; manual copy-symbol Deepvue handoff; complete canonical
+sizing amounts/refusals; and API-sourced rule metadata. Missing values stay
+unknown. Synthetic identity stays visible. Portfolio heat is explicitly
+unavailable. Only UI preferences persist in session storage.
+
+[Development commands, schemas and scope](workstation-slice-v1.md) are documented.
+[Desktop Brief](workstation-evidence/brief-1366.png),
+[mobile Brief](workstation-evidence/brief-390.png), and Tape/detail/Sizer captures
+in the same directory were produced by real Chromium tests against the local
+fixture API. The browser tests found and verified a fix for dialog focus return
+under React StrictMode.
+
+Observed verification: **58 focused Python tests passed**, followed by
+**2,699 full-suite tests passed**. **11 frontend component tests** and **two
+desktop/mobile browser tests** passed. Generated OpenAPI determinism, frontend
+type synchronization, TypeScript, production build, Python/frontend lint/format
+and whitespace checks passed. One upstream Starlette httpx TestClient
+deprecation warning remains nonblocking. Initial sandbox TestClient execution
+stalled; the complete observed passing runs used local execution outside that
+sandbox, without provider access.
+
+Completed engine source, feature source and immutable configuration have no diff
+from the handoff. The pre-existing `.vscode/settings.json` change is preserved
+and excluded from the milestone commit. No data ingestion, database/staged
+publication, exposure rebuild, crosswalk application, calibration, broker
+interaction or PR merge occurred. No workstation blocker remains; real
+materialization, portfolio workflows and the unrelated September security-master
+timestamp-precision publication correction remain separate future work.

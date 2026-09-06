@@ -2,7 +2,7 @@
 
 **Task ID:** AP-WORKSTATION-SLICE-001
 
-**Status:** READY
+**Status:** COMPLETE
 
 **Issued:** 2026-09-06
 
@@ -306,3 +306,23 @@ authentication, broker connections, or order execution.
 
 The September security-master nanosecond/microsecond publication mismatch remains
 a separate deferred blocker and does not block this fixture-backed vertical slice.
+
+## Completion record — 2026-09-06
+
+Implemented AP-WORKSTATION-SLICE-001 on `codex/workstation-slice-v1` from
+`3b46db79f7ad9530606b98632af18bbe0ddc16bb`. Frozen snapshots, strict explicit
+local loading, typed FastAPI routes, generated OpenAPI/TypeScript and the complete
+React Brief/Tape/detail/Sizer/Rules flow are implemented. See
+[the local setup and contract](workstation-slice-v1.md) and
+[synthetic browser evidence](workstation-evidence/brief-1366.png).
+
+Observed validation: 58 focused Python tests, 2,699 full-suite tests, 11 frontend
+component tests and two real-browser desktop/mobile tests passed. TypeScript,
+production build, API type drift, Python/frontend lint/format and whitespace
+checks passed. The existing Starlette TestClient emits one httpx deprecation
+warning; tests pass. No provider access, ingestion, production publication,
+engine/config changes, portfolio implementation or merge occurred. User settings
+remain uncommitted. Draft PR targets `codex/decision-risk-v1`.
+
+No workstation implementation blocker remains. The unrelated September
+security-master timestamp-precision publication issue remains deferred.

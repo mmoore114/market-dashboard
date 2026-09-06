@@ -230,3 +230,11 @@ data/database/*
 *.db
 *.parquet
 .venv/
+
+# Workstation development artifacts and local snapshots
+node_modules/
+web/dist/
+web/coverage/
+web/test-results/
+web/playwright-report/
+*.local-snapshot.json

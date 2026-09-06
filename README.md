@@ -1,5 +1,11 @@
 # market-dashboard
 
+The local Aperture Workstation now provides Brief, Tape, symbol detail, Sizer and
+Rules through React/TypeScript and FastAPI. Start with the
+[local setup and snapshot contract](docs/workstation-slice-v1.md).
+Development defaults to visibly labeled synthetic fixtures; real snapshot
+materialization remains deferred.
+
 Current implementation handoff: [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md).
 For new structure/setup work, read the canonical specifications linked there.
 The older stage/setup descriptions below describe legacy research or earlier

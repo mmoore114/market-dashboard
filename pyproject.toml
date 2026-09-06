@@ -21,11 +21,14 @@ dependencies = [
     "streamlit",
     "boto3",
     "botocore",
+    "fastapi==0.141.1",
+    "uvicorn>=0.34,<1",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "ruff==0.16.6",
 ]
 
 [tool.setuptools.packages.find]
