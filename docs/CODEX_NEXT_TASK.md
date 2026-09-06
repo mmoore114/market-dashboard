@@ -91,14 +91,16 @@ Use close-to-close simple price returns on the repository's consistent
 split-adjusted price basis:
 
 ```text
+R5   = Close[T] / Close[T-5]   - 1
+R21  = Close[T] / Close[T-21]  - 1
 R63  = Close[T] / Close[T-63]  - 1
 R126 = Close[T] / Close[T-126] - 1
 R252 = Close[T] / Close[T-252] - 1
 ```
 
-These are the V1 trading-session definitions of three, six, and twelve months.
-Do not substitute calendar offsets. Preserve the actual source/adjustment
-metadata in evidence.
+These are the V1 trading-session definitions of one week, one month, three
+months, six months, and twelve months. Do not substitute calendar offsets.
+Preserve the actual source/adjustment metadata in evidence.
 
 ### Cross-sectional percentiles
 
@@ -125,6 +127,24 @@ RS_comp = 0.50 * percentile(R63)
 
 All three components are required. Do not renormalize weights around missing
 inputs. Emit explicit insufficient-data reasons.
+
+### Short-term rotation pulse
+
+Preserve one-week and one-month strength as an independent swing-horizon view:
+
+```text
+RS_rotation = 0.40 * percentile(R5)
+            + 0.60 * percentile(R21)
+
+rotation_delta = RS_rotation - RS_comp
+```
+
+Both short-term components are required for `RS_rotation`. Do not fold them into
+`RS_comp`; the slow composite should continue to describe established leadership
+while `RS_rotation` and `rotation_delta` reveal recent acceleration or
+deceleration. Do not turn rotation_delta into an entry signal or an uncalibrated
+categorical label. Store the raw returns, percentiles, denominators, pulse, and
+delta so the UI can sort and display them transparently.
 
 ### Residual RS versus QQQ
 
@@ -176,6 +196,8 @@ For each `(session_date, group_type, group_id)`, emit:
 - total point-in-time member count;
 - valid RS_comp count and coverage fraction;
 - median and 75th percentile RS_comp;
+- valid RS_rotation count and coverage fraction;
+- median RS_rotation and median rotation_delta;
 - fraction of valid members with RS_comp >= 80;
 - median residual-RS percentile and its valid count;
 - fraction UPTREND and fraction UPTREND-or-EMERGING when structure is supplied;
@@ -194,6 +216,12 @@ same type and session by median RS_comp, descending, with average ordinal rank
 for ties. A group is rank-eligible only when it has at least five valid RS_comp
 members and at least 60% member coverage. Noneligible groups retain metrics but
 receive null rank and explicit reasons. Do not create an opaque group score.
+
+Also emit a separate `group_rotation_rank` by median RS_rotation using the same
+five-valid-member and 60%-coverage gates. This is a short-horizon rotation rank,
+not a replacement for the established-leadership group rank. Preserve both and
+store `rotation_rank_advantage = leadership_rank - rotation_rank`, so positive
+means the group is ranking better short term. Do not blend them into one score.
 
 For supplied consecutive group snapshots, also emit:
 
@@ -239,11 +267,13 @@ theme, Structure Engine, and Setup Engine contracts without changing them.
 
 Add focused synthetic tests covering at minimum:
 
-- exact 63/126/252 return boundaries and insufficient history;
+- exact 5/21/63/126/252 return boundaries and insufficient history;
 - point-in-time and future-mutation invariance;
 - average-rank ties, singleton populations, missing-value denominators, and
   deterministic 0–100 endpoints;
 - complete and missing-component RS_comp behavior;
+- complete and missing-component RS_rotation behavior, rotation_delta, and proof
+  that short-term inputs never change RS_comp;
 - beta overlap alignment, sample covariance/variance, zero benchmark variance,
   minimum 126 observations, and QQQ residual calculation;
 - cross-sectional residual percentiles without look-ahead;
@@ -251,6 +281,8 @@ Add focused synthetic tests covering at minimum:
 - many-to-many themes and no invented parent hierarchy;
 - group medians, 75th percentiles, breadth fractions, coverage, and five-member/
   60%-coverage rank boundaries;
+- independent group leadership and rotation ranks, including newly strong groups
+  whose long-term rank remains weak;
 - group tie ranks, five-/twenty-session rank changes, and top-quintile streaks;
 - optional structure/setup context never changing RS values;
 - exact reference versus market-data identity behavior;
