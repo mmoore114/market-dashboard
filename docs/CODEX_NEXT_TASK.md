@@ -1,12 +1,12 @@
 # Codex Next Task
 
-**Task ID:** AP-DECISION-RISK-001
+**Task ID:** AP-WORKSTATION-SLICE-001
 
-**Status:** COMPLETE
+**Status:** READY
 
 **Issued:** 2026-09-06
 
-**Base commit:** `0baffb58507d00b4cab3c245e66dda32dba03e26`
+**Base commit:** `e81994aa9f561439f5c2dd970e5d2d6a4e2358e3`
 
 ## Handoff protocol
 
@@ -14,35 +14,38 @@ This file is the single current assignment for VS Code Codex.
 
 1. Read `AGENTS.md`, `docs/PROJECT_STATE.md`, and every authoritative source
    listed below before editing.
-2. Implement the exact V1 hypothesis in this assignment as new opt-in contracts.
-   Preserve all completed engine and legacy outputs.
-3. Work autonomously unless contracts materially conflict, required data cannot
-   be represented safely, or external/destructive action is required.
+2. Build the complete bounded vertical slice autonomously. Preserve all completed
+   engine contracts and legacy behavior.
+3. Stop only for a material contract contradiction, a required unavailable
+   dependency, or an external/destructive action.
 4. At completion, mark this task `COMPLETE`, add a concise completion record,
    update `docs/PROJECT_STATE.md`, commit, push, and open a draft PR targeting
-   `codex/regime-engine-v1` so it contains only this milestone.
-5. Return only the full commit SHA, focused and complete-suite test totals, PR
-   link, and any genuine blocker. Keep detailed evidence in the repository.
+   `codex/decision-risk-v1` so it contains only this milestone.
+5. Return only the full commit SHA, Python focused/full-suite totals, frontend test
+   and build results, PR link, and any genuine blocker. Keep detailed evidence in
+   the repository.
 
 Preserve `.vscode/settings.json`, `.env`, credentials, databases, Parquet/CSV
 datasets, staged artifacts, generated reports, and unrelated user changes.
 
 ## Milestone
 
-Implement the deterministic Decision & Risk Layer V1, composing the completed
-Universe, Structure, Setup, Leadership/Group, and Market Regime engines into:
+Build the first usable local Aperture Workstation vertical slice:
 
-- direction-aware extension evidence;
-- earnings/event eligibility evidence;
-- the `WATCH -> TRADE -> ACT` decision ladder;
-- transparent per-idea risk sizing.
+- a versioned snapshot/read-model boundary;
+- a small typed FastAPI service;
+- a React/TypeScript primary interface;
+- Brief, Tape, symbol detail, Sizer, and Rules experiences;
+- deterministic synthetic-fixture mode and an explicit local-snapshot mode.
 
 Create and work on:
 
-`codex/decision-risk-v1`
+`codex/workstation-slice-v1`
 
-Base it on this handoff branch after pulling the task commit. This layer remains
-decision support only. It must not place orders or select a single “best” setup.
+Base it on this handoff branch after pulling the task commit. This is the first
+user-facing product milestone. It remains a local, single-user, decision-support
+application. It must not place trades, contact providers, publish data, or claim
+that synthetic fixture data is live.
 
 ## Authoritative sources
 
@@ -50,281 +53,256 @@ Read and follow:
 
 - `AGENTS.md`
 - `docs/PROJECT_STATE.md`
-- `docs/aperture_product_contract.md`, especially Extension, Action ladder,
-  Risk contract, and Earnings veto
-- `docs/architecture_decision.md`
+- `docs/architecture_decision.md`, especially repository layout, snapshot/API
+  boundaries, frontend decision, testing, and Milestone 3
+- `docs/aperture_product_contract.md`, especially product principles, primary
+  interface, symbol detail, scoring policy, and risk contract
+- all completed Universe, Structure, Setup, Leadership, Regime, and Decision &
+  Risk implementation contracts
 - `config/aperture_rules_v1.yaml` and its immutable loader
-- completed Structure, Setup, Leadership, and Regime implementation contracts
-- existing universe, extension, sizing, decision, and rule code/tests
+- current diagnostic Streamlit application only as legacy context, not as the
+  primary interface design
 
-Where older candidate prose is incomplete, the exact rules below freeze the new
-`decision-risk-v1` experimental hypothesis. Keep every component and veto visible;
-do not create or consume an opportunity score.
+Do not redesign canonical trading logic in the UI or API. The existing engines
+remain the sole authority for states, eligibility, reasons, extension, earnings,
+and sizing.
 
-## Timing and alignment
+## Architecture freeze
 
-A session-T decision uses only evidence available at the completed T close and is
-eligible for discretionary action no earlier than T+1. Require exact symbol,
-session, source, calendar, universe, engine-version, and rules-fingerprint
-alignment. Reject future-effective evidence and mixed data bases.
+Use the gradual target layout already approved:
 
-The layer accepts caller-supplied point-in-time inputs and performs no I/O,
-network access, calendar inference, event lookup, or publication.
+- `src/market_dashboard/workstation/` for frozen snapshot/read models,
+  projections, fixture construction, and local snapshot loading;
+- `api/` for the FastAPI application and entry point;
+- `web/` for the React/TypeScript application;
+- `tests/` for Python snapshot/API tests;
+- colocated frontend tests under `web/`.
 
-## Direction-aware extension
+Use FastAPI with Pydantic contracts. Add only the Python dependencies required to
+run and test the typed local API.
 
-For an explicitly evaluated direction:
+Use React, TypeScript, and Vite for this V1 slice. Use TanStack Query for server
+state and TanStack Table or an equivalently focused table primitive for the Tape.
+Keep the component layer restrained and owned in-repository; do not import a large
+dashboard template or reproduce another trading platform.
 
-```text
-signed_extension_sma50_atr = direction_sign * (Close - SMA50) / WilderATR14
-direction_sign = +1 LONG, -1 SHORT
-```
+The API and UI run as separate local development processes. CORS must default to
+the exact local frontend origin(s), never wildcard with credentials. Bind locally
+by default. No authentication or remote hosting belongs in this milestone.
 
-Use the existing configured bands without changing them:
+## Snapshot and read-model boundary
 
-- below 0: `BELOW_REFERENCE`;
-- 0 <= extension < 3: `ENTRY_ZONE`;
-- 3 <= extension < 5: `HEALTHY`;
-- 5 <= extension < 7: `EXTENDED`;
-- extension >= 7: `EXTREME`;
-- missing/nonfinite/nonpositive denominator: `INSUFFICIENT_DATA`.
+Create a frozen, extra-field-forbidding `WorkstationSnapshotV1` contract with:
 
-New-entry extension eligibility is inclusive from 0 through 4.8 ATR. Store close,
-SMA50, Wilder ATR14, signed extension, direction, state, band boundaries, version,
-and exact reason. Preserve the existing extension functions and legacy columns;
-add direction-aware V1 alongside them.
+- snapshot ID, schema version, generated-at timestamp, as-of session, action
+  session, and explicit mode (`FIXTURE` or `LOCAL_SNAPSHOT`);
+- freshness state and machine-readable reasons;
+- source, calendar, security-master, exposure, universe, feature, Structure,
+  Setup, Leadership, Regime, Decision/Risk, and rules version identities;
+- complete current regime/sleeve evidence;
+- explicit funnel counts for NONE/WATCH/TRADE/ACT;
+- group summaries needed by Brief and symbol context;
+- one canonical per-symbol/direction record retaining component values, setup
+  evidence, every gate, veto/reason codes, and sizing context;
+- a deterministic logical fingerprint excluding only generation timestamps.
 
-## Earnings/event evidence
+Define compact versioned API view models projected from that canonical snapshot.
+The projection may omit nested implementation detail from list responses but must
+never recalculate, rename, merge, or contradict canonical engine states. Preserve
+explicit nulls and reasons. Missing is never zero, false, neutral, or clear.
 
-Accept a typed, caller-supplied event record with:
+Snapshot loading rules:
 
-- exact MarketDataSymbol;
-- event type (`EARNINGS` for V1; schema must be extensible later);
-- scheduled exchange session;
-- timing (`BEFORE_OPEN`, `AFTER_CLOSE`, `DURING_SESSION`, `UNKNOWN`);
-- confidence (`CONFIRMED`, `ESTIMATED`, `UNKNOWN`);
-- source, source event ID, observed-at timestamp, and source-as-of timestamp;
-- cancellation/replacement status and optional replacement ID.
+- `FIXTURE` is the default development mode and uses a committed deterministic,
+  fully synthetic fixture constructed without importing from `tests/`;
+- fixture rows must cover NONE, WATCH, TRADE, ACT, Green/Yellow/Red context,
+  established and new-rotation strength, each setup family, earnings veto/unknown,
+  extension refusal, missing-data reasons, and capital-constrained sizing;
+- every fixture response and UI surface must visibly say `SYNTHETIC FIXTURE`;
+- `LOCAL_SNAPSHOT` loads only an explicitly configured local JSON snapshot file,
+  validates the complete frozen contract and fingerprint, and performs no database
+  query or fallback;
+- missing, malformed, stale, wrong-version, or wrong-fingerprint local snapshots
+  fail closed with typed health/freshness evidence; never silently fall back to the
+  fixture while labeled local/live;
+- do not implement DuckDB/Parquet materialization in this milestone.
 
-Also require a typed caller-supplied event-calendar coverage record containing at
-least the covered session range, source/as-of time, and completeness status. An
-empty event list is `CLEAR` only when this coverage explicitly proves a complete,
-fresh calendar through action session `T+5`. Missing, stale, incomplete, or
-insufficiently ranged coverage is `UNKNOWN` and blocks `ACT`.
+No runtime mode may read proprietary Deepvue exports or staging directories.
 
-Compute `sessions_until_event` from the supplied exchange calendar. For a
-decision at T close, an event on T after close is distance 0; an event on the next
-exchange session is distance 1. A before-open or during-session event on T is
-already past for the T-close decision and must not veto T+1. UNKNOWN timing on T
-is conservatively treated as distance 0.
+## Typed API V1
 
-The configured five-session hard veto applies when a live CONFIRMED or ESTIMATED
-earnings event has effective distance 0 through 5 inclusive. Use distinct veto
-reasons for confirmed and estimated dates. An event with UNKNOWN confidence or
-missing timing/date/source freshness makes earnings eligibility `UNKNOWN` and
-blocks ACT with a separate reason; it is not silently treated as safe.
+Provide versioned routes under `/api/v1`:
 
-If multiple live events exist, evaluate all, retain all evidence, and let the
-nearest effective veto win only for summary display. Do not delete farther events.
-Cancelled events do not veto but remain in evidence. Replacements must be explicit;
-never infer them by ticker/date proximity.
+- `GET /health` — service, mode, snapshot availability, as-of/action sessions,
+  freshness, version, and reason codes;
+- `GET /brief` — regime sleeves, funnel counts, leading/weakening group context,
+  ACT candidates, data freshness, and explicit unavailable portfolio-heat status;
+- `GET /tape` — typed paginated/sorted/filterable candidate rows;
+- `GET /symbols/{symbol}` — exact-symbol detail with checklist, component
+  evidence, all setup instances, vetoes, price/volume context, and sizing context;
+- `POST /sizer` — a what-if calculation that calls the existing canonical sizing
+  function with snapshot regime/earnings context and caller entry/stop/equity/
+  buying power; it must not duplicate sizing math;
+- `GET /rules` — effective human-readable thresholds plus exact rule/version
+  metadata and `experimental_uncalibrated` status.
 
-## Strength eligibility
+Tape query behavior must be explicit and tested:
 
-For LONG:
+- stable exact-symbol tie-break ordering;
+- sort allowlist rather than arbitrary field access;
+- filters for action state, Structure state, setup family, minimum RS composite,
+  minimum RS rotation, group, and veto presence;
+- bounded page size and deterministic pagination metadata;
+- invalid filters/sorts return typed 4xx responses;
+- exact case-sensitive MarketDataSymbol path resolution.
 
-```text
-established_strength = RS_comp >= 60
-new_rotation = RS_comp >= 40 and RS_rotation >= 80 and rotation_delta >= 15
-strength_eligible = established_strength or new_rotation
-```
+Return a versioned error envelope with machine-readable code, human message, and
+optional field details. Do not expose stack traces, local absolute paths, secrets,
+environment values, or raw file contents.
 
-For SHORT, V1 decision promotion is disabled by policy. Preserve SHORT setup and
-extension evidence, but cap the symbol at `WATCH` with `SHORT_PROMOTION_DISABLED`.
-Do not delete or relabel short evidence.
+Generate and check in the OpenAPI document deterministically. Generate or validate
+frontend API types from it so contract drift fails tests. Do not maintain a second
+handwritten set of contradictory transport types.
 
-Missing required strength components produce `STRENGTH_UNKNOWN`, never zero.
-Store both branches and their exact threshold results. Do not alter RS_comp or
-RS_rotation.
+## React Workstation V1
 
-## Group eligibility
+Create a polished, dense, responsive interface intended primarily for the user's
+Chromebook/desktop browser, with a useful compact mobile fallback.
 
-Use the symbol's explicit point-in-time `SUB_INDUSTRY` membership only. Themes
-remain display context and never substitute for the structural group gate.
+Use a restrained dark terminal/workstation visual language with accessible text,
+focus states, and labels in addition to color. Do not use generic oversized cards,
+marketing-page styling, gradients everywhere, or fake candlestick charts.
 
-A group is `NOT_LAGGING` when:
+Persistent navigation must expose:
 
-- it has a valid leadership rank and eligible-group count;
-- `leadership_rank <= ceil(0.80 * eligible_group_count)`.
+- Brief
+- Tape
+- Sizer
+- Rules
 
-Otherwise classify it as `LAGGING` or `UNKNOWN` with explicit reasons. Missing or
-unresolved sub-industry membership is UNKNOWN and blocks TRADE. A strong theme
-cannot override a lagging/missing sub-industry in V1.
+Groups, Book, and Journal may appear only as clearly disabled future destinations;
+do not fabricate those workflows.
 
-Also expose group rotation rank, rotation-rank advantage, and theme memberships
-as nonvoting context.
+### Brief
 
-## WATCH -> TRADE -> ACT ladder
+Render:
 
-Produce exactly one symbol/direction decision state: `NONE`, `WATCH`, `TRADE`, or
-`ACT`. Also emit per-setup action evidence for every active setup instance; never
-rank a primary setup.
+- current confirmed regime and five separately visible sleeves;
+- as-of/action sessions and data freshness;
+- Watch/Trade/Act funnel counts;
+- leading and weakening groups supplied by the snapshot;
+- compact ACT review queue with symbol, setup(s), strength, extension, group, and
+  first visible veto/status context;
+- portfolio heat as `Unavailable — portfolio context not implemented`, never 0%.
 
-### WATCH — all required
+### Tape
 
-- current equity-trade-universe membership is eligible;
-- LONG Structure state is `EMERGING` or `UPTREND`;
-- strength is eligible under either branch above.
+Build a dense sortable/filterable table showing at minimum:
 
-SHORT evidence may reach WATCH only when trade-universe eligible and Structure is
-`DECLINE`; it cannot promote farther in V1.
+- exact symbol and price;
+- Structure;
+- RS composite, 1-week/5-session rotation, 1-month/21-session rotation context,
+  `RS_rotation`, and `rotation_delta` where supplied;
+- sub-industry and group rank;
+- setup families/statuses;
+- extension ATR;
+- decision state;
+- earnings status;
+- veto/reason indicator.
 
-### TRADE — WATCH plus all required
+Filters must survive navigation within the session. Selecting a row opens a
+responsive symbol detail drawer or route without losing Tape state.
 
-- confirmed Market Regime state is `GREEN` or `YELLOW` and its
-  `eligible_from_session` is the decision/action session being evaluated;
-- sub-industry group is NOT_LAGGING.
+### Symbol detail
 
-`RED`, `UNKNOWN`, stale, same-session-ineligible, or misaligned regime evidence
-blocks TRADE with distinct reasons.
+Show the transparent funnel rather than a master opportunity score:
 
-### ACT — TRADE plus all required
+- every Watch/Trade/Act gate with pass/fail/unknown and reason;
+- Structure, strength/rotation, sub-industry, regime, extension, earnings, and
+  setup evidence as separate sections;
+- all setup instances without choosing a primary setup;
+- current sizing evidence and an obvious path to the Sizer what-if;
+- a clearly labeled manual `Review chart in Deepvue` handoff affordance that does
+  not scrape, embed, or require Deepvue. If no safe documented deep link exists,
+  provide a copy-symbol/manual-review interaction instead of inventing one.
 
-- at least one LONG Setup instance is `NEAR_TRIGGER` or `TRIGGERED`, evaluated,
-  not replay-required, and nonterminal;
-- direction-aware extension is eligible from 0 through 4.8 ATR inclusive;
-- earnings eligibility is explicitly clear beyond five sessions;
-- a valid nonzero per-idea size is available under the risk contract below.
+### Sizer
 
-`FORMING` setups remain visible but do not promote ACT. Emit every qualifying
-setup ID and family. ACT means “perform discretionary review now,” not “buy.”
+Provide an interactive form for exact symbol, direction, account equity, available
+buying power, proposed entry, and proposed stop. Submit to `POST /sizer` and render
+all canonical results: base/allowed risk, stop distance dollars/percent/ATR, full
+and pilot shares, capital-constrained shares, costs, planned risk, unused risk,
+and every refusal reason. Never calculate an authoritative share count solely in
+the browser.
 
-Evaluate every gate even after a failure so the output contains the complete
-veto/reason set. The achieved state is the highest rung whose requirements all
-pass. Do not let a lower-rung failure be overridden by a higher-rung input.
+### Rules
 
-## Per-idea risk sizing
+Render live API rule/version metadata and human-readable current hypotheses for
+universe, strength/rotation, group gate, regime, extension, earnings, and sizing.
+Clearly label uncalibrated hypotheses. Do not hardcode a visually different copy
+of the formulas that can drift from the API response.
 
-Accept explicit caller-proposed entry and stop prices. The Decision layer does not
-choose an entry. Provide a separate default-stop helper:
+## State, accessibility, and failure behavior
 
-```text
-LONG_default_stop  = entry - 1.6 * WilderATR14
-SHORT_default_stop = entry + 1.6 * WilderATR14
-```
+Every view must provide designed loading, empty, unavailable, stale, and error
+states. No blank white page or infinite spinner. A local-snapshot failure must
+leave the shell usable while clearly blocking research content.
 
-Setup invalidation levels remain separate evidence and must never silently become
-trade stops.
+Meet practical keyboard navigation and semantic-label requirements. State chips
+must include text; red/green alone cannot convey meaning. Respect reduced motion.
+Avoid tooltips as the only place a reason is available.
 
-Use account equity—not remaining buying power—as the risk base:
-
-```text
-base_risk_dollars = account_equity * 0.0025
-allowed_risk = base_risk_dollars * regime_multiplier
-regime_multiplier: GREEN 1.0, YELLOW 0.5, RED 0.0
-stop_distance = abs(entry - stop)
-risk_based_shares = floor(allowed_risk / stop_distance)
-pilot_shares = floor(risk_based_shares / 3)
-```
-
-Require stop below entry for LONG and above entry for SHORT. Show stop distance in
-dollars, percent, and ATR; full/pilot shares, position costs, planned dollar risk,
-equity percentage at risk, and unused risk dollars.
-
-Available buying power is a capital constraint, not the risk denominator:
-
-```text
-affordable_shares = floor(available_buying_power / entry)
-capital_constrained_shares = min(risk_based_shares, affordable_shares)
-```
-
-Report both sizes and `CAPITAL_CONSTRAINED` when applicable. Never increase risk
-because buying power is high or reduce the 0.25% risk base merely because capital
-is already deployed.
-
-Sizing must refuse or return explicit invalid status for nonpositive/nonfinite
-equity, buying power, entry, stop, ATR, stop distance, zero shares, RED/UNKNOWN
-regime, same-session-ineligible regime, and active earnings veto/unknown status.
-Do not use margin or fractional shares in V1.
-
-## Contracts and outputs
-
-Deliver frozen, finite-or-null, extra-field-forbidding contracts for:
-
-- extension input/evidence;
-- event input and event/earnings eligibility evidence;
-- strength and group gate evidence;
-- per-setup action evidence;
-- symbol/direction decision evidence;
-- sizing input/result;
-- complete daily Decision & Risk output.
-
-Keep veto codes machine-readable and human explanations separately available.
-Include formula, threshold, engine, feature, universe, source, and calendar
-versions plus deterministic fingerprints.
-
-Provide pure adapters from existing Universe, Structure, Setup, Leadership/Group,
-Regime, rules, and feature contracts. Do not modify those engines or infer missing
-outputs. Input objects/frames must remain unchanged.
+Local UI preferences may persist filters, table density, and drawer state only.
+Never store credentials, provider data, portfolio values, or snapshot payloads in
+browser storage.
 
 ## Verification
 
-Add synthetic focused tests covering at minimum:
+Add Python tests covering at minimum:
 
-- every extension band and inclusive 4.8-ATR boundary for LONG and SHORT;
-- event timing on T before open/after close/unknown and exact session distances
-  0, 1, 5, and 6;
-- confirmed, estimated, unknown, cancelled, replacement, multiple-event, stale-
-  source, and missing-event-evidence behavior, including the rule that an empty
-  event list without explicit complete coverage never becomes `CLEAR`;
-- both strength branches and every equality boundary;
-- group 80th-percentile boundary, ties, missing membership, invalid group ranks,
-  and proof themes cannot vote;
-- every WATCH, TRADE, and ACT gate independently and in combination;
-- RED/UNKNOWN/same-session regime vetoes and T+1 timing;
-- FORMING versus NEAR_TRIGGER/TRIGGERED setups, replay-required evidence,
-  terminal instances, and multiple qualifying setup IDs without priority;
-- default and explicit stops, LONG/SHORT orientation, 0.25% equity risk, Green/
-  Yellow/Red multipliers, floor boundaries, pilot sizing, zero-share refusal,
-  available-capital constraints, and proof buying power never changes risk base;
-- complete reason accumulation rather than short-circuiting;
-- point-in-time/future-mutation invariance and exact cross-engine alignment;
-- frozen schemas, fingerprints, no mutation, no network, no I/O, and no production
-  or staged writes;
-- full regression suites for Universe, Structure, Setup, Leadership, and Regime.
+- frozen snapshot and API schemas, deterministic fingerprints, and explicit nulls;
+- fixture coverage for every required representative state;
+- strict local-snapshot validation and no fixture fallback under a local label;
+- health, Brief, Tape, symbol, Sizer, Rules, and error endpoints;
+- all Tape filters, stable sorts, pagination bounds, and exact-case symbols;
+- Sizer delegation to canonical sizing and refusal propagation;
+- OpenAPI determinism/type synchronization;
+- no network/provider access, no database access, no production/staged writes,
+  and no input mutation;
+- complete regressions for all existing engines.
 
-Run focused tests, then:
+Add frontend tests covering at minimum:
 
-`.venv/bin/python -m pytest`
+- route rendering and navigation;
+- fixture-mode banner and freshness display;
+- regime sleeves and funnel counts;
+- Tape sorting/filtering, persistence, and row-to-detail flow;
+- explicit null/unknown/veto rendering;
+- Sizer request/results/refusals;
+- loading, empty, stale, API-error, and unavailable-snapshot states;
+- keyboard-accessible interactions and labels;
+- API contract/type drift.
 
-`git diff --check`
+Run:
 
-Document formulas, state ladder, timing, veto precedence, sizing examples,
-version identities, missing-data behavior, and representative synthetic paths.
-Label the new policy `experimental_uncalibrated`.
+- focused Python tests;
+- `.venv/bin/python -m pytest`;
+- frontend unit/component tests;
+- TypeScript typecheck;
+- production frontend build;
+- lint/format checks for both stacks;
+- `git diff --check`.
+
+Document exact local development commands, fixture/local-snapshot selection,
+snapshot/API contracts, route behavior, screenshots or rendered-state evidence,
+and the boundary for the later real materializer.
 
 ## Deferred work
 
-Do not implement portfolio-level heat/concentration limits, position management,
-trade exits, journal, API, UI, ingestion, publication, or brokerage behavior.
-The validated September security-master timestamp-precision publication blocker
-remains outside this task.
+Do not implement real DuckDB/Parquet snapshot materialization, data ingestion,
+provider/event retrieval, security-master publication, exposure publication,
+portfolio positions/heat, Book, Journal, outcomes, backtests, remote hosting,
+authentication, broker connections, or order execution.
 
-
-## Completion record
-
-AP-DECISION-RISK-001 is implemented on `codex/decision-risk-v1` from exact handoff
-commit `370d5cdb79dde61854a89ace457f80edb5696a61`. The new opt-in contracts compose
-unchanged engine evidence into direction-aware extension, explicit earnings
-coverage, the complete WATCH/TRADE/ACT gate set and per-idea sizing. All setup
-instances remain visible, SHORT promotion is capped at WATCH, and entry/stop
-proposals remain caller-owned.
-
-Observed verification: **306 focused tests** and **2,641 complete-suite tests**
-passed; whitespace checks passed. All 336 protected production/staging/settings
-files matched their pre-work SHA-256 inventory. No completed engine, immutable
-configuration or legacy output contract changed. See
-[the implementation contract](decision-risk-implementation-v1.md) for formulas,
-timing, freshness attestations, veto precedence and synthetic sizing examples.
-No milestone implementation blocker remains. The unrelated security-master
-precision publication blocker and all listed deferred work remain outside scope.
+The September security-master nanosecond/microsecond publication mismatch remains
+a separate deferred blocker and does not block this fixture-backed vertical slice.
