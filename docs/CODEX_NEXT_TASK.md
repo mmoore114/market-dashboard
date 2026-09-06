@@ -1,196 +1,174 @@
 # Codex Next Task
 
-**Task ID:** AP-FOUNDATION-RECONCILE-001
+**Task ID:** AP-FOUNDATION-AUTHORITY-001
 
-**Status:** COMPLETE — reconciled offline; workstation build remains blocked
+**Status:** READY
 
 **Issued:** 2026-09-06
 
-**Product baseline:** `c5e696ddeb0be2a2fb8befa91ad2adc292ee49e9`
+**Product baseline:** `ccf31f8f95f090830d2a2f3ff52a173b24c064d2`
 
-**Handoff branch:** `codex/foundation-reconciliation-handoff`
-
-## Completion and next boundary
-
-The assignment below is retained as the acceptance record. The eight original
-findings now have a private, independently validated disposition ledger: one
-resolved by verified DATE equivalence, four requiring local review, one requiring
-publication after prerequisites, and two requiring separately bounded acquisition.
-An additional rules-effective-date mismatch is reported separately.
-
-Verification: 76 focused / 2,810 complete Python tests, 11 frontend tests, and two
-desktop/mobile fixture browser tests passed. API/schema/type checks, build,
-lint/format and whitespace checks passed. All 344 protected files are unchanged.
-See [the complete evidence contract](foundation-reconciliation-v1.md) and the
-PROJECT_STATE completion record. No real snapshot or source publication occurred.
-
-**Exact next bounded action:** offline operator review of the staged volume and
-provenance evidence matrix, plus selection of a pinned authoritative XNYS calendar
-implementation. Unsupported fields remain UNKNOWN. Any dependency/source
-acquisition, volume repair, identity/population acquisition, universe publication
-or market-history request needs separately bounded authority. Do not rerun a real
-snapshot build or consume the unpublished September master.
+**Handoff branch:** `codex/foundation-authority-handoff`
 
 ## Goal
 
-Reconcile the eight hard blockers found by the AP-LOCAL-MATERIALIZER-001
-read-only audit into verified offline evidence and a precise remaining-action
-plan. Do not attempt another workstation snapshot build during this milestone.
+Implement the reviewed calendar, adjusted-volume, and source-provenance authority
+decisions needed by the local materializer. Produce verified staged evidence and
+an exact recoverable migration/publication plan, but do not mutate production or
+build a real workstation snapshot.
 
-This is foundation reconciliation, not market-data acquisition or publication.
-Resolve only what the existing local evidence can establish honestly. A finding
-that needs new provider data, operator attestation, or publication must remain
-blocked with an exact bounded next action; never infer or manufacture readiness.
+This milestone should eliminate conceptual ambiguity, not bypass missing data.
+The remaining QQQE, spot, identity, and Aperture schedule inputs stay deferred to
+later bounded acquisition/publication work.
 
-## Branch and handoff
+## Branch and completion protocol
 
-1. Fetch origin and create `codex/foundation-reconciliation-v1` from the current
-   remote head of the handoff branch above. Verify that it descends from the exact
-   product baseline before editing.
-2. Target a draft PR to `codex/local-materializer-v1`.
+1. Fetch origin and create `codex/foundation-authority-v1` from the current remote
+   head of the handoff branch above. Verify ancestry from the product baseline.
+2. Target a draft PR to `codex/foundation-reconciliation-v1`.
 3. Read `AGENTS.md`, `docs/PROJECT_STATE.md`, this file,
-   `docs/local-materializer-v1.md`, the snapshot V2 contract, and the existing
-   data/publication contracts before editing.
-4. Work through this bounded milestone autonomously. Stop only for a material
-   contract contradiction, a destructive action, or authority beyond this task.
-5. At completion, update `docs/PROJECT_STATE.md` and this file, run verification,
-   commit, push, open the draft PR, and return only the commit SHA, test totals,
-   draft PR link, remaining blockers, and exact next bounded action.
+   `docs/foundation-reconciliation-v1.md`, `docs/local-materializer-v1.md`, the
+   adjusted-ingestion code/contracts, and snapshot V2 before editing.
+4. Complete the bounded milestone autonomously unless a destructive action or
+   materially contradictory authoritative contract is encountered.
+5. Update this file and `docs/PROJECT_STATE.md`, run verification, commit, push,
+   and open the draft PR. Return only the commit SHA, test totals, PR link,
+   authority/migration results, remaining blockers, and next bounded action.
 
-## Authority boundary
+## Explicit authority
 
 Authorized:
 
-- source code, tests, configuration schemas, and documentation required for a
-  deterministic offline reconciliation workflow;
-- read-only inspection of the exact local artifacts and private audit evidence;
-- new reports and candidate artifacts written only beneath the existing explicit
-  workstation staging workspace;
-- local hashes, field-level comparisons, calendar validation, coverage analysis,
-  and isolated fixture simulations;
-- one implementation commit, push, and draft PR as described above.
+- code, tests, documentation, immutable source-contract configuration, and a
+  direct pinned dependency on `exchange-calendars==4.13.2`;
+- installation of that exact PyPI package and only its resolver-required Python
+  dependencies when not already available locally;
+- no-market-data network access strictly necessary for that package installation;
+- read-only inspection of production inputs and existing private staged evidence;
+- generation of calendar, provenance, comparison, and migration-simulation
+  artifacts only in the existing nonproduction workstation staging workspace;
+- isolated migration/recovery simulations using copied fixtures;
+- one commit, push, and draft PR for this milestone.
 
 Not authorized:
 
-- network or provider requests of any kind;
-- production-data mutation, ingestion, repair, publication, or migration;
-- another real snapshot build or production API startup;
-- security-master or exposure publication, universe publication/rebuild,
-  crosswalk application, or use of the unpublished September master;
-- copying licensed rows, machine paths, private reports, credentials, databases,
-  Parquet/CSV data, manifests with local provenance, or staging outputs into Git;
-- changes to `.vscode/settings.json`, merges, or broker behavior.
+- Massive or any other provider/market-data request;
+- production DuckDB, Parquet, manifest, calendar, master, exposure, universe, or
+  workstation snapshot writes;
+- applying a schema migration or publishing a provenance/calendar artifact;
+- QQQE, VIX, security-master, market-cap, taxonomy, earnings, or other acquisition;
+- security-master publication, exposure rebuild, Aperture schedule publication,
+  crosswalk application, real snapshot build, production API startup, merge,
+  brokerage behavior, or `.vscode/settings.json` changes.
 
-## Required workflow
+## Reviewed authority decisions
 
-Add a narrow offline reconciliation command or extend the existing materializer
-CLI with explicit `reconcile-plan`, `reconcile`, and `reconcile-validate` behavior
-only if that fits the current architecture cleanly. Plan mode must make zero file,
-database, or network reads and no writes. Reconciliation must open production
-sources read-only, disable DuckDB external access, preserve before/after hashes,
-and write only to an explicit nonproduction workspace. Validation must be offline
-and bind the exact plan, input hashes, findings, and generated evidence.
+Implement these decisions exactly:
 
-Use the original audit receipt and its exact eight finding codes as the starting
-population. Every original finding must end in exactly one state:
+1. Calendar implementation: `exchange-calendars==4.13.2`, calendar `XNYS`.
+   Record the package version, XNYS identity, timezone, ordered sessions, regular
+   and early closes, generation range, artifact hash, and deterministic command.
+   Do not infer sessions from observed bars.
+2. Massive adjusted aggregate endpoint semantics: `adjusted=true` means adjusted
+   for splits. It is not a dividend-total-return series. Preserve this distinction
+   explicitly in the source contract.
+3. Provider aggregate `v` is numeric, and the provider-returned fractional values
+   written to the existing Parquet files are the authoritative representation of
+   those observed rows. The current DuckDB `BIGINT` values are a lossy rounded
+   derivative, not an alternative canonical source.
+4. Canonical adjusted volume must preserve the provider-returned numeric value as
+   `DOUBLE` end to end. Never round, truncate, cast to integer, or silently choose
+   between copies. Transaction count remains integral.
+5. This decision establishes representation authority; it does not authenticate
+   missing historical provider receipts or declare the existing database repaired
+   or published.
 
-- `RESOLVED_BY_VERIFIED_EVIDENCE`;
-- `REMAINS_BLOCKED_REQUIRES_LOCAL_REVIEW`;
-- `REMAINS_BLOCKED_REQUIRES_PUBLICATION`;
-- `REMAINS_BLOCKED_REQUIRES_BOUNDED_ACQUISITION`.
+Authoritative references reviewed 2026-09-06:
 
-Do not silently add, combine, or drop findings. New findings may be reported
-separately with stable codes and evidence.
+- `https://massive.com/docs/rest/stocks/aggregates/custom-bars`
+- `https://github.com/gerrymanoim/exchange_calendars`
+- `https://github.com/gerrymanoim/exchange_calendars/releases/tag/4.13.2`
 
-## Reconciliation requirements
+## Calendar implementation
 
-### Adjusted bars
+- Add a narrow adapter that converts the pinned XNYS schedule into the existing
+  frozen `CalendarV1` without changing that contract.
+- Preserve timezone-aware actual closes and correctly identify early closes.
+- Reject unsupported calendar identity/version, duplicate or unordered sessions,
+  naive or non-UTC-convertible closes, out-of-range requests, and a package-version
+  mismatch.
+- Generate and independently validate a candidate calendar in staging covering
+  all sessions required to assess the current bar history and candidate T/T+1.
+- Bind calendar logical fingerprint and bytes to the candidate provenance evidence.
+  The staged calendar is not production publication.
 
-- Compare the DuckDB and all 100 declared Parquet copies at key and field level.
-- Report rows present only in either store and per-field mismatch counts, date and
-  symbol bounds, duplicates, nulls, invalid OHLCV, and logical fingerprints.
-- Trace publication receipts/configuration where available. Do not choose a
-  canonical copy merely because it is newer, larger, or first in the plan.
-- If authority cannot be proved locally, retain the blocker and propose the exact
-  review or recoverable publication action required.
+## Adjusted-volume and provenance implementation
 
-### Legacy universe and Aperture schedule
+- Change new `daily_bars` table creation and new writes so `volume` is `DOUBLE`.
+- Add schema checks that fail closed when an existing table remains `BIGINT`; do
+  not auto-alter it from ordinary ingestion or materialization.
+- Preserve fractional volume through API mapping, pandas, Parquet, DuckDB, hashing,
+  comparison, features, and replay. Audit every downstream integer assumption.
+- Record sanitized response-level evidence needed for future ingestion receipts,
+  including endpoint class, requested/returned adjusted flag, source version,
+  requested and observed bounds, and artifact fingerprints. Do not persist keys,
+  authorization headers, query strings, or raw responses.
+- Define a versioned provenance profile stating split-adjusted price, no dividend
+  total-return adjustment, and matching provider-returned split-adjusted numeric
+  volume. Unsupported publication/observation facts remain UNKNOWN.
+- Re-evaluate the staged candidate manifest field by field. Do not relabel it as a
+  complete `ManifestV1` unless every required field has verifiable evidence.
 
-- Compare DuckDB and Parquet legacy-universe copies exactly and explain their
-  differences without treating either as the Aperture research universe.
-- Identify the authoritative versioned rules that define Aperture research and
-  trade membership. Build a candidate dated schedule in staging only when every
-  member, identity interval, policy version, effective session, and rules hash is
-  derivable from approved local sources.
-- A candidate is not a publication. Never label legacy exposure eligibility as a
-  canonical Aperture research/trade schedule.
+## Recoverable migration simulation
 
-### Calendar
+Implement an explicit offline plan/simulate/validate workflow for a future
+`daily_bars.volume BIGINT -> DOUBLE` correction.
 
-- Inventory installed, versioned exchange-calendar sources and existing calendar
-  artifacts. A union of observed bar dates is not an exchange calendar.
-- A candidate XNYS schedule may be generated in staging only from an authoritative
-  versioned calendar implementation already available locally. Record package or
-  source version, timezone, regular and early closes, session range, artifact hash,
-  and reproducibility command.
-- Validate T and T+1 against that exact schedule. If no authoritative source is
-  available offline, retain the blocker and specify the minimal later action.
+- Plan mode opens no files/databases, performs no network calls, and writes nothing.
+- Simulation uses copies only and creates a replacement table/database outside
+  production. Load exact Parquet volume values by `(ticker,date)`, require identical
+  keys and all non-volume fields, and reject missing/extra/duplicate rows.
+- Verify all 63,279 current keys and all 11,607 fractional values can be restored,
+  with full DuckDB/Parquet field equality and deterministic fingerprints.
+- Exercise pending, complete, interrupted/recovery-required, verified recovery,
+  identical rerun/no-op, and changed-input rejection states.
+- Produce exact backup, maintenance-window, apply, verification, and rollback
+  commands for later approval. Do not expose an executable production apply mode
+  under this task.
 
-### Provenance and adjustment basis
+## Rules-date and forward-target handling
 
-- Recover only attestations supported by existing receipts, configurations, and
-  immutable source metadata: provider/dataset, price adjustment, dividend
-  treatment, matching volume basis, observation/fetch/publication times, coverage,
-  calendar binding, and artifact hashes.
-- Produce a reviewable candidate manifest plus a field-by-field evidence matrix.
-  Unsupported fields remain UNKNOWN; Codex must not self-attest provider semantics.
-- A candidate manifest is not a publication or operator approval.
+The separate `APERTURE_RULES_AFTER_CANDIDATE_T` result is correct, not a formula
+bug. `aperture-rules-v1` must not be projected before its 2026-08-25 effective
+date. Retain it as a timing constraint and state that a real target T must be a
+valid XNYS session on or after that date with master, exposure, universe, bars,
+benchmarks, and spot evidence valid for the same point in time.
 
-### Identity and time alignment
+Do not use the unpublished 2026-09-05 security master, project July 26 identity
+backward, or invent a feasible T/T+1 pair.
 
-- Calculate the intersection of adjusted-bar sessions, complete published exact
-  security identity, complete exposure-policy-v3, and any valid candidate universe
-  schedule.
-- Do not project the 2026-07-26 master backward to candidate T=2026-07-24 and do
-  not consume the unpublished 2026-09-05 artifact.
-- Report every feasible T/T+1 pair, or prove that none exists with current local
-  artifacts. Never choose a convenient date that violates identity intervals.
+## Reconciliation and acceptance
 
-### Benchmarks and spot volatility
+Rerun the existing offline reconciliation using the pinned calendar and reviewed
+authority profile. Report separately:
 
-- Assess exact session coverage for SPY, QQQ, IWM, RSP, QQQE, and the versioned
-  non-security VIX/approved-equivalent spot series after calendar and population
-  reconciliation.
-- Distinguish absent symbols, missing sessions, insufficient warmup, copy-selection
-  effects, and missing spot identity/source.
-- Produce a bounded acquisition specification for only the remaining gaps,
-  including identifiers, date bounds, expected rows, endpoint classes, request and
-  record caps, and validation gates. Do not execute it.
+- calendar finding disposition;
+- volume representation authority versus still-unapplied production correction;
+- provenance fields established and fields still UNKNOWN;
+- exact migration simulation row/mismatch/fingerprint results;
+- original eight-finding conservation and any separate findings;
+- remaining prerequisites for an identity-valid post-2026-08-25 target;
+- the next minimal acquisition/publication milestone.
 
-## Outputs and acceptance
+Tests must cover the pin/version gate, known XNYS holidays and early closes,
+timezone conversion, deterministic calendar generation, fractional volume
+round-trips, existing BIGINT refusal, response metadata sanitization, migration
+state/recovery/no-op/rejection behavior, zero market-data calls, no production
+writes, protected-file preservation, and unchanged engine/snapshot semantics.
 
-Create private staged outputs containing:
+Run focused tests, the full Python suite, applicable frontend/browser and
+schema/type synchronization checks, and `git diff --check`.
 
-- resolved plan and input/hash receipt;
-- exact eight-finding disposition ledger;
-- bar and universe copy-difference reports;
-- calendar candidate/evidence or explicit absence report;
-- provenance evidence matrix and candidate manifest;
-- identity-valid T/T+1 intersection report;
-- benchmark/spot/research coverage report;
-- bounded next-action specification;
-- preservation proof and deterministic logical fingerprints.
-
-Commit only reusable code, schemas, synthetic fixtures, and documentation. Tests
-must cover zero-I/O planning, zero-network reconciliation, no production writes,
-finding conservation, conflicting copies, unsupported provenance, calendar early
-closes, identity interval refusal, benchmark/spot gaps, deterministic receipts,
-tamper detection, and protected-file preservation.
-
-Run focused tests, the complete Python suite, applicable frontend/contract checks,
-and `git diff --check`.
-
-Success does not require clearing all eight blockers. It requires that every one
-is backed by exact evidence and reduced to either a verified resolution or the
-smallest honest next action. Do not build a real workstation snapshot in this
-milestone.
+Do not build a real workstation snapshot in this milestone. Success means calendar
+and representation authority are deterministic and the real correction/acquisition
+boundary is ready for one later reviewed action.
