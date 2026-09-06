@@ -32,8 +32,8 @@ def test_normalizes_many_to_many_membership_and_preserves_empty_theme(
     catalog, memberships = DeepvueThemeNormalizer().read_csv(source, "2026-09-05")
 
     assert memberships[["theme", "ticker"]].values.tolist() == [
-        ["AI", "MSFT"],
-        ["AI", "NVDA"],
+        ["AI", "msft"],
+        ["AI", "nvda"],
         ["Robotics", "NVDA"],
     ]
     assert catalog.set_index("theme").loc["Bitcoin", "membership_status"] == "EMPTY"
@@ -54,7 +54,7 @@ def test_rejects_missing_columns_blank_themes_and_duplicate_membership(
         invalid,
         [
             {"Theme": "", "Symbol": "AAA"},
-            {"Theme": "AI", "Symbol": "nvda"},
+            {"Theme": "AI", "Symbol": "NVDA"},
             {"Theme": "AI", "Symbol": "NVDA"},
         ],
     )
@@ -65,7 +65,7 @@ def test_rejects_missing_columns_blank_themes_and_duplicate_membership(
     write_snapshot(
         duplicate,
         [
-            {"Theme": "AI", "Symbol": "nvda"},
+            {"Theme": "AI", "Symbol": "NVDA"},
             {"Theme": "AI", "Symbol": "NVDA"},
         ],
     )

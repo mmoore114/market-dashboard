@@ -13,6 +13,8 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
+from market_dashboard.data.security_identity import compatibility_projection
+
 from market_dashboard.data.exposure_policy import (  # noqa: E402
     CLASSIFICATION_COLUMNS,
     EXPOSURE_SCOPES,
@@ -85,11 +87,16 @@ def validate_exposure_classification(
             [snapshot, version],
         ).fetchdf()
         if "security_master" in tables:
+            reference = connection.execute(
+                "SELECT * FROM security_master WHERE snapshot_date = ?", [snapshot]
+            ).df()
+            compatible, _ = compatibility_projection(reference)
+            connection.register("market_data_master", compatible)
             enriched = connection.execute(
                 """
                 SELECT c.*, m.security_type, m.normalized_category
                 FROM security_exposure_classification c
-                JOIN security_master m
+                JOIN market_data_master m
                   ON m.snapshot_date = c.snapshot_date AND m.ticker = c.ticker
                 WHERE c.snapshot_date = ? AND c.policy_version = ?
                 ORDER BY c.ticker
@@ -98,7 +105,7 @@ def validate_exposure_classification(
             ).fetchdf()
             master_count = int(
                 connection.execute(
-                    "SELECT COUNT(*) FROM security_master WHERE snapshot_date = ?",
+                    "SELECT COUNT(*) FROM market_data_master WHERE snapshot_date = ?",
                     [snapshot],
                 ).fetchone()[0]
             )

@@ -358,3 +358,27 @@ def test_validator_metrics(tmp_path: Path) -> None:
     assert metrics["duckdb_parquet_row_count_match"] is True
     assert metrics["recent_date_coverage"]["expected_sessions"] == 90
     assert all(value == 0 for value in metrics["core_metric_null_counts"].values())
+
+
+def test_master_join_preserves_exact_uppercase_precedence(tmp_path):
+    duckdb_path,parquet_directory=prepare_inputs(tmp_path)
+    with duckdb.connect(str(duckdb_path)) as con:
+        con.execute("""
+            INSERT INTO security_master
+            SELECT * REPLACE ('Liquid' AS ticker, 'PFD' AS security_type,
+                              'Preferred Share' AS normalized_category,
+                              FALSE AS candidate_eligible)
+            FROM security_master WHERE ticker='LIQUID'
+        """)
+    builder=SwingUniverseBuilder(
+        duckdb_path=duckdb_path,parquet_directory=parquet_directory,
+        exposure_classification_directory=duckdb_path.parent/'exposure',
+        thresholds=THRESHOLDS,maximum_window_sessions=90,
+    )
+    master,metrics,_=builder._read_inputs(MASTER_DATE,START_DATE,END_DATE,POLICY_VERSION)
+    # The exact uppercase identity can join its own bars and exposure; the
+    # distinct mixed-case reference never substitutes for it.
+    assert 'LIQUID' in set(master.ticker)
+    assert 'LIQUID' in set(metrics.ticker)
+    assert 'Liquid' not in set(master.ticker)
+    assert 'BZXETF' in set(master.ticker)

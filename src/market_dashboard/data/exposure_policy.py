@@ -14,6 +14,7 @@ import pandas as pd
 import yaml
 
 from market_dashboard.data.storage import DUCKDB_PATH, PROCESSED_DIRECTORY
+from market_dashboard.data.security_identity import MarketDataSymbol, compatibility_projection
 
 
 EXPOSURE_SCOPES = {
@@ -215,6 +216,7 @@ class ExposurePolicy:
         missing = required - set(frame.columns)
         if missing:
             raise ValueError(f"exposure classification missing columns: {sorted(missing)}")
+        frame, projection = compatibility_projection(frame)
         known_equities = set(
             frame.loc[frame["normalized_category"] == "Common Stock", "ticker"]
             .astype(str)
@@ -224,9 +226,11 @@ class ExposurePolicy:
             self.classify_record(row._asdict(), snapshot, known_equities)
             for row in frame.itertuples(index=False)
         ]
-        return pd.DataFrame(
+        result = pd.DataFrame(
             [row.to_dict() for row in rows], columns=CLASSIFICATION_COLUMNS
         ).sort_values("ticker").reset_index(drop=True)
+        result.attrs['identity_projection'] = projection.to_dict('records')
+        return result
 
     def classify_record(
         self,
@@ -234,7 +238,7 @@ class ExposurePolicy:
         snapshot: date,
         known_equities: set[str],
     ) -> ExposureClassification:
-        ticker = str(record.get("ticker", "")).strip().upper()
+        ticker = MarketDataSymbol(record.get("ticker", "")).value
         category = str(record.get("normalized_category", "")).strip()
         raw_type = str(record.get("security_type", "")).strip().upper()
         name = str(record.get("name", "")).strip()
@@ -928,6 +932,10 @@ def _validate_classification_frame(frame: pd.DataFrame) -> None:
     missing = set(CLASSIFICATION_COLUMNS) - set(frame.columns)
     if missing:
         raise ValueError(f"classification frame missing columns: {sorted(missing)}")
+    for ticker in frame['ticker']:
+        MarketDataSymbol(ticker)
+    for ticker in frame.loc[frame['underlying_ticker'].notna(), 'underlying_ticker']:
+        MarketDataSymbol(ticker)
     if frame["policy_version"].astype(str).str.strip().eq("").any():
         raise ValueError("classification policy version cannot be empty")
     invalid = set(frame["exposure_scope"]) - EXPOSURE_SCOPES

@@ -1,0 +1,72 @@
+{
+  "version": "deepvue-identity-disposition-v1",
+  "source_as_of_date": "2026-09-05",
+  "NON_SECURITY_MARKET_SERIES": [
+    "$AAIIBEAR",
+    "$AAIIBULL",
+    "$RUT",
+    "$SPX",
+    "$TNX",
+    "$VIX",
+    "$VXN"
+  ],
+  "DEEPVUE_BREADTH_INDICATOR": [
+    "NH-NASDAQ",
+    "NH-NYSE",
+    "NH-USA",
+    "NL-NASDAQ",
+    "NL-NYSE",
+    "NL-USA",
+    "S1-USA",
+    "S1A-USA",
+    "S2-USA",
+    "S2A-USA",
+    "S3-USA",
+    "S3A-USA",
+    "S4-USA",
+    "S4B--USA",
+    "SA200MA-USA",
+    "SA20MA-NASDAQ",
+    "SA20MA-NYSE",
+    "SA20MA-USA",
+    "SA40MA-NYSE",
+    "SA50MA-USA",
+    "SA5MA-NASDAQ",
+    "SA5MA-NYSE"
+  ],
+  "quarantined_proposals": {
+    "NXH": {
+      "july_master_ticker": "BBBY",
+      "reason": "EXCHANGE_REVIEW"
+    },
+    "SEPQ": {
+      "july_master_ticker": "TUGN",
+      "reason": "CIK_REVIEW"
+    }
+  },
+  "proposed_crosswalk": {
+    "AELV": "VLLU",
+    "AGGM": "GBF",
+    "BTLN": "GGRP",
+    "CNSY": "PSTV",
+    "EDVA": "SBEV",
+    "HOS": "HLX",
+    "IA": "ISSC",
+    "MEGX": "MGKX",
+    "NXH": "BBBY",
+    "OPPG": "GEOA",
+    "PAAI": "AREN",
+    "PARA": "BNZI",
+    "QNME": "LSH",
+    "REIX": "IQRA",
+    "SEPQ": "TUGN",
+    "STLN": "TOI",
+    "USGX": "XVUG",
+    "USLX": "VOOX",
+    "USMX": "XVO",
+    "USSX": "VBX",
+    "VAI": "AIHS",
+    "VMRK": "EQR",
+    "YARW": "VYNE"
+  }
+}

@@ -164,3 +164,167 @@ publication, engine implementation and Git publication remain paused.
 Verification: 13 focused mocked tests passed; full suite 346 passed. Repository
 whitespace checks passed. Data, source CSV and machine-settings fingerprints
 remained unchanged; no commit or push was performed.
+
+## Staged security-master refresh implementation — 2026-09-05
+
+Implemented the locally approved four-mode workflow described in
+[security-master-refresh.md](security-master-refresh.md). `plan` stages a bounded
+scope and immutable local inputs offline. `fetch` is the sole network boundary,
+with fixed reference-only scope, request/page budgets, no retries/redirects,
+first-page schema checks and preserved completed-page evidence. `validate` is
+offline and binds page, input, report and candidate hashes to a validation receipt.
+`publish` is offline, explicitly confirmed, independent of exposure publication
+and recoverable through pending/complete/recovery_required states. The existing
+immediate-publication ingestion CLI is unchanged.
+
+Publication protects July 26's exact logical content and original Parquet bytes,
+checks every DuckDB/Parquet field, makes identical same-date content a no-op and
+requires the old logical fingerprint for an explicitly authorized revision.
+Existing readers do not enforce the new publication state: use a maintenance
+window through completion/recovery. This remains an operational approval condition.
+
+The exact versioned Deepvue disposition preserves all 29 observed non-security
+records in source snapshots while excluding them from security matching and
+coverage denominators. Local-only verification reproduced 11,370 total rows,
+29 non-security records, 11,341 security candidates, 5,462 classified security
+candidates and 5,879 unclassified security candidates. No broad symbol rules or
+source-normalization changes were introduced.
+
+All 23 crosswalk entries remain unapplied proposals. NXH to BBBY is quarantined
+for exchange review; SEPQ to TUGN is quarantined for CIK review. TUNG is not a
+mapping candidate. STLN to TOI and VMRK to EQR remain proposals. The 231 previously
+identified supported current/new securities will be assessed against the actual
+new dated response by exact ticker, without appending prior lookup evidence or
+applying historical aliases. FIGI collisions, unknown codes and all unmatched
+records remain explicit review outputs.
+
+Observed validation: 58 focused tests passed, followed by all 391 tests. Tests
+explicitly prohibited HTTP/socket calls in plan, validation, publication and
+publication recovery and observed zero network calls. Fetch behavior was tested
+only with mocked responses. The offline local plan succeeded with ceilings of
+20 requests and 20,000 records; July's 13,023 records imply an estimate of 14
+pages. Offline validation of that unfetched plan correctly exited 2 because fetch
+evidence does not exist. No real fetch was performed. All 294 inventoried data
+files and machine settings remained unchanged. Whitespace checks passed.
+
+Next approval checkpoint: review the bounded plan and approve reference fetch
+only. Inspect complete validation/reconciliation outputs before separately
+approving publication. No production publication, crosswalk application,
+ingestion, exposure/universe rebuilding, engine work, commit, push or PR merge
+was performed for this implementation.
+
+## Exact-case provider identity correction — 2026-09-05
+
+The approved 14-request bulk fetch returned 13,155 exact tickers. Its first
+validation rejected 404 mixed-case provider symbols. This local correction reuses
+that immutable fetch; no additional provider request was made.
+
+The master builder now preserves ticker strings exactly and rejects every exact
+snapshot/ticker duplicate. Case-insensitive collisions are explicit diagnostics,
+never keys or automatic mappings. The 404 mixed-case rows retain their actual
+types: 354 PFD, 30 SP and 20 RIGHT. TPC/TpC and BCPC/BCpC coexist as distinct rows.
+See [the complete compatibility audit](security-master-case-audit.md).
+
+Offline revalidation succeeded for all 13,155 rows with zero exact duplicates.
+Logical fingerprint: `7d22fab5f8dbffea1c9254124e9c2731006648391519e55543f6058c77c7112b`.
+Deepvue security reconciliation remains 11,325 exact matches and 16 unmatched;
+29 source-native non-security records are preserved and excluded. All 23 mapping
+proposals remain unapplied, including NXH/BBBY and SEPQ/TUGN quarantines.
+
+Validation success does not authorize publication. Both public master publication
+paths block mixed-case snapshots until compatibility is established for exposure
+registries/classification, daily/flat bars, feature keys, universe models and
+legacy Deepvue importers/diagnostics. The legacy ingestion CLI itself is unchanged;
+its shared store now blocks before writing an incompatible snapshot. No reader
+semantics or immutable exposure policy results were changed.
+
+Verification: 80 focused tests and all 397 full-suite tests passed. HTTP/socket
+calls were blocked during the actual offline revalidation and observed zero calls.
+All 30 previously hashed staging artifacts remained unchanged. All 294 production
+files, July's exact logical content and Parquet bytes, and machine settings were
+preserved. Whitespace checks passed. No publication, mapping application,
+ingestion, engine work, commit, push or PR merge occurred.
+
+## Reference/market-data compatibility boundary — 2026-09-05
+
+Implemented `reference-to-market-data-v1` with distinct immutable ReferenceTicker
+and MarketDataSymbol types and explicit snapshot-scoped conversion. The reference
+master is unchanged. Mixed-case references receive no automatic market-data
+symbol; every member of a case-insensitive collision group is excluded from the
+consumer projection. Exclusion is not an invalid-reference classification.
+
+See [the identity-boundary contract and complete reader migration map](security-identity-boundary.md).
+Exposure classification now projects complete reference inputs before applying
+uppercase-domain policies. Swing-universe and exposure-validation joins use a
+connection-local projected master. Deepvue importers preserve source symbol case;
+reference reconciliation remains exact, with versioned non-security dispositions
+and separate unapplied crosswalks. Existing bar/feature/trading uppercase-domain
+normalization and invariants remain unchanged.
+
+Legacy master ingestion no longer automatically publishes exposure classifications.
+Both master publication paths consult the unsafe-reader registry and block
+ambiguous conversion. No identified unsafe reference readers remain in the
+audited repository paths; the current snapshot remains blocked by TPC/TpC and
+BCPC/BCpC ambiguity. No operator confirmation or revision flag bypasses this gate.
+
+Offline revalidation: all 13,155 reference rows preserved; 12,749 compatible
+projection rows; 406 projection exclusions. Exclusions are 402 mixed-case-only
+rows (353 PFD, 29 SP, 20 RIGHT) and four ambiguous rows (2 CS, 1 PFD, 1 SP).
+Reference types remain 354 mixed-case PFD, 30 mixed-case SP and 20 mixed-case RIGHT.
+Deepvue remains 11,325 exact matches, 16 unmatched security candidates and 29
+excluded non-security source records. All crosswalks remain unapplied.
+
+Reference logical fingerprint unchanged:
+`7d22fab5f8dbffea1c9254124e9c2731006648391519e55543f6058c77c7112b`.
+Reference Parquet SHA-256 unchanged:
+`d3bd5b75665c646e109e22514839da6771b49070f4ed2998b5e879cdb16fc8fc`.
+
+Validation: 195 focused tests and all 405 full-suite tests passed. The actual
+revalidation blocked HTTP/socket calls and observed zero calls. Original raw
+staging pages/provenance and copied inputs, July's exact logical content and
+Parquet bytes, all 294 production files, and machine settings remained unchanged.
+Whitespace checks passed. No network, publication, crosswalk application,
+ingestion, engine work, commit, push or merge occurred in this milestone.
+
+## Exact-case precedence refinement — 2026-09-05
+
+Compatibility policy `reference-to-market-data-v2-exact-precedence` supersedes the
+v1 collision exclusion rule. An exact uppercase ReferenceTicker converts to its
+own MarketDataSymbol even if a mixed-case neighbor exists. TPC and BCPC therefore
+convert exactly; TpC and BCpC remain reference-only. Both collision groups remain
+reported. No reference row, key or stored identifier is rewritten.
+
+Reverse resolution checks exact identity first, including exact mixed-case
+reference requests. Every non-exact request returns AMBIGUOUS_NO_EXACT_IDENTITY
+and no reference; casefold candidates are diagnostic only, even when only one
+candidate exists. No crosswalk or alias is applied.
+
+Offline revalidation produced the expected 13,155 reference rows, 12,751
+compatible symbols and 404 explicit mixed-case exclusions (354 PFD, 30 SP,
+20 RIGHT). Ambiguous automatic conversions: zero. Retained case-insensitive
+collision groups: two. No audited identity-compatibility publication blocker
+remains. Production publication still requires separate approval and the existing
+publication/recovery operational checks; compatibility is not authorization.
+
+The exact reference logical fingerprint and Parquet SHA-256 remain unchanged:
+`7d22fab5f8dbffea1c9254124e9c2731006648391519e55543f6058c77c7112b`
+and `d3bd5b75665c646e109e22514839da6771b49070f4ed2998b5e879cdb16fc8fc`.
+Original staged pages, fetch provenance and copied inputs remain unchanged.
+July's logical content and Parquet bytes, all 294 production files, and machine
+settings were verified unchanged. Actual revalidation blocked HTTP/socket calls
+and observed zero calls. Deepvue remains 11,325 exact security matches, 16
+unmatched candidates and 29 excluded non-security records; all crosswalks remain
+unapplied proposals.
+
+Legacy master ingestion remains decoupled from exposure publication and now
+explicitly prints `exposure publication: not performed (disabled; separate
+workflow required)`. Master CLI success no longer implies exposure freshness;
+existing automations must use a separately authorized exposure workflow. The
+CLI regression test verifies no exposure-store publication call.
+
+Verification for the final refinement: 198 focused tests and all 408 complete-suite
+tests passed; tracked and untracked whitespace checks passed. The accumulated
+implementation is ready for a single reviewed source/configuration/documentation/
+test commit, excluding machine settings and all staged data/reports. No network,
+publication, exposure publication, crosswalk application, ingestion, engine work,
+commit, push or merge occurred.

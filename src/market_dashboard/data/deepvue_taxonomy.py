@@ -235,7 +235,7 @@ class DeepvueTaxonomyStore:
 
 
 def _clean_ticker(value: object) -> str:
-    return str(value).strip().upper()
+    return str(value).strip()
 
 
 def _clean_classification(value: object) -> str | None:

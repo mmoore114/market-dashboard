@@ -6,6 +6,8 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any
 
+from market_dashboard.data.security_identity import compatibility_projection
+
 import duckdb
 import pandas as pd
 
@@ -191,6 +193,13 @@ class SwingUniverseBuilder:
             if "security_exposure_classification" not in tables:
                 raise ValueError("security_exposure_classification table not found")
 
+            reference = connection.execute(
+                'SELECT * FROM security_master WHERE snapshot_date = ?',
+                [master_snapshot],
+            ).df()
+            compatible, _ = compatibility_projection(reference)
+            connection.register('market_data_master', compatible)
+
             master = connection.execute(
                 """
                 SELECT m.ticker, m.name, m.normalized_category,
@@ -200,7 +209,7 @@ class SwingUniverseBuilder:
                        c.classification_method AS exposure_classification_method,
                        c.underlying_ticker,
                        c.policy_reason AS exposure_policy_reason
-                FROM security_master m
+                FROM market_data_master m
                 JOIN security_exposure_classification c
                   ON c.snapshot_date = m.snapshot_date
                  AND c.ticker = m.ticker
@@ -228,7 +237,7 @@ class SwingUniverseBuilder:
                 """
                 WITH structurally_eligible AS (
                     SELECT m.ticker
-                    FROM security_master m
+                    FROM market_data_master m
                     JOIN security_exposure_classification c
                       ON c.snapshot_date = m.snapshot_date
                      AND c.ticker = m.ticker

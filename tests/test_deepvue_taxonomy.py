@@ -38,9 +38,9 @@ def test_normalizes_placeholders_and_does_not_infer_parent_taxonomy(tmp_path: Pa
 
     frame = DeepvueTaxonomyNormalizer().read_csv(source, "2026-09-05")
 
-    assert frame["ticker"].tolist() == ["ABC", "SPY"]
+    assert frame["ticker"].tolist() == ["abc", "spy"]
     assert frame["classification_status"].tolist() == ["CLASSIFIED", "UNCLASSIFIED"]
-    assert frame.loc[frame["ticker"] == "SPY", "sub_industry"].isna().item()
+    assert frame.loc[frame["ticker"] == "spy", "sub_industry"].isna().item()
     assert "sector" not in frame.columns
     assert "industry" not in frame.columns
     assert frame["source_row_fingerprint"].str.len().eq(64).all()
@@ -74,7 +74,7 @@ def test_rejects_duplicate_symbols_and_missing_columns(tmp_path: Path) -> None:
         duplicate,
         [
             {"Symbol": "AAA", "Industry Rank - 3 Month": "1", "Sub-Industry": "One"},
-            {"Symbol": "aaa", "Industry Rank - 3 Month": "1", "Sub-Industry": "One"},
+            {"Symbol": "AAA", "Industry Rank - 3 Month": "1", "Sub-Industry": "One"},
         ],
     )
     with pytest.raises(ValueError, match="duplicate symbols"):
@@ -160,3 +160,9 @@ def test_csv_missing_classification_preserves_rank_and_counts(tmp_path: Path, pl
     summary = normalizer.summarize(first, normalizer.build_group_snapshot(first))
     assert (summary.source_rows, summary.classified_tickers, summary.unclassified_tickers) == (2, 1, 1)
     assert (summary.ranked_tickers, summary.unique_sub_industries) == (2, 1)
+
+
+def test_source_symbol_case_is_preserved(tmp_path):
+    path=tmp_path/'case.csv'
+    write_export(path,[{'Symbol':t,'Industry Rank - 3 Month':'1','Sub-Industry':'One'} for t in ['TPC','TpC']])
+    assert DeepvueTaxonomyNormalizer().read_csv(path,'2026-09-05').ticker.tolist()==['TPC','TpC']

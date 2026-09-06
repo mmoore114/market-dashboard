@@ -10,6 +10,7 @@ import duckdb
 import pandas as pd
 
 from market_dashboard.data.storage import DUCKDB_PATH, PROCESSED_DIRECTORY
+from market_dashboard.data.security_identity import exact_ticker, publication_blockers
 
 
 SECURITY_MASTER_COLUMNS = [
@@ -158,6 +159,8 @@ class SecurityMasterStore:
     ) -> dict[str, Any]:
         snapshot = date.fromisoformat(str(snapshot_date))
         frame = self._build_frame(records, snapshot, classifier)
+        if publication_blockers(frame['ticker']):
+            raise ValueError('Publication blocked: identity compatibility ambiguity or unsafe reader')
         parquet_path = self.parquet_path(snapshot)
         self._write_parquet(frame, parquet_path)
         self._write_duckdb(frame, snapshot)
@@ -230,7 +233,7 @@ class SecurityMasterStore:
             rows.append(
                 {
                     "snapshot_date": snapshot_date,
-                    "ticker": _clean_string(record.get("ticker")).upper() or None,
+                    "ticker": exact_ticker(record.get("ticker")),
                     "name": _clean_string(record.get("name")) or None,
                     "market": _clean_string(record.get("market")).lower() or None,
                     "locale": _clean_string(record.get("locale")).lower() or None,
@@ -264,9 +267,10 @@ class SecurityMasterStore:
         frame = pd.DataFrame(rows, columns=SECURITY_MASTER_COLUMNS)
         if frame.empty:
             return frame
+        if frame.duplicated(subset=["snapshot_date", "ticker"]).any():
+            raise ValueError('Duplicate exact snapshot/ticker key')
         frame = (
-            frame.drop_duplicates(subset=["snapshot_date", "ticker"], keep="last")
-            .sort_values(["snapshot_date", "ticker"], na_position="last")
+            frame.sort_values(["snapshot_date", "ticker"], na_position="last")
             .reset_index(drop=True)
         )
         return frame

@@ -50,15 +50,15 @@ def _sanitize(text: str, response: httpx.Response, limit: int) -> str:
     return " ".join(text.split())[:limit]
 
 
-def capture_reference_error(response: httpx.Response, ticker: str) -> dict | None:
+def capture_reference_error(response: httpx.Response, ticker: str | None) -> dict | None:
     """Return safe diagnostics for HTTP errors; successful responses are untouched.
 
-    The caller supplies its allowlisted source ticker. No URL, headers, cookies,
+    The caller supplies its allowlisted source ticker, or None for a bulk page. No URL, headers, cookies,
     arbitrary JSON fields or raw response body are included in the output.
     """
     if response.is_success:
         return None
-    if not re.fullmatch(r"[A-Za-z0-9$.:_-]{1,80}", ticker):
+    if ticker is not None and not re.fullmatch(r"[A-Za-z0-9$.:_-]{1,80}", ticker):
         raise ValueError("Invalid reference ticker for diagnostics")
     code = None
     if len(response.content) > MAX_BODY_BYTES:
@@ -91,6 +91,7 @@ def capture_reference_error(response: httpx.Response, ticker: str) -> dict | Non
         "provider_error_code": _sanitize(str(code), response, MAX_CODE_CHARS)
         if isinstance(code, (str, int)) and not isinstance(code, bool) else None,
         "provider_error_message": _sanitize(message, response, MAX_MESSAGE_CHARS),
-        "endpoint_path": "/v3/reference/tickers/" + quote(ticker, safe=""),
+        "endpoint_path": "/v3/reference/tickers"
+        + ("/" + quote(ticker, safe="") if ticker is not None else ""),
         "captured_at": datetime.now(UTC).isoformat(),
     }
