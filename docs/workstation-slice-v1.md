@@ -57,7 +57,9 @@ APERTURE_SNAPSHOT_PATH=/path/to/review.local-snapshot.json \
 ```
 
 The path must identify a standalone JSON snapshot, at most 32 MiB, outside
-Deepvue/staging and production raw/processed/database directories. It must carry
+Deepvue/provider staging and production raw/processed/database directories.
+The explicit `aperture-staging/workstation-local-snapshot-v1` standalone layout
+is also accepted for the [offline materializer](local-materializer-v1.md). It must carry
 `mode=LOCAL_SNAPSHOT`. There is no database query, provider call, directory scan,
 implicit data build, or fixture fallback. JSON is loaded once at startup;
 freshness is rechecked on each request. Missing files, invalid contracts,
@@ -66,10 +68,11 @@ unknown freshness block all research routes. Health remains available with typed
 reasons, and the UI shell retains navigation. The caller explicitly supplies
 `freshness.valid_until`; V1 does not invent a market-session TTL.
 
-The later real materializer must construct this complete contract from verified,
-point-in-time published inputs, provide a real exchange calendar and attested
-freshness, preserve every version identity, and use `materialize_v2`. This
-milestone deliberately does not implement that materializer. Relabeling a fixture
+The offline materializer constructs this complete contract from verified,
+point-in-time published inputs, requires a real exchange calendar and attested
+freshness, preserves every version identity, and uses `materialize_v2`. This
+original UI milestone did not implement that boundary; AP-LOCAL-MATERIALIZER-001
+now supplies it. Its actual laptop readiness audit is blocked. Relabeling a fixture
 does not make it real market evidence.
 
 ## Snapshot and transport contracts

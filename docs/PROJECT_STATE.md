@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-WORKSTATION-SNAPSHOT-002 complete; normalized immutable snapshot V2 preserves the workstation API/UI and fits 2,000 synthetic records in 17.96 MiB.
+Current milestone: AP-LOCAL-MATERIALIZER-001 complete; the offline materializer is implemented and verified. Actual local readiness is BLOCKED by eight foundational findings; no real snapshot was built.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
@@ -712,3 +712,61 @@ provider/event retrieval, real data materialization, database/staged publication
 exposure rebuild, crosswalk, portfolio workflow, UI redesign, hosting, brokerage
 or PR merge occurred. No snapshot-correction blocker remains. The separate
 September security-master timestamp-precision publication issue is unchanged.
+
+
+## AP-LOCAL-MATERIALIZER-001 completion record — 2026-09-06
+
+Implemented on `codex/local-materializer-v1` from exact handoff
+`866b15a09773c56dcbf72530bf077b9def9355e9`, with draft PR base
+`codex/workstation-snapshot-v2`.
+
+The explicit offline CLI now provides plan, audit, build and validate. Frozen
+plans/readiness and source attestations bind exact paths, versions, hashes,
+publication state, identity intervals, adjustment basis and exchange calendar.
+Native DuckDB reads are read-only with external access disabled; explicitly
+selected Parquet copies are compared in full. Missing optional groups/events/
+proposals/QA remain canonical UNKNOWN or refused evidence. Real source repair,
+publication and provider access are separate boundaries.
+
+Replay uses existing pure Structure/Setup, Leadership, Regime and Decision/Risk
+engines. Histories are processed per symbol, group history is bounded, and final
+records stream into normalized V2. Historical membership revisions are retained;
+departed members' history is verified through their last effective member session.
+The existing shared-calendar/per-symbol-index incompatibility is an explicit
+blocker rather than filled data or an engine semantic change. Build rechecks the
+successful audit and source hashes, validates temporary output, then uses an
+atomic no-replace rename. Standalone validation checks full V2, receipt/field
+hashes and canonical decision parity. The prescribed standalone workstation
+staging layout is narrowly accepted by the existing live loader.
+
+Observed verification: **46 materializer focused tests** and **93 workstation
+focused tests passed**, followed by **2,780 full-suite tests passed**. **11 frontend
+component tests** and **two desktop/mobile browser tests passed**. Typecheck,
+production build, OpenAPI/snapshot-schema/type synchronization, Python/frontend
+lint/format and whitespace checks passed. The existing Starlette TestClient
+httpx deprecation warning remains nonblocking. The unchanged normalized scale
+regression again retained 2,000 records in 18,834,442 bytes with the same logical
+fingerprint. Existing engine/feature source, immutable configuration, API schemas
+and frontend files have no diff from the handoff.
+
+One actual plan and read-only audit returned **8 HARD_BLOCKER findings** and five
+optional gaps. Adjusted bars: 63,279 rows, 100 explicit Parquet copies, 2024-01-02
+through 2026-07-24, zero duplicate keys/required OHLCV nulls, but exact copies
+disagree. July master and exposure each have 13,023 rows and agreeing copies;
+exposure-policy-v3 publication is complete and verified. The legacy universe
+slice has 13,023 diagnostic rows, disagrees across stores and is not a published
+Aperture research/trade schedule. Calendar, provenance and spot paths are missing;
+the July 26 master follows candidate T=July 24, and one mandatory benchmark is
+missing. No real build or real-data API startup was attempted.
+
+All **337 protected files / 112,487,134 bytes** retained SHA256s, including
+production datasets, September provider staging, environment file and user VS Code
+settings. Git status/diff were unchanged across the audit. Reports and preservation
+proof remain private in the authorized audit workspace. No provider request,
+source mutation/publication, exposure/universe rebuild, crosswalk, broker action,
+UI redesign or PR merge occurred.
+
+[Complete source contract, commands, limitations, report fingerprints and the
+next bounded offline foundation reconciliation](local-materializer-v1.md) are
+recorded. The September timestamp-precision publication issue remains deferred;
+no unpublished source was consumed or repaired.

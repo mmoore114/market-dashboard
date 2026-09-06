@@ -1,5 +1,9 @@
 # Workstation snapshot V2 — AP-WORKSTATION-SNAPSHOT-002
 
+The subsequent [offline local materializer](local-materializer-v1.md) implements
+the explicit published-source boundary described below. Its actual local audit
+is blocked; the normalized snapshot contract and existing engines are unchanged.
+
 The first workstation repeated the complete Leadership and Regime populations
 inside every Decision/Risk row. Its 12-record GREEN fixture occupied approximately
 8,739,961 compact JSON bytes. Raising the loader limit would not solve that growth.
@@ -79,7 +83,8 @@ loader validates V2 only. V1 retains its original schema/meaning in Python for
 explicit parity/migration tests; neither fixture nor local runtime accepts it.
 V1 local files receive `SNAPSHOT_VERSION_UNSUPPORTED`. Rebuild from explicit
 canonical outputs using `materialize_v2`; changing a version label is not a
-migration. No automatic scan, database query, provider call or materializer exists.
+migration. The loader performs no automatic scan, database query, provider call
+or implicit materialization.
 
 ## API and UI compatibility
 

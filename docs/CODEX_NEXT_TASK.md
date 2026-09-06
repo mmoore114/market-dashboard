@@ -2,7 +2,7 @@
 
 **Task ID:** AP-LOCAL-MATERIALIZER-001
 
-**Status:** READY
+**Status:** COMPLETE
 
 **Issued:** 2026-09-06
 
@@ -330,3 +330,39 @@ Do not fetch provider data, publish/fix the security master, rebuild exposure or
 universes, apply crosswalks, import raw Deepvue data, retrieve events, mutate
 production storage, implement portfolio/Book/Journal, host remotely, authenticate,
 connect brokers, or place orders.
+
+
+## AP-LOCAL-MATERIALIZER-001 completion record — 2026-09-06
+
+Implemented on `codex/local-materializer-v1` from exact handoff
+`866b15a09773c56dcbf72530bf077b9def9355e9`. The four-mode offline boundary,
+strict source/readiness contracts, canonical point-in-time replay, normalized
+streaming output, receipt-bound validation and no-clobber atomic publication are
+complete. [Source contract, commands, limits and audit evidence](local-materializer-v1.md).
+
+Observed verification: **46 materializer focused tests** and **93 workstation
+focused tests passed**; final full Python suite **2,780 passed**. **11 frontend
+component tests** and **two desktop/mobile Chromium tests passed**. TypeScript,
+production build, OpenAPI/snapshot-schema/type synchronization, Python/frontend
+lint/format and whitespace checks passed. The existing Starlette TestClient
+httpx deprecation warning remains nonblocking.
+
+The one actual read-only audit returned **8 HARD_BLOCKER findings** and five
+optional evidence gaps. No real snapshot was built. Missing selected calendar,
+provenance and spot inputs, bars/legacy-universe cross-store disagreement, the
+legacy universe contract, master/as-of identity timing and mandatory benchmark
+coverage prevent materialization. Per-engine denominators cannot be certified
+without the missing calendar and actual Aperture research membership.
+
+All 337 protected files (112,487,134 bytes), including September staged evidence,
+production data, environment file and user VS Code settings, retained their
+hashes. Git status/diff were identical across the actual audit. Private reports
+and preservation proof remain in the authorized workspace; no licensed data,
+source artifact, credential or machine settings is included in the commit.
+
+Next bounded data action: separately scoped offline foundation reconciliation
+of source copies, an authoritative exchange calendar and reviewed provenance,
+and an identity-valid published Aperture research/trade schedule for a selected
+T, followed by exact missing benchmark/spot/research coverage assessment. No
+repair, publication, fetch, crosswalk application or automatic retry is authorized
+by this completed task. Do not consume the unpublished September master.

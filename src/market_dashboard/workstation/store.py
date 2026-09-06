@@ -56,8 +56,15 @@ class SnapshotStore:
             )
         try:
             target = Path(path).resolve()
+            workstation_staging = (
+                target.parent.name == "workstation-local-snapshot-v1"
+                and target.parent.parent.name == "aperture-staging"
+                and sum("staging" in p.lower() for p in target.parts) == 1
+            )
             forbidden = any(
-                "staging" in p.lower() or "deepvue" in p.lower() for p in target.parts
+                ("staging" in p.lower() and not workstation_staging)
+                or "deepvue" in p.lower()
+                for p in target.parts
             )
             forbidden = forbidden or any(
                 tuple(target.parts[i : i + 2]) == ("data", folder)

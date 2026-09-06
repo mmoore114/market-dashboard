@@ -3,8 +3,10 @@
 The local Aperture Workstation now provides Brief, Tape, symbol detail, Sizer and
 Rules through React/TypeScript and FastAPI. Start with the
 [local setup and snapshot contract](docs/workstation-slice-v1.md).
-Development defaults to visibly labeled synthetic fixtures; real snapshot
-materialization remains deferred. The [normalized V2 snapshot](docs/workstation-snapshot-v2.md)
+Development defaults to visibly labeled synthetic fixtures. The
+[offline local materializer](docs/local-materializer-v1.md) now audits explicitly
+selected publications and builds only when all foundational gates pass. The actual
+local audit is blocked; no real snapshot was produced. The [normalized V2 snapshot](docs/workstation-snapshot-v2.md)
 retains complete audit evidence while fitting 2,000 synthetic records in 17.96 MiB.
 
 Current implementation handoff: [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md).
@@ -23,7 +25,7 @@ confirmed-state hysteresis; see [its pure API and timing contract](docs/regime-e
 Decision & Risk V1 composes these contracts into direction-aware extension,
 earnings gates, WATCH/TRADE/ACT evidence and per-idea sizing; see
 [its formulas, timing and pure API](docs/decision-risk-implementation-v1.md).
-Production materialization and portfolio-level policies remain separate work.
+Production source publication and portfolio-level policies remain separate work.
 
 Market Dashboard is a Python research repository for equity discovery, ranking, and discretionary market research. The project is intended to collect market data, persist local research datasets, compute opportunity features, and expose a Streamlit dashboard for exploration.
 
