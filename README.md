@@ -11,6 +11,8 @@ The separate daily Setup Engine V1 is also implemented as a pure API; see
 Strength/Leadership and Group Ranking V1 provide a separate experimental
 5/21-session rotation pulse and 63/126/252-session composite; see
 [the pure API and point-in-time group contract](docs/leadership-engine-implementation-v1.md).
+Market Regime V1 adds five independent sleeves, explicit UNKNOWN evidence and
+confirmed-state hysteresis; see [its pure API and timing contract](docs/regime-engine-implementation-v1.md).
 Production materialization and trading-policy layers remain separate work.
 
 Market Dashboard is a Python research repository for equity discovery, ranking, and discretionary market research. The project is intended to collect market data, persist local research datasets, compute opportunity features, and expose a Streamlit dashboard for exploration.

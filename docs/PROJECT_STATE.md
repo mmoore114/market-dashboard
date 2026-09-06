@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-LEADERSHIP-001 complete; pure Strength/Leadership and Group Ranking V1 with independent one-week/one-month rotation, alongside preserved Structure and Setup engines.
+Current milestone: AP-REGIME-001 complete; pure five-sleeve Market Regime V1 with explicit UNKNOWN evidence, hysteresis and risk-off overrides, alongside preserved Structure, Setup and Leadership engines.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
@@ -484,3 +484,62 @@ Exact milestone file inventory (13 files; no data, reports or machine settings):
 - `tests/test_leadership_features.py`
 - `tests/test_leadership_groups.py`
 - `tests/test_leadership_ranking.py`
+
+
+## AP-REGIME-001 completion record
+
+Implemented on `codex/regime-engine-v1` from handoff commit `10c7e46`, targeting
+`codex/leadership-engine-v1` for the draft PR. Recovered the interrupted draft
+contracts and completed the pure opt-in `experimental_uncalibrated` layer.
+
+Five independent sleeves retain index predicates, separate breadth denominators,
+Leadership rotation participation and eligible sub-industry medians, spot VIX
+context and exact 21-session equal-weight participation returns. The aggregate
+exposes candidate, sleeve counts, historical memory, entry/counts, transition
+reason, override branches and eligibility no earlier than the supplied T+1.
+UNKNOWN observations emit no confirmed state and reset candidate continuity.
+Opposite directional transitions pass through YELLOW; overrides use only valid
+inputs required by their independently qualifying branch.
+
+Frozen schemas, immutable thresholds, pure features and explicit bar/universe/
+Structure/Leadership adapters reject ambiguous identity, duplicated observations,
+mixed source bases, misaligned context and future-effective evidence. VIX remains
+a versioned non-security spot series. Themes cannot affect internals, and
+sub-industry security memberships cannot overlap. No crosswalk is applied.
+[The implementation contract](regime-engine-implementation-v1.md) records formulas,
+thresholds, missing-data behavior, initialization conventions and synthetic paths.
+
+Versions: `market-regime-v1`, `market-regime-features-v1`,
+`market-regime-thresholds-v1`. Rules fingerprint:
+`3e13d0e057fbc80d806e8eab8fb3b9060b1c3f5de60bf45f8fb33ae15abec01a`.
+
+Observed verification: **1,277 focused tests passed** (1,171 sleeves/candidates,
+49 transitions, 57 adapters/contracts), followed by **2,335 complete-suite tests
+passed**. Focused coverage includes all 64 index-vote combinations and 1,024
+aggregate combinations. Every new test blocks socket/httpx network access; the
+complete adapter/engine pipeline also runs with file-open APIs forbidden.
+All **336** protected production/staging/settings files matched the saved
+pre-disconnect SHA-256 inventory. `.vscode/settings.json` remains the preserved
+uncommitted user change. Structure, Setup, Leadership, legacy code and immutable
+configuration remain unchanged. Whitespace checks passed.
+
+No AP-REGIME-001 implementation blocker remains. The unrelated September
+security-master timestamp-precision publication issue is still deferred. No
+provider request, ingestion, production publication, exposure rebuild, crosswalk
+application, calibration, UI, actionability, sizing or PR merge occurred.
+
+Milestone file inventory (13 files; no market data, reports or machine settings):
+
+- `README.md`
+- `docs/CODEX_NEXT_TASK.md`
+- `docs/PROJECT_STATE.md`
+- `docs/regime-engine-implementation-v1.md`
+- `src/market_dashboard/aperture/regime.py`
+- `src/market_dashboard/aperture/regime_adapters.py`
+- `src/market_dashboard/aperture/regime_contracts.py`
+- `src/market_dashboard/aperture/regime_policy.py`
+- `src/market_dashboard/features/regime_features.py`
+- `tests/regime_fixtures.py`
+- `tests/test_regime_adapters.py`
+- `tests/test_regime_sleeves.py`
+- `tests/test_regime_transitions.py`

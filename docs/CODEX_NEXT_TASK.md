@@ -2,7 +2,7 @@
 
 **Task ID:** AP-REGIME-001
 
-**Status:** READY
+**Status:** COMPLETE
 
 **Issued:** 2026-09-06
 
@@ -273,3 +273,17 @@ version identities, and representative synthetic paths. Label this V1
 Do not implement Watch/Trade/Act, extension integration, earnings vetoes, risk
 sizing, portfolio heat, UI, ingestion, or publication. The validated September
 security-master timestamp-precision publication blocker remains outside this task.
+
+
+## Completion record
+
+AP-REGIME-001 is implemented on `codex/regime-engine-v1`. The five pure sleeves,
+point-in-time adapters, frozen schemas, versioned thresholds, confirmed-state
+hysteresis and independently valid risk-off overrides are documented in
+[the implementation contract](regime-engine-implementation-v1.md).
+
+Observed verification: 1,277 focused tests and 2,335 complete-suite tests passed;
+whitespace checks passed. All 336 protected files matched the saved pre-work
+inventory. Structure, Setup and Leadership remain unchanged. No implementation
+blocker remains; production integration and empirical calibration are separate
+work. The security-master timestamp-precision publication issue remains deferred.
