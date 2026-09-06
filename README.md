@@ -13,7 +13,10 @@ Strength/Leadership and Group Ranking V1 provide a separate experimental
 [the pure API and point-in-time group contract](docs/leadership-engine-implementation-v1.md).
 Market Regime V1 adds five independent sleeves, explicit UNKNOWN evidence and
 confirmed-state hysteresis; see [its pure API and timing contract](docs/regime-engine-implementation-v1.md).
-Production materialization and trading-policy layers remain separate work.
+Decision & Risk V1 composes these contracts into direction-aware extension,
+earnings gates, WATCH/TRADE/ACT evidence and per-idea sizing; see
+[its formulas, timing and pure API](docs/decision-risk-implementation-v1.md).
+Production materialization and portfolio-level policies remain separate work.
 
 Market Dashboard is a Python research repository for equity discovery, ranking, and discretionary market research. The project is intended to collect market data, persist local research datasets, compute opportunity features, and expose a Streamlit dashboard for exploration.
 

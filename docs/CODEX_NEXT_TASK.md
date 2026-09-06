@@ -2,7 +2,7 @@
 
 **Task ID:** AP-DECISION-RISK-001
 
-**Status:** READY
+**Status:** COMPLETE
 
 **Issued:** 2026-09-06
 
@@ -309,3 +309,22 @@ Do not implement portfolio-level heat/concentration limits, position management,
 trade exits, journal, API, UI, ingestion, publication, or brokerage behavior.
 The validated September security-master timestamp-precision publication blocker
 remains outside this task.
+
+
+## Completion record
+
+AP-DECISION-RISK-001 is implemented on `codex/decision-risk-v1` from exact handoff
+commit `370d5cdb79dde61854a89ace457f80edb5696a61`. The new opt-in contracts compose
+unchanged engine evidence into direction-aware extension, explicit earnings
+coverage, the complete WATCH/TRADE/ACT gate set and per-idea sizing. All setup
+instances remain visible, SHORT promotion is capped at WATCH, and entry/stop
+proposals remain caller-owned.
+
+Observed verification: **306 focused tests** and **2,641 complete-suite tests**
+passed; whitespace checks passed. All 336 protected production/staging/settings
+files matched their pre-work SHA-256 inventory. No completed engine, immutable
+configuration or legacy output contract changed. See
+[the implementation contract](decision-risk-implementation-v1.md) for formulas,
+timing, freshness attestations, veto precedence and synthetic sizing examples.
+No milestone implementation blocker remains. The unrelated security-master
+precision publication blocker and all listed deferred work remain outside scope.

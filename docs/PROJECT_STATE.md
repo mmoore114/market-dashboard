@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-REGIME-001 complete; pure five-sleeve Market Regime V1 with explicit UNKNOWN evidence, hysteresis and risk-off overrides, alongside preserved Structure, Setup and Leadership engines.
+Current milestone: AP-DECISION-RISK-001 complete; pure direction-aware extension, earnings coverage, WATCH/TRADE/ACT evidence and per-idea sizing, alongside preserved Universe, Structure, Setup, Leadership and Regime engines.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
@@ -543,3 +543,77 @@ Milestone file inventory (13 files; no market data, reports or machine settings)
 - `tests/test_regime_adapters.py`
 - `tests/test_regime_sleeves.py`
 - `tests/test_regime_transitions.py`
+
+
+## AP-DECISION-RISK-001 completion record
+
+Implemented on `codex/decision-risk-v1` from exact handoff commit
+`370d5cdb79dde61854a89ace457f80edb5696a61`, targeting `codex/regime-engine-v1`
+for the milestone draft PR. The layer remains `experimental_uncalibrated`.
+
+Frozen inputs and evidence compose the unchanged Universe, Structure, Setup,
+Leadership/Group and Market Regime contracts. Direction-aware extension preserves
+the configured bands and inclusive 4.8-ATR cap. Earnings use explicit known event
+records, exchange-session distances and complete fresh coverage through T+5;
+missing coverage never makes an empty list CLEAR. Freshness is caller-attested
+for T with timestamps no later than completed close, without an invented provider
+TTL. Explicit cancellation/replacement and every known event remain auditable.
+
+The complete ladder evaluates all gates before selecting the highest passing
+rung. Strength branches remain separate, only sub-industry membership votes,
+SHORT promotion stops at WATCH, and every setup retains its own qualification
+and action evidence without a primary ranking. Regime alignment and exact T+1
+eligibility are required; historical memory cannot replace UNKNOWN current data.
+
+Sizing uses explicit entry/stop proposals, equity times .0025 as the risk base,
+configured regime multipliers, exact whole-share floors, and separate capital
+constraints. Both unconstrained/constrained full and pilot costs, dollar risk,
+equity-risk percentages and unused risk are visible. Default-stop calculation is
+a separate optional helper; setup invalidation never supplies a trade stop.
+Invalid earnings/regime/input/zero-share cases cannot promote ACT. The pure daily
+batch rejects duplicate symbol/direction keys and mixed evidence identities.
+
+Engine/formula/threshold versions: `decision-risk-v1`,
+`decision-risk-formulas-v1`, `decision-risk-thresholds-v1`.
+Feature version: `decision-risk-features-v1`. Rules fingerprint:
+`59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8`.
+[The implementation contract](decision-risk-implementation-v1.md) documents all
+formulas, schema identities, timing, missing-data behavior and synthetic examples.
+
+Observed verification: **306 focused tests passed** (95 components, 45 events,
+98 ladder, 68 adapters/contracts), followed by **2,641 complete-suite tests
+passed**. Focused tests cover independent gates and 64 combined failure paths,
+threshold equality, lifecycle status, monetary floors, point-in-time alignment,
+future-event mutation and frozen JSON round trips. Every new test blocks
+socket/httpx access; the full decision pipeline additionally runs with file-open
+APIs forbidden and input objects unchanged. Whitespace checks passed.
+
+All **336** protected production/staging/settings files matched their pre-work
+SHA-256 inventory. `.vscode/settings.json` remains the preserved uncommitted user
+change. Completed engine source/tests, immutable configuration, legacy extension
+and legacy decision snapshots are unchanged. The full suite includes their
+regression coverage. No provider request, market-data ingestion, production write,
+exposure build, crosswalk application, empirical calibration or PR merge occurred.
+
+No AP-DECISION-RISK-001 implementation blocker remains. Portfolio heat,
+concentration, position management, exits, journal, API/UI, ingestion, publication
+and brokerage behavior remain deferred. The unrelated September security-master
+timestamp-precision publication blocker is unchanged.
+
+Milestone file inventory (15 files; synthetic tests, source and documentation only):
+
+- `README.md`
+- `docs/CODEX_NEXT_TASK.md`
+- `docs/PROJECT_STATE.md`
+- `docs/decision-risk-implementation-v1.md`
+- `src/market_dashboard/aperture/decision_adapters.py`
+- `src/market_dashboard/aperture/decision_components.py`
+- `src/market_dashboard/aperture/decision_contracts.py`
+- `src/market_dashboard/aperture/decision_events.py`
+- `src/market_dashboard/aperture/decision_policy.py`
+- `src/market_dashboard/aperture/decision_risk.py`
+- `tests/decision_fixtures.py`
+- `tests/test_decision_adapters.py`
+- `tests/test_decision_components.py`
+- `tests/test_decision_events.py`
+- `tests/test_decision_ladder.py`
