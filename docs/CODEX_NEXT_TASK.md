@@ -2,7 +2,7 @@
 
 **Task ID:** AP-SETUP-001
 
-**Status:** READY
+**Status:** COMPLETE
 
 **Issued:** 2026-09-06
 
@@ -202,3 +202,57 @@ At completion, record in this file and `docs/PROJECT_STATE.md`:
 - any genuine unresolved decision or blocker;
 - confirmation that protected data, settings, legacy outputs, and the Structure
   Engine remained unchanged.
+
+
+## AP-SETUP-001 completion record
+
+Implemented on `codex/setup-engine-v1` from handoff commit `68b0b93`.
+Engine/feature/threshold identities are `setup-engine-v1`, `setup-features-v1`
+and `setup-thresholds-v1`. Frozen input, instance, evidence and output contracts
+cover EP, CONTRACTION, TREND_PULLBACK and RANGE in both directions. The pure
+adapter consumes unchanged Structure Engine evidence and the exact reference to
+market-data compatibility boundary.
+
+Implemented stable identity, committed T-1 geometry, failure-first lifecycle
+processing, independent observation clocks, geometry/reference replacement,
+terminal retention, rejected EP diagnostics and corporate-action quarantine.
+The owner clarified that an unobservable failure session requires corrected-data
+replay rather than a later inferred resolution; that clarification is recorded
+in the authoritative decisions file.
+
+Representative paths: EP TRIGGERED at age zero resolves after five following
+sessions, with day-five failure taking precedence. Contraction and range may
+coexist at the same pivot, trigger independently and resolve after eight following
+sessions. Two consecutive contraction predicate losses stale the untriggered
+instance. A deeper MA replaces an untriggered pullback with a new ID; terminal
+instances remain non-reactivatable. Detailed formulas and evidence are in
+[the implementation contract](setup-engine-implementation-v1.md).
+
+Final verification: **485 focused tests passed** (336 setup tests and all 149
+Structure Engine tests), followed by **893 complete-suite tests passed**.
+`git diff --check` passed. Every setup test blocks socket/httpx requests. All
+336 protected production/staging/settings files matched their pre-work SHA-256
+inventory. Structure Engine source/tests and legacy source/output contracts were
+unchanged. No proprietary data, reports, credentials or machine settings are
+included in the commit.
+
+No unresolved AP-SETUP-001 decision remains. The separate security-master
+nanosecond/microsecond publication blocker remains deferred. No provider request,
+production data write, exposure build, crosswalk application or PR merge occurred.
+Production materialization and empirical setup calibration remain separately scoped.
+
+Exact milestone file inventory:
+
+- `README.md`
+- `docs/CODEX_NEXT_TASK.md`
+- `docs/PROJECT_STATE.md`
+- `docs/engine-spec-decisions-v1.md`
+- `docs/setup-engine-implementation-v1.md`
+- `src/market_dashboard/aperture/setup.py`
+- `src/market_dashboard/aperture/setup_contracts.py`
+- `src/market_dashboard/aperture/setup_detection.py`
+- `src/market_dashboard/features/setup_features.py`
+- `tests/setup_fixtures.py`
+- `tests/test_setup_detection.py`
+- `tests/test_setup_features.py`
+- `tests/test_setup_lifecycle.py`

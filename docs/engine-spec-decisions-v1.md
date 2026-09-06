@@ -201,6 +201,17 @@ a hard voter. Other families may emit with missing volume and record
 
 ## Versioning and acceptance
 
+### AP-SETUP-001 owner clarification: unobservable failure sessions
+
+During implementation, the owner explicitly selected corrected-data replay for
+an existing triggered setup whose failure could not be checked because required
+inputs were unavailable. Preserve the last observed lifecycle status as
+unevaluated evidence, record the first unavailable session, and require corrected
+replay. Later valid bars cannot infer that the missed session did not fail, or
+silently advance that instance to RESOLVED. This is an evaluation-availability
+flag, not a seventh lifecycle status. It does not suppress independent new events
+whose inputs are complete.
+
 - Implement as new structure/setup version identities; do not relabel legacy
   S1/S2/S3/S4 or older setup history.
 - Required tests include every equality boundary, missing/nonpositive ATR,
