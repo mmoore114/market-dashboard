@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-FOUNDATION-AUTHORITY-001 complete; pinned XNYS and adjusted-volume authority verified offline. Production correction remains unapplied; no real snapshot was built.
+Current milestone: AP-FOUNDATION-AUTHORITY-001 complete; pinned XNYS and adjusted-volume authority verified offline. The separately approved production volume correction is complete; no real snapshot was built.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
@@ -889,3 +889,48 @@ correction with verified backup and an exclusive maintenance window. Calendar an
 provenance publication, feature rebuilding, identity/population prerequisites,
 QQQE/current history, spot identity/history and Aperture schedule publication
 remain separate later boundaries.
+
+
+## Approved production volume correction — completed 2026-09-06
+
+After AP-FOUNDATION-AUTHORITY-001, the user explicitly approved the exact
+production volume correction. The approved source/candidate hashes and complete
+authority evidence were revalidated before applying it. A standalone process held
+DuckDB's exclusive write lock throughout full-backup creation, hash verification,
+transactional correction, verification and checkpoint.
+
+A full-database rehearsal revealed the existing ticker/date index prevents ALTER.
+The operation therefore dropped and identically recreated that index inside the
+same transaction. Rehearsal confirmed both exact corrected values and rollback to
+BIGINT. Production then changed only daily_bars.volume to DOUBLE and restored its
+exact original Parquet values by ticker/date; transactions remain BIGINT. All
+seven other tables, constraints, views and index definitions were verified equal.
+
+Independent read-only SQL comparison against all 100 original Parquet files
+verified **63,279 rows**, January 2, 2024–July 24, 2026, **11,607 fractional
+volumes**, **zero full-field mismatches**, **zero duplicate keys**, and zero
+null/nonfinite volumes. The pre-commit comparison also validated OHLCV. The other
+**347 protected files** remained byte-identical. The only new production-directory
+file is the retained full backup; no Parquet or derived feature data was changed.
+
+Original database and verified full backup SHA256:
+`d48574ec429a3c5d3fdfde7fd9042606712f031f30f65678a43822907642fb77`.
+Corrected, checkpointed production database SHA256:
+`8428f3a758fb1e317db141fe515351ccf9a5dfab4ccd0026f4e87e7f1436d842`.
+Private execution and independent verification receipts remain with the staged
+plan. The previous authority/reconciliation receipts are preserved as historical
+pre-correction evidence; their old production hash is intentionally superseded.
+Do not rerun their migration validator against the corrected DOUBLE database or
+silently reseal those historical receipts.
+
+This operational follow-up changed no application code. The exact SQL was tested
+on a complete copy with rollback, verified inside production before and after
+commit, and independently rechecked read-only after connection close. The earlier
+2,846-test suite result remains the code baseline; it was not rerun for this data
+operation. No ingestion, source manifest/calendar publication, feature rebuild,
+real snapshot, production API startup or PR merge occurred.
+
+Next bounded action: prepare fresh post-correction source evidence and a reviewed
+calendar/provenance publication plan. Missing historical receipt facts remain
+UNKNOWN; derived feature schemas/rebuilds, identity/population, current bars/QQQE,
+spot and Aperture schedule inputs still require their own authority.

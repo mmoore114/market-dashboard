@@ -224,3 +224,19 @@ staged BIGINT-to-DOUBLE production correction, backup and exclusive maintenance
 window. This completed handoff does not authorize applying it. Identity-valid
 post-August-25 inputs, QQQE/current history, spot, provenance and Aperture schedule
 publication remain unresolved prerequisites for a later real snapshot.
+
+
+## Subsequent owner approval and execution — 2026-09-06
+
+The user subsequently approved the exact production volume correction, superseding
+only this completed handoff's prohibition on applying that correction. It is now
+complete: 63,279 rows, 11,607 fractional volumes restored, zero full-field Parquet
+mismatches, verified full backup retained. Seven other tables and 347 other
+protected files are unchanged. An existing ticker/date index was identically
+recreated within the correction transaction after a successful full-copy rehearsal.
+
+See the latest PROJECT_STATE entry for hashes and independent verification. Old
+pre-correction receipts remain historical and cannot validate the new database
+hash. The next bounded work is fresh post-correction evidence and a reviewed
+calendar/provenance publication plan. No publication, acquisition, derived-feature
+rebuild or real snapshot is authorized by this volume-only approval.

@@ -1,5 +1,13 @@
 # Foundation authority V1
 
+**Subsequent operation:** the owner separately approved and completed the production
+volume correction on September 6, 2026. See the latest PROJECT_STATE entry for
+backup and corrected hashes and independent validation. The milestone results
+below describe the original offline run before that approval. Its preserved
+receipts retain the old production hash and are historical evidence. The actual
+transaction also temporarily dropped and identically recreated the existing
+ticker/date index, as required by DuckDB and verified in a full-copy rehearsal.
+
 AP-FOUNDATION-AUTHORITY-001 establishes the reviewed XNYS calendar and adjusted
 volume representation, and verifies a recoverable correction on a staged copy.
 Production remains unchanged. No market-data request or real snapshot build ran.
