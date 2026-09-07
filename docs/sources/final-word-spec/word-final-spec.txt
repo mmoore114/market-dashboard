@@ -1,0 +1,884 @@
+Aperture: Final Structure State & Setup Classification Specification
+
+Consolidated project decisions from the independent design challenges
+
+Purpose. This document is the final project-ready specification for the two foundational descriptive engines in Aperture: the Structure State Engine and the Setup Classification Engine. It consolidates the final architectural decisions, formulas, thresholds, lifecycle rules, evidence requirements, interfaces, testing approach, calibration philosophy, and deliberate exclusions.
+
+Core architectural rule. Measurements describe observable market facts. Structure classifies directional condition. Setup classifies a specific price/volatility configuration or event. Lifecycle records where a setup is in its development. Leadership, regime, extension, earnings risk, actionability, position sizing, and portfolio policy remain independent downstream layers.
+
+Final Aperture pipeline:
+
+Market Regime -> Groups -> Leadership -> Structure -> Setup -> Actionability -> Risk -> Portfolio Context
+
+Non-negotiable separation of concerns
+
+Structure must not encode setup type, relative strength, group strength, extension, earnings, regime, or actionability.
+
+Setup must not decide whether a setup should be traded.
+
+Extension is not a structure state.
+
+Reclaim is not a V1 setup family; it is a deterministic evidence/event flag.
+
+Multiple setup families may coexist on one stock.
+
+No arbitrary confidence percentage is produced by either engine.
+
+Every historical classification must be reconstructable from stored numeric evidence and versioned rules.
+
+
+
+
+Part I - Structure State Engine
+
+1. Final state taxonomy
+
+Internal enum	UI label	Conceptual meaning
+NEUTRAL	Neutral	No sufficiently established directional structure.
+TRANSITION_UP	Emerging	Structure is rotating positively but is not yet a mature uptrend.
+TREND_UP	Uptrend	Established constructive intermediate swing structure.
+TRANSITION_DOWN	Deteriorating	Material structural damage is developing, but decline is not yet mature.
+TREND_DOWN	Decline	Established negative intermediate swing structure.
+
+
+
+Why these five states
+
+NEUTRAL replaces BASE because 'base' is a setup concept. A sideways stock may be neutral without being a constructive base.
+
+EMERGING and DETERIORATING are retained because inflection points matter materially to swing traders.
+
+UPTREND and DECLINE are established directional states.
+
+The internal vocabulary is directionally symmetric, which supports future short-side use without doubling the state count.
+
+2. Moving averages and roles
+
+Average	Used in classifier?	Role
+EMA10	No	Setup/location/trade-management context; too reactive for structural state authority.
+SMA20	Yes	Fast structural trend, roughly one trading month.
+SMA50	Yes	Intermediate structural anchor, roughly ten trading weeks.
+SMA200	No	Long-term context only; must not delay short-horizon structural transitions.
+
+
+
+Key decision:
+
+The classifier is driven by the 20-day/50-day complex, not a 10/20/50/200 stack. EMA10 and SMA200 should be calculated and stored, but they do not vote on the state. This sharply reduces redundant signals and avoids state churn during normal short-term pullbacks.
+
+3. Exact mathematical inputs
+
+Adjusted daily OHLC data.
+
+Wilder ATR14.
+
+SMA20 and SMA50.
+
+ATR-normalized close distance from SMA20 and SMA50.
+
+ATR-normalized SMA20/SMA50 separation.
+
+ATR-normalized SMA20 and SMA50 slope.
+
+Ten-session persistence of closes above SMA20.
+
+Previous state and persistence counters.
+
+4. Core formulas
+
+ATR14 = Wilder ATR(14)
+
+D20 = (Close - SMA20) / ATR14
+
+D50 = (Close - SMA50) / ATR14
+
+Spread2050 = (SMA20 - SMA50) / ATR14
+
+Slope20 = (SMA20[t] - SMA20[t-10]) / median(ATR14[t-9:t])
+
+Slope50 = (SMA50[t] - SMA50[t-20]) / median(ATR14[t-19:t])
+
+P20 = count(Close > SMA20 over t-9:t) / 10
+
+Why ATR normalization? A fixed dollar or percentage threshold behaves very differently in a 2% ADR stock versus an 8% ADR stock. ATR units create a more comparable structural language across volatility profiles. Median ATR is used in slope denominators to reduce distortion from a single volatility shock.
+
+5. State qualification rules
+
+EMERGING entry
+
+E1 D50 >= +0.25
+
+E2 Slope20 >= +0.15
+
+E3 Spread2050 >= -0.25
+
+E4 Slope50 >= -0.10
+
+E5 P20 >= 0.60
+
+Require E1 AND E2 AND at least 4 of 5 conditions for 2 consecutive sessions.
+
+UPTREND entry
+
+U1 D50 >= -0.25
+
+U2 Spread2050 >= +0.25
+
+U3 Slope20 >= +0.25
+
+U4 Slope50 >= +0.15
+
+U5 P20 >= 0.60
+
+Require U1 AND U4 AND at least 4 of 5 conditions for 3 consecutive sessions.
+
+UPTREND retention
+
+H1 D50 >= -0.50
+
+H2 Spread2050 >= 0.00
+
+H3 Slope50 >= +0.05
+
+H4 P20 >= 0.40
+
+Require H1 AND H3 AND at least 3 of 4 conditions.
+
+DETERIORATING from UPTREND
+
+D1 D20 <= -0.50
+
+D2 P20 <= 0.40
+
+D3 Slope20 <= +0.05
+
+D4 Spread2050 <= +0.20
+
+D5 D50 <= +0.50
+
+Require D1 AND D2 AND at least 4 of 5 conditions for 2 consecutive sessions.
+
+DECLINE entry
+
+L1 D50 <= +0.25
+
+L2 Spread2050 <= -0.25
+
+L3 Slope20 <= -0.25
+
+L4 Slope50 <= -0.15
+
+L5 P20 <= 0.40
+
+Require L1 AND L4 AND at least 4 of 5 conditions for 3 consecutive sessions.
+
+Short-side symmetry. The downside model should be implemented as the sign-inverted mirror of the upside rules wherever possible. This keeps the architecture consistent and avoids maintaining separate discretionary long and short models.
+
+6. State transitions and hysteresis
+
+Current state	Allowed next states
+NEUTRAL	NEUTRAL, EMERGING, DETERIORATING
+EMERGING	EMERGING, UPTREND, NEUTRAL, DETERIORATING
+UPTREND	UPTREND, DETERIORATING, NEUTRAL
+DETERIORATING	DETERIORATING, DECLINE, NEUTRAL, UPTREND
+DECLINE	DECLINE, EMERGING, NEUTRAL
+
+
+
+Do not normally allow UPTREND -> DECLINE or DECLINE -> UPTREND directly.
+
+Use stricter thresholds to enter a mature trend and looser thresholds to retain it.
+
+Require two sessions for transitional states and three sessions for mature directional states.
+
+If UPTREND retention fails for five consecutive sessions but explicit bearish damage does not fire, transition to NEUTRAL.
+
+Mirror the same logic on the downside.
+
+7. Extraordinary gaps / shock override
+
+Positive shock override:
+
+D50 >= +2.0 AND Close > SMA20 AND Slope20 > -0.10
+
+=> NEUTRAL or DECLINE may move immediately to EMERGING.
+
+
+
+Negative shock override:
+
+D50 <= -2.0 AND Close < SMA20 AND Slope20 < +0.10
+
+=> positive/neutral states may move immediately to DETERIORATING.
+
+Important: A violent one-day event can accelerate entry into a transitional state, but it cannot establish a mature trend by itself.
+
+8. Extension is separate
+
+Final decision: EXTENDED is not a structure state. A stock can remain structurally UPTREND while its extension layer says NORMAL, ELEVATED, or EXTREME. This preserves orthogonality between trend condition and trade location.
+
+Example:
+
+Structure = UPTREND
+
+Extension = EXTREME
+
+9. Constructive pullbacks and bases
+
+A normal pullback to EMA10/SMA20/SMA50 should remain UPTREND while the Setup Engine detects TREND_PULLBACK.
+
+A six-week consolidation above a rising SMA50 may remain UPTREND while the Setup Engine detects RANGE and/or CONTRACTION.
+
+A directionless months-long sideways stock is NEUTRAL, even if the Setup Engine separately identifies a RANGE.
+
+Structure never decides whether a range is a 'good base.'
+
+10. Structure evidence and state history
+
+Store at minimum:
+
+symbol, session, current_state, previous_state, state_entered_date, sessions_in_state,
+
+close, sma20, sma50, atr14, d20_atr, d50_atr, spread20_50_atr,
+
+slope20_10_atr, slope50_20_atr, p20,
+
+all state predicate booleans, conditions_passed, threshold margins,
+
+qualification-day counters, retention status, shock_override, transition_reason,
+
+engine_version, feature_version, threshold_version, data/adjustment revision.
+
+Store previous-state duration and last transition date/reason.
+
+Track transition_count_20d and transition_count_60d as diagnostics, not classification features.
+
+Expose passed and failed conditions rather than an arbitrary confidence percentage.
+
+11. Deliberately excluded from Structure V1
+
+RSI, MACD, ADX/DMI, Bollinger Bands.
+
+Volume and relative strength.
+
+Group strength and market regime.
+
+Earnings or event risk.
+
+52-week-high requirements.
+
+Higher-high/higher-low pivot algorithms.
+
+Linear-regression slope.
+
+EMA10 and SMA200 as voting inputs.
+
+Extension and compression.
+
+Machine learning or LLM chart judgment.
+
+
+
+
+Part II - Setup Classification Engine
+
+12. Final V1 setup taxonomy
+
+Setup type	What it represents	What it does not decide
+EP	Unusually large directional information gap with strong participation and close.	Catalyst identity, quality, leadership, actionability.
+CONTRACTION	Progressive compression in closing dispersion and realized range.	Textbook VCP artistry or pivot-leg interpretation.
+TREND_PULLBACK	Return toward a trend reference after prior excursion while external structure remains intact.	Whether the pullback should be bought.
+RANGE	Sustained bounded and relatively horizontal trading area with objective upper/lower boundaries.	Cup/handle, double bottom, saucer, base count.
+
+
+
+Reclaim decision. RECLAIM is not a fifth V1 setup. It is a deterministic event/evidence flag that can annotate Pullback, Emerging, Range, or EP.
+
+13. Multiple simultaneous setups
+
+Use active_setups[] rather than primary_setup/secondary_setup.
+
+Do not rank setup families. Priority belongs downstream in policy/actionability.
+
+A stock may simultaneously be RANGE + CONTRACTION, or EP + RANGE_BREAKOUT.
+
+Prevent duplicate instances with one active instance per setup_type + direction + reference.
+
+14. Universal setup lifecycle
+
+FORMING -> NEAR_TRIGGER -> TRIGGERED -> RESOLVED
+
+Any active state -> FAILED
+
+Any pre-trigger state -> STALE
+
+Lifecycle	Definition
+FORMING	Setup conditions exist but price is not yet sufficiently close to its trigger/reference.
+NEAR_TRIGGER	Setup remains valid and price is within the configured ATR distance of the trigger.
+TRIGGERED	The objective trigger boundary or contact condition has occurred; this does not mean BUY.
+RESOLVED	Post-trigger observation window ended without satisfying failure; this does not mean profitable.
+FAILED	Explicit setup invalidation occurred.
+STALE	Pre-trigger setup aged out or geometry drifted enough to become a new setup.
+
+
+
+Critical lifecycle rule. Lifecycle is monotonic. Once a setup is TRIGGERED it never goes backward to NEAR_TRIGGER. If the setup later reforms, create a new immutable setup_id.
+
+15. Common setup object
+
+SetupInstance {
+
+  setup_id, symbol, session, setup_type, direction, lifecycle,
+
+  first_detected_date, lifecycle_entered_date, age_sessions,
+
+  reference_type, reference_level, distance_to_reference_atr,
+
+  trigger_level, invalidation_level,
+
+  measurements{}, rules{}, supporting_evidence{}, contradictions[],
+
+  structure_state_ref, transition_reason,
+
+  feature_version, setup_engine_version, threshold_version, data_version
+
+}
+
+16. EP / Episodic Information Gap
+
+Measurements
+
+GapPct = (Open[t] - Close[t-1]) / Close[t-1]
+
+GapATR = (Open[t] - Close[t-1]) / ATR14[t-1]
+
+ShockATR = (Close[t] - Close[t-1]) / ATR14[t-1]
+
+MedianVol20_prior = median(Volume[t-20:t-1])
+
+RVOL20 = Volume[t] / MedianVol20_prior
+
+CLV = (Close - Low) / (High - Low)
+
+If High == Low, define CLV = 0.5.
+
+Long EP initial thresholds
+
+GapPct >= +4%
+
+GapATR >= +1.0
+
+ShockATR >= +1.5
+
+RVOL20 >= 1.5
+
+CLV >= 0.65
+
+All five conditions required.
+
+Do not require Close > Open.
+
+Do not require a new recent high.
+
+Use both GapPct and GapATR so the move is large in absolute and stock-specific volatility terms.
+
+EP context may be stored as TRANSITION or CONTINUATION based on Structure, but not as separate setup types.
+
+Bearish EP symmetry
+
+GapPct <= -4%
+
+GapATR <= -1.0
+
+ShockATR <= -1.5
+
+RVOL20 >= 1.5
+
+CLV <= 0.35
+
+setup_type = EP, direction = SHORT
+
+EP lifecycle
+
+EP begins directly at TRIGGERED on the event session.
+
+Store event high, event low, event midpoint, event close, and prior-close gap reference.
+
+Long EP FAILED if Close < event low within the next 5 sessions.
+
+Short EP mirrors the rule.
+
+If no failure after 5 complete sessions, mark RESOLVED.
+
+17. CONTRACTION
+
+Core formulas
+
+CRn = (max(Close over n sessions) - min(Close over n sessions)) / Close[t]
+
+Compute CR20, CR10, CR5
+
+R10_20 = CR10 / CR20
+
+R5_10 = CR5 / CR10
+
+TR5 = mean(TrueRange[t-4:t])
+
+TR20 = mean(TrueRange[t-19:t])
+
+TRCompression = TR5 / TR20
+
+Core definition
+
+C1 CR10 / CR20 <= 0.75
+
+C2 CR5 / CR10 <= 0.75
+
+C3 TR5 / TR20 <= 0.80
+
+C4 CR20 > 0
+
+Require all core conditions.
+
+Volume dry-up
+
+VolumeDryRatio = MedianVolume5 / MedianVolume20
+
+Supporting evidence only: volume_dryup = VolumeDryRatio <= 0.80. It does not veto contraction.
+
+Objective contraction reference
+
+Upper10 = second-highest High over last 10 sessions
+
+Lower10 = second-lowest Low over last 10 sessions
+
+Breakout trigger must use yesterday's frozen Upper10/Lower10, never today's dynamically updated boundary.
+
+Lifecycle
+
+FORMING: core contraction passes and DistancePivotATR > 0.50
+
+NEAR_TRIGGER LONG: 0 < (Upper10 - Close)/ATR14 <= 0.50
+
+TRIGGERED LONG: Close[t] > Upper10[t-1] + 0.10 * ATR14[t-1]
+
+FAILED pre-trigger: TR5/TR20 > 1.10 OR Close < Lower10 - 0.25 ATR
+
+FAILED post-trigger within 5 sessions: Close < TriggerLevel - 0.50 * ATR_at_trigger
+
+RESOLVED: 5 sessions after trigger without failure
+
+STALE: active > 15 sessions without triggering
+
+VCP decision. Do not detect sequential VCP legs in V1. That would require a hidden pivot/swing algorithm and would reintroduce subjective chart artistry.
+
+18. TREND_PULLBACK
+
+One family, three possible references: EMA10, SMA20, SMA50.
+
+Structural compatibility
+
+Long pullback requires structure == UPTREND
+
+Short pullback requires structure == DECLINE
+
+Do not duplicate structure slopes or MA-order rules inside the setup engine.
+
+Distance and approach formulas
+
+DistanceMA_ATR = (Close - MA) / ATR14
+
+Long approach condition: max(DistanceMA_ATR over prior 5 sessions) >= +1.0
+
+Short approach condition: min(DistanceMA_ATR over prior 5 sessions) <= -1.0
+
+Long pullback lifecycle bands
+
+FORMING: +0.75 < DistanceMA_ATR <= +1.50
+
+NEAR_TRIGGER: +0.25 < DistanceMA_ATR <= +0.75
+
+TRIGGERED: -0.50 <= DistanceMA_ATR <= +0.25
+
+If multiple MAs qualify, choose the nearest MA as reference_ma and store all qualifying candidate_references.
+
+Pullback quality metrics such as volume contraction, TR contraction, down-day count, CLV, distance from recent high, and reclaim flags are supporting evidence only.
+
+A normal undercut can still be a valid pullback; that is why the trigger zone extends to -0.50 ATR.
+
+Failure / resolution / staleness
+
+FAILED if DistanceMA_ATR < -0.75 for 2 consecutive sessions
+
+OR immediately if structure becomes DETERIORATING or DECLINE.
+
+RESOLVED after trigger if DistanceMA_ATR >= +1.0 before failure.
+
+STALE if pre-trigger instance lasts >10 sessions without entering trigger zone
+
+OR price moves back above +1.50 ATR before ever triggering.
+
+19. RANGE / BASE
+
+Canonical V1 window: 20 sessions. Do not scan multiple overlapping 15/20/30/40/60-day range families.
+
+Robust boundaries
+
+Upper20 = second-highest High over last 20 sessions
+
+Lower20 = second-lowest Low over last 20 sessions
+
+Range geometry
+
+RangeDepthPct = (Upper20 - Lower20) / ((Upper20 + Lower20)/2)
+
+RangeDepthATR = (Upper20 - Lower20) / median(ATR14 over last 20 sessions)
+
+Efficiency20 = abs(Close[t] - Close[t-19]) / (Upper20 - Lower20)
+
+SMA20Drift = abs(SMA20[t] - SMA20[t-10]) / median(ATR14[t-9:t])
+
+RANGE definition
+
+RangeDepthATR <= 6.0
+
+RangeDepthPct <= 25%
+
+Efficiency20 <= 0.50
+
+SMA20Drift <= 0.50
+
+Require all conditions.
+
+Lifecycle
+
+FORMING: range qualifies and price is >0.50 ATR from both boundaries
+
+NEAR_TRIGGER LONG: 0 < (Upper20 - Close)/ATR14 <= 0.50
+
+NEAR_TRIGGER SHORT: 0 < (Close - Lower20)/ATR14 <= 0.50
+
+TRIGGERED LONG: Close[t] > Upper20[t-1] + 0.10 * ATR14[t-1]
+
+TRIGGERED SHORT: Close[t] < Lower20[t-1] - 0.10 * ATR14[t-1]
+
+FAILED LONG within 3 sessions: Close < TriggerUpper - 0.25 * ATR_at_trigger
+
+FAILED SHORT: symmetric
+
+RESOLVED: 5 sessions after trigger without failure
+
+STALE: pre-trigger age >60 sessions OR boundaries shift by >1 ATR from setup inception
+
+Do not require breakout volume; record it as evidence.
+
+Use closing confirmation rather than intraday high/low alone.
+
+Second-highest/second-lowest boundaries reduce one-wick distortion while remaining fully deterministic.
+
+20. Reclaim event flags
+
+Example SMA20 reclaim flag:
+
+Close[t-1] < SMA20[t-1] AND Close[t] > SMA20[t]
+
+Optional strengthening evidence: Low[t] < SMA20[t] AND CLV[t] > 0.60
+
+Use as context/evidence, not as setup_type. The same pattern applies to EMA10 and SMA50.
+
+21. Setup compatibility matrix
+
+Setup	NEUTRAL	EMERGING	UPTREND	DETERIORATING	DECLINE
+EP Long	Yes	Yes	Yes	Yes	Yes
+EP Short	Yes	Yes	Yes	Yes	Yes
+CONTRACTION	Yes	Yes	Yes	Yes	Yes
+TREND_PULLBACK Long	No	No	Required	No	No
+TREND_PULLBACK Short	No	No	No	No	Required
+RANGE	Yes	Yes	Yes	Yes	Yes
+
+
+
+22. Relationship with other Aperture layers
+
+Layer	Setup engine behavior
+Leadership / RS	Ignore entirely. Low-RS stocks can objectively form setups.
+Group strength	Ignore entirely.
+Extension	Record setup even when extension is EXTREME.
+Market regime	Record setup even in RED regime.
+Earnings proximity	Ignore for ordinary setups; policy handles lockout.
+Actionability	Never decided by Setup Engine.
+Position sizing / risk	Completely downstream.
+
+
+
+23. No setup confidence score
+
+Do not emit 'VCP confidence 82%' or similar.
+
+Expose passed rules, failed rules, numerical threshold margins, lifecycle, age, and contradictions.
+
+A probability should only exist later if it is explicitly calibrated to a defined future event; it should not be disguised as setup classification.
+
+24. Setup evidence schema
+
+Store at minimum:
+
+setup_id, symbol, session, setup_type, direction, lifecycle,
+
+first_detected_date, lifecycle_entered_date, age_sessions,
+
+reference_type, reference_level, distance_to_reference_atr,
+
+trigger_level, invalidation_level,
+
+exact setup-specific measurements, passed/failed core rules, supporting evidence, contradictions,
+
+structure_state_ref, transition from/to/reason,
+
+data timestamp/source/revision, feature_version, setup_engine_version, threshold_version.
+
+25. Setup transition history
+
+Separate transition table:
+
+setup_id
+
+symbol
+
+transition_date
+
+from_lifecycle
+
+to_lifecycle
+
+reason
+
+reference_level
+
+engine_version
+
+
+
+
+Part III - Integrated Aperture Design
+
+26. Final descriptive grammar
+
+The key outcome of the design work is not just the formulas; it is the separation of descriptive dimensions. Aperture should be able to describe one stock with several independent facts without forcing them into one composite label.
+
+Example 1:
+
+Structure     UPTREND
+
+Setup         TREND_PULLBACK / TRIGGERED
+
+Reference     SMA20
+
+Extension     NORMAL
+
+RS            94
+
+Group         LEADING
+
+Regime        GREEN
+
+Earnings      +18 sessions
+
+Action        ACT
+
+
+
+Example 2:
+
+Structure     EMERGING
+
+Setup         EP / TRIGGERED
+
+EP Context    TRANSITION
+
+Extension     EXTREME
+
+RS            91
+
+Regime        YELLOW
+
+Action        WATCH
+
+
+
+Example 3:
+
+Structure     UPTREND
+
+Setups        RANGE / NEAR_TRIGGER; CONTRACTION / NEAR_TRIGGER
+
+Extension     NORMAL
+
+Action        determined downstream
+
+27. Hard definitions vs configurable parameters
+
+Hard definitions: feature equations, state/setup semantics, lifecycle semantics, use of frozen prior-session trigger references, separation of layers, monotonic setup lifecycle, versioned historical evidence.
+
+Configurable V1 parameters: ATR buffers, persistence-day counts, EP thresholds, contraction ratios, pullback zones, range depth limits, breakout buffers, failure windows, and staleness windows. These must live in explicit versioned parameter files rather than being scattered through code.
+
+28. Historical reproducibility requirements
+
+Persist daily state/setup snapshots rather than reconstructing only from current code.
+
+Store raw-data timestamp/source and adjustment/corporate-action revision where available.
+
+Version feature formulas, state engine, setup engine, and threshold sets independently.
+
+Store previous state and persistence counters because Structure is path-dependent.
+
+Store frozen reference levels used for setup triggers so later rolling-window changes do not alter history.
+
+Keep policy/action versions outside Structure/Setup evidence.
+
+29. Testing strategy
+
+Structure synthetic fixtures
+
+Flat base -> NEUTRAL.
+
+Gradual emergence -> NEUTRAL -> EMERGING -> UPTREND.
+
+Clean sustained advance -> UPTREND retained.
+
+Normal pullback / brief SMA20 undercut -> remain UPTREND.
+
+Extended advance -> remain UPTREND; extension changes externally.
+
+Slow flattening -> UPTREND -> NEUTRAL.
+
+Genuine rollover -> UPTREND -> DETERIORATING -> DECLINE.
+
+False breakdown and reclaim -> state retained or rapid recovery according to hysteresis.
+
+Large positive gap -> immediate EMERGING, not immediate UPTREND.
+
+Crash gap -> immediate DETERIORATING, not immediate DECLINE.
+
+Noisy SMA20/SMA50 oscillation -> minimal state flipping.
+
+Setup synthetic fixtures
+
+EP: ordinary gap; valid long EP; huge gap with weak close; huge gap without volume; valid bearish EP; fail below event low; survive to RESOLVED.
+
+CONTRACTION: progressive 20->10->5 compression; range compression with TR expansion; one-day tightness; re-expansion failure; near-trigger; breakout; resolved breakout.
+
+TREND_PULLBACK: EMA10/SMA20/SMA50 approaches; stock living under MA; trigger-zone touch; structure deterioration; rebound to RESOLVED.
+
+RANGE: clean horizontal range; directional trend rejected by efficiency; anomalous wick handled by trimmed extrema; near trigger; breakout; failed breakout; breakdown.
+
+Boundary tests
+
+Every major threshold must be tested at threshold-epsilon, threshold, and threshold+epsilon. Also test missing bars, newly listed stocks, zero volume, High=Low, bad OHLC relationships, duplicate sessions, splits, trading halts, null ATR, and corporate-action revisions.
+
+30. Calibration philosophy
+
+Start with the explicit V1 priors in this document; do not optimize immediately.
+
+Inspect broad point-in-time distributions of every core measurement across years, sectors, and volatility regimes.
+
+Randomly inspect positives, near misses, and negatives; do not calibrate only on famous winners.
+
+Include failed setups and failed leaders to avoid hindsight bias.
+
+Measure state duration, setup frequency, stale rate, failure rate, overlap, transition churn, and one-day reversals.
+
+Use walk-forward validation across bull, bear, crisis, quiet, and speculative regimes.
+
+Prefer round, explainable thresholds over numerically optimized values.
+
+Use future returns only after semantics stabilize and only as diagnostics, not as the definition of the setup or state.
+
+31. Deliberately excluded from Setup V1
+
+Cup-and-handle, double bottom, saucer, ascending triangle, wedge, head-and-shoulders.
+
+Flags/pennants as independent families; these are usually contractions inside trends.
+
+Textbook sequential VCP leg recognition.
+
+Pocket pivots.
+
+Reclaim as its own setup family.
+
+Inside day / NR7 as foundational setup types.
+
+Bollinger squeeze and RSI/MACD-based setup definitions.
+
+Fibonacci retracements.
+
+Candlestick-pattern families.
+
+RS, group strength, regime, earnings lockout, extension veto.
+
+LLM or visual chart interpretation.
+
+32. Final V1 parameters at a glance
+
+Component	Parameter	Initial V1
+Structure	Emerging persistence	2 sessions
+Structure	Uptrend/Decline persistence	3 sessions
+Structure	Lost retention to Neutral	5 sessions
+Structure	Shock transition	2 ATR from SMA50 plus directional conditions
+EP	GapPct	>= 4% absolute directional threshold
+EP	GapATR	>= 1.0 absolute directional threshold
+EP	ShockATR	>= 1.5 absolute directional threshold
+EP	RVOL	>= 1.5 vs prior 20-session median volume
+EP	CLV	>= .65 long / <= .35 short
+CONTRACTION	CR10/CR20	<= .75
+CONTRACTION	CR5/CR10	<= .75
+CONTRACTION	TR5/TR20	<= .80
+CONTRACTION	Near trigger	<= .50 ATR
+CONTRACTION	Breakout buffer	.10 ATR
+CONTRACTION	Stale	15 sessions
+PULLBACK	Prior excursion	>= 1.0 ATR from reference
+PULLBACK	Forming	+.75 to +1.50 ATR
+PULLBACK	Near trigger	+.25 to +.75 ATR
+PULLBACK	Triggered zone	-.50 to +.25 ATR
+PULLBACK	Distance failure	< -.75 ATR for 2 sessions
+PULLBACK	Stale	10 sessions
+RANGE	Window	20 sessions
+RANGE	Depth ATR cap	<= 6.0 ATR
+RANGE	Depth % cap	<= 25%
+RANGE	Efficiency	<= .50
+RANGE	SMA20 drift	<= .50 ATR / 10 sessions
+RANGE	Near boundary	<= .50 ATR
+RANGE	Breakout buffer	.10 ATR
+RANGE	Max pre-trigger age	60 sessions
+
+
+
+33. Strongest final recommendation
+
+Ship this as V1 without adding more indicators, states, or chart-pattern families. The strength of the design is that each engine makes a narrow, auditable claim. The Structure Engine answers whether price is neutral, transitioning, or in an established trend. The Setup Engine answers whether one of four measurable configurations or events exists and where it is in its lifecycle. Everything that answers 'should I care?' or 'should I trade it?' remains downstream.
+
+Recommended V1 Structure:
+
+NEUTRAL / EMERGING / UPTREND / DETERIORATING / DECLINE
+
+
+
+Recommended V1 Setups:
+
+EP / CONTRACTION / TREND_PULLBACK / RANGE
+
+
+
+Recommended lifecycle:
+
+FORMING / NEAR_TRIGGER / TRIGGERED / RESOLVED / FAILED / STALE
+
+
+
+Recommended philosophy:
+
+Simple measurable market behavior > mathematical imitation of subjective chart artistry.
+
+Implementation handoff note
+
+Before coding, convert every configurable parameter above into versioned configuration constants and convert every state/setup predicate into pure deterministic functions with unit tests. Persist evidence and lifecycle/state transitions as first-class data, not just UI labels. That will allow Aperture to audit historical decisions and safely evolve thresholds later without rewriting history.
