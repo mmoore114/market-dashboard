@@ -1,319 +1,206 @@
 # Codex Next Task
 
-**Task ID:** AP-CURRENT-FOUNDATION-001
+**Task ID:** AP-CURRENT-BOOTSTRAP-001
 
-**Status:** BLOCKED — safe current-foundation prerequisites published; historical population/replay contract prevents a truthful first snapshot
+**Status:** READY — implement the truthful current-state bootstrap and build the first real Workstation snapshot
 
 **Issued:** 2026-09-07
 
-**Product baseline:** `f1250d733ec9f2192fd7c361b8c3cbbccccc226c`
+**Product baseline:** `e678049bb1093db3164fd540d2197aee74c03845`
 
-**Handoff branch:** `codex/current-foundation-handoff`
+**Handoff branch:** `codex/current-bootstrap-handoff`
 
 ## Outcome
 
-Advance Aperture from verified engine/UI/materializer code to the first truthful
-real local Workstation V1 snapshot for the initial covered population. Complete
-the remaining foundation work in one autonomously sequenced milestone instead of
-requesting approval after each ordinary implementation, staging, validation, or
-recoverable publication step.
+Use the fully published current foundation from AP-CURRENT-FOUNDATION-001 to build,
+validate, and locally exercise the first real Aperture Workstation snapshot for the
+September 6 decision context:
 
-The deterministic V1 product logic is already built. Reuse the existing Structure,
-Setup, Leadership/RS, Regime, Decision/Risk, snapshot V2, API, React Workstation,
-identity, publication, reconciliation, and materializer contracts. Do not redesign
-them, add a new scoring model, or expand test matrices merely for reassurance.
+- market observations through `T=2026-09-04`;
+- the recorded evaluation timestamp `E`, which is September 6 in New York;
+- next XNYS action session `A=2026-09-08`;
+- the explicitly bounded current population selected with evidence known by `E`
+  for eligibility on `A`.
+
+The remaining blocker is a representation mismatch, not missing market data.
+Implement a versioned current-state bootstrap/replay contract. Do not require
+verifiable historical membership merely to calculate today's state, and do not
+mislabel current-cohort retrospective calculations as point-in-time historical
+membership or backtest evidence.
 
 ## Branch and completion protocol
 
-1. Fetch origin and create `codex/current-foundation-v1` from the current remote
-   head of this handoff branch. Verify ancestry from the product baseline.
-2. Target a draft PR to `codex/foundation-authority-v1`.
-3. Read `AGENTS.md`, `docs/PROJECT_STATE.md`, this file, the completed foundation
-   contracts, publication contracts, universe rules, and materializer contract.
-4. Execute all authorized phases below without returning for routine approvals.
-   Each phase must validate before the next phase can consume it.
-5. Stop only for a material contract contradiction, unavailable credential or
-   entitlement, a cap/safety failure, inability to obtain exclusive maintenance,
-   or evidence that would make the resulting snapshot dishonest.
-6. At completion update this file and `docs/PROJECT_STATE.md`, commit, push, open
-   the draft PR, and return the commit SHA, test totals, PR link, published input
-   versions, snapshot status/path/date, and only genuine remaining blockers.
+1. Fetch origin and create `codex/current-bootstrap-v1` from the exact remote head
+   of this handoff branch. Verify the product baseline is its parent.
+2. Target a draft PR to `codex/current-foundation-v1`.
+3. Read `AGENTS.md`, `docs/PROJECT_STATE.md`, this file,
+   `docs/current-foundation-v1.md`, the universe/leadership/materializer
+   contracts, snapshot V2, and the canonical engine decision overlay.
+4. Work through the complete milestone autonomously. Do not stop for ordinary
+   implementation choices already governed here.
+5. Stop only for a material contradiction between authoritative numerical
+   contracts, corrupted published inputs/backups, or a destructive/external action
+   outside this authorization.
+6. At completion update this file and PROJECT_STATE, commit, push, open the draft
+   PR, and return only the commit SHA, test totals, PR link, snapshot path/size/
+   fingerprint, population/funnel counts, smoke-test result, and genuine blockers.
 
 ## Authorization boundary
 
-This assignment explicitly authorizes:
+Authorized:
 
-- code, configuration, tests, and documentation needed for this milestone;
-- bounded Massive and FRED data retrieval described below using already configured
-  credentials where required;
-- isolated staging, full backups, exclusive-maintenance production corrections,
-  recoverable publication, exposure/universe/feature rebuilding, and creation of
-  a real local Workstation snapshot when every gate passes;
-- deterministic offline validation after every network or production phase;
+- code, configuration, documentation, focused regression tests, and contract/schema
+  changes required for the bootstrap;
+- recoverable publication of the already staged September 8 population schedule;
+- building and validating one real normalized `workstation-snapshot-v2` in the
+  approved local snapshot location;
+- brief loopback startup of the local API and desktop/mobile browser smoke tests
+  against that exact snapshot, followed by shutdown;
+- full backups and isolated/recoverable simulations needed for the one schedule
+  publication;
 - one commit, push, and draft PR.
 
-It does not authorize:
+Not authorized:
 
-- unbounded discovery or downloading the full U.S. market history;
-- use of raw Deepvue exports, applying any of the 23 proposed crosswalks, or
-  changing the exact 29-record non-security disposition;
-- overwriting the immutable July or September staged source artifacts;
-- weakening point-in-time, identity, publication, coverage, or freshness gates;
-- brokerage connectivity, order placement, portfolio automation, cloud hosting,
-  PR merging, or `.vscode/settings.json` changes.
+- new provider acquisition or refetching already published inputs;
+- changing any Structure, Setup, Leadership/RS, Regime, Decision/Risk, actionability,
+  sizing, or universe threshold/formula;
+- inventing, backdating, forward-filling, or imputing prices, membership, market
+  cap, reference facts, VIX, or sessions;
+- claiming this bounded cohort is the full U.S. market;
+- publishing a historical research-membership schedule before September 8;
+- making bootstrap results available as historical Time Machine/backtest evidence
+  before the bootstrap effective session;
+- crosswalk application, raw Deepvue publication, brokerage behavior, hosting,
+  PR merging, backup deletion, or `.vscode/settings.json` changes.
 
-Preserve exact backups until the user separately chooses to remove them. Never
-log credentials, authorization headers, cookies, environment contents, full query
-strings, proprietary rows, or unsanitized provider errors.
+No network request should be necessary. If a published artifact fails its recorded
+hash or completeness gate, stop rather than reacquire it under this task.
 
-## Execution policy
+## Current-state bootstrap contract
 
-- Start with source hashes, Git state, current production schema, backup presence,
-  staging inventory, credential-presence checks, and exclusive-maintenance plan.
-- Reuse the proven plan/stage/validate/publish/recover patterns. Production writes
-  require fresh preflight hashes, complete backup, no active WAL/readers/writers,
-  atomic or transactional application, post-close independent validation, and a
-  tested rollback path.
-- A failed or incomplete phase cannot feed the next phase. Preserve its evidence
-  and continue with independent work that remains safe; stop only when nothing
-  useful in this milestone can progress.
-- Prefer a working, explainable V1 over additional abstraction. Add only focused
-  boundary/regression tests needed by changed behavior, then run the complete
-  suite once at the end.
+### Separate calculation identity from historical membership
 
-## Three-clock current-state contract
+The bootstrap has two distinct truths:
 
-The first real Workstation snapshot must separate three clocks instead of forcing
-all evidence onto one date:
+1. Each symbol's Structure, Setup, feature, and other time-series calculations use
+   only that symbol's real observed market history through September 4.
+2. The cross-sectional cohort is the population known at evaluation time for
+   possible action on September 8.
 
-- `market_as_of_session` (`T`): the latest completed XNYS session whose close
-  supplies market observations and signal inputs;
-- `evaluation_timestamp` (`E`): the actual time the current state is evaluated,
-  after the close of `T`;
-- `action_session` (`A`): the next XNYS session after `T` on which the decision
-  state could be acted upon.
+It is valid to apply the current cohort to its actual historical price series to
+calculate the current September 4 state. This is an **as-known-at-E current scan**.
+It is not evidence that the cohort, ranks, or denominators were known on earlier
+dates.
 
-For an evaluation on 2026-09-06, these are `T=2026-09-04`, `E=2026-09-06`, and
-`A=2026-09-08`. The September 7 market holiday does not make the September 4
-close stale or prevent a truthful current weekend/holiday snapshot.
+Preserve these labels and dates in the plan, manifest, snapshot, API, UI, receipts,
+and logical fingerprint:
 
-Market-derived signals, ranks, structure, setups, leadership, and regime may use
-no observation dated after `T`. Data for `T` may be retrieved, validated, or
-published after its close as long as it is available by `E` and the receipt
-preserves the observation and availability times.
+- calculation mode: `CURRENT_STATE_BOOTSTRAP`;
+- market-as-of session: September 4;
+- evaluation timestamp: the already recorded September 6 New York decision time;
+- action/population-effective session: September 8;
+- population scope: bounded initial covered population;
+- historical-membership status: `UNKNOWN_BEFORE_BOOTSTRAP`.
 
-Reference, identity, eligibility, and other decision-time control evidence that
-became effective after `T` but is known by `E` may govern current identity and
-tradability for `A`. In particular, the validated 2026-09-05 security master may
-support identity and action eligibility for September 8. It must not be backdated,
-claimed available at the September 4 close, or used to rewrite September 4 market
-signals, historical ranks, or point-in-time membership.
+### Population and ranks
 
-Every materialized snapshot, API contract, and Workstation surface must preserve
-and clearly display all three clocks and bind each input to its role, effective or
-observation date, and availability/observed-at timestamp. Extend the snapshot
-contract compatibly if it currently conflates these clocks; do not change any
-engine formula to accomplish this.
+Use the validated staged action population without changing its rules:
 
-## Phase 1 — certify the corrected adjusted-bar foundation
+- 75 research members;
+- 49 strict trade members;
+- 25 market-mapping members.
 
-Revalidate the completed production correction recorded in PROJECT_STATE:
+Publish it recoverably with first effective session September 8. Do not create
+earlier dated membership rows.
 
-- `daily_bars.volume` is DOUBLE;
-- 63,279 existing rows and 11,607 fractional values exactly match all 100 original
-  Parquet copies;
-- ticker/date uniqueness and all non-volume fields agree;
-- the verified full backup remains readable and matches its recorded pre-change
-  hash;
-- the seven other tables and protected files remain unchanged.
+For the September 4 snapshot:
 
-Create fresh post-correction source evidence rather than resealing historical
-pre-correction receipts. Preserve the old receipts as immutable history.
+- compute current cross-sectional ranks and group/breadth denominators over the
+  explicitly identified current research cohort using only observations dated on
+  or before September 4;
+- label them as current-cohort/evaluation-time results;
+- do not persist or expose them as historical point-in-time ranks for dates before
+  September 8;
+- preserve excluded, ineligible, and UNKNOWN reasons rather than silently shrinking
+  a denominator;
+- retain the existing bounded-population warnings in every applicable surface.
 
-## Phase 2 — exact September security-master publication
+Any current-cohort retrospective series required solely to warm up an existing
+formula must carry the same bootstrap label and may support only the current
+snapshot. It must not be reused as historical membership evidence.
 
-Use the immutable validated 2026-09-05 staged artifact. Do not refetch it or change
-its Parquet bytes, exact-case identities, compatibility projection, exclusions,
-collision evidence, Deepvue reconciliation, or unapplied crosswalk reports.
+### Sparse per-symbol calendar alignment
 
-Fix the nanosecond/microsecond `last_updated_utc` publication mismatch with an
-explicit exact-precision schema/serialization contract. Add real-artifact tests
-and repeat isolated first-publication, identical no-op, interruption/recovery,
-changed-same-date rejection, July preservation, and DuckDB/Parquet full-field
-agreement simulations.
+Replace the shared-dense-index assumption at the materializer boundary; do not
+change engine mathematics.
 
-If every simulation passes, publish that exact September artifact using the
-existing confirmed, recoverable publication protocol during exclusive maintenance.
-Back up the complete database and affected partition state first. Independently
-verify after closing the publishing connection:
+- XNYS remains the canonical market calendar and defines T, A, session distances,
+  lifecycle timing, and freshness.
+- Each symbol retains its actual dated observations and may begin after the common
+  history start.
+- Leading dates before a symbol's first observation are explicit
+  `NOT_YET_OBSERVED`, not missing bars.
+- Missing internal XNYS observations remain explicit `MISSING_OBSERVATION`.
+- Never synthesize OHLCV, shift a symbol onto another date, compress calendar time,
+  forward-fill, or drop a symbol merely to make indices equal.
+- Adapt sparse dated histories into the pure engines while preserving their
+  existing lookback and session semantics. If a required value cannot be computed
+  honestly across a gap, emit the existing UNKNOWN/refused evidence for that
+  symbol/component.
+- The five stocks and all 914 reported absent slots must remain accounted for.
+  A symbol-level UNKNOWN must not veto unrelated valid symbols or the entire
+  snapshot unless an existing canonical global gate explicitly requires it.
 
-- 13,155 exact reference rows;
-- unchanged logical fingerprint
-  `7d22fab5f8dbffea1c9254124e9c2731006648391519e55543f6058c77c7112b`;
-- unchanged Parquet SHA-256
-  `d3bd5b75665c646e109e22514839da6771b49070f4ed2998b5e879cdb16fc8fc`;
-- exact field-level DuckDB/Parquet agreement;
-- July logical content and bytes unchanged;
-- complete publication state.
+Add deterministic reason/evidence counts for not-yet-observed, internal missing,
+insufficient-history, and valid-current outcomes.
 
-Do not apply crosswalks or publish exposure as a side effect.
+## Materialization and Workstation acceptance
 
-## Phase 3 — calendar, provenance, and current market inputs
+1. Revalidate all published input hashes and completion states without rewriting
+   the completed foundation.
+2. Simulate schedule first publication, interruption/recovery, and identical no-op
+   on copies. Then publish the exact staged September 8 schedule recoverably with
+   a verified pre-write backup and independent post-close comparison.
+3. Build one real `workstation-snapshot-v2` for T/E/A above. A missing September 4
+   VIXCLS observation remains the canonical Volatility UNKNOWN evidence and does
+   not veto other valid sleeves or the snapshot.
+4. Validate full schema, evidence references, canonical engine parity, three-clock
+   bindings, population accounting, denominators, bytes, and logical fingerprint.
+5. Enforce the 24 MiB materializer target and 32 MiB loader ceiling without dropping
+   records.
+6. Start the loopback API against that exact file only long enough to verify health,
+   Brief, Tape, Groups/detail, Sizer, Rules, and explicit Time Machine refusal
+   before September 8. Run desktop and mobile browser smoke tests, then shut it down.
+7. The Workstation must visibly show `LOCAL_SNAPSHOT`,
+   `CURRENT_STATE_BOOTSTRAP`, market September 4, evaluated September 6 New York,
+   action September 8, bounded population scope, source/rules fingerprints,
+   freshness/UNKNOWN evidence, and funnel/denominator counts.
+8. Do not call this a historically reproducible snapshot before the bootstrap
+   effective boundary. It is a truthful current decision snapshot with reproducible
+   source evidence.
 
-Publish a versioned local `CalendarV1` from pinned
-`exchange-calendars==4.13.2`, calendar `XNYS`, with ordered sessions, aware closes,
-early closes, source version, bytes hash, and logical fingerprint. Do not derive
-sessions from bars.
+## Verification
 
-Create a new post-correction provenance/publication manifest bound to exact source
-artifacts and retrieval receipts. The reviewed source profile is:
+Add focused tests for:
 
-- Massive custom daily stock aggregates with `adjusted=true`;
-- split-adjusted prices, not dividend total return;
-- provider-returned split-adjusted numeric volume preserved as DOUBLE;
-- transaction counts integral;
-- calendar bound to the published XNYS artifact.
+- current-state versus historical-replay provenance;
+- no pre-September-8 membership publication;
+- current-cohort rank/denominator labeling;
+- sparse leading and internal calendar gaps;
+- no imputation, date shifting, silent symbol dropping, or denominator shrinkage;
+- symbol-level UNKNOWN isolation;
+- all five affected stocks and 914 absent slots remaining accounted for;
+- stable formulas and exact pure-engine parity;
+- schedule publication recovery/no-op;
+- snapshot validation, size, clocks, API metadata, and Time Machine refusal;
+- zero provider requests and preservation of all completed foundation artifacts,
+  backups, Git state, and settings.
 
-Unknown historical facts remain UNKNOWN, but newly retrieved inputs must have
-complete observed/fetch/publication timestamps and hashes. Do not invent historical
-attestations.
+Run focused tests, then the complete Python suite once. Run frontend component and
+desktop/mobile browser tests, OpenAPI/schema/type synchronization, TypeScript
+typecheck, production build, lint/format, and `git diff --check`.
 
-After offline plan validation, update the initial covered population:
-
-- exact symbols from the reviewed existing 100-symbol adjusted-backfill plan;
-- required market ETFs SPY, QQQ, IWM, RSP, and QQQE, deduplicated;
-- for covered existing symbols, fetch only missing sessions after verified local
-  maxima; for absent QQQE, fetch from 2024-01-02;
-- end at the latest completed XNYS session at execution time;
-- Massive endpoint only:
-  `GET /v2/aggs/ticker/{ticker}/range/1/day/{from}/{to}` with
-  `adjusted=true`, `sort=asc`, `limit=50000`;
-- at most 125 total HTTP attempts and 25,000 returned rows; one attempt per request,
-  failures count, no automatic retry, no redirects or unexpected pagination.
-
-Stage exact results first. Validate identities, response adjusted flags, sessions,
-keys, OHLCV, fractional volume, coverage, hashes, and source receipts offline.
-Publish only the exact validated staged increment through a recoverable path, then
-prove complete DuckDB/Parquet equality. Preserve prior history.
-
-For spot volatility, implement and use the versioned non-security source:
-
-- canonical Aperture identity `$VIX`;
-- provider/dataset `Federal Reserve Bank of St. Louis FRED / VIXCLS`;
-- source is Cboe Market Statistics;
-- daily close, not a security, ETF, futures contract, or intraday proxy;
-- retrieve only 2024-01-02 through the latest available observation;
-- maximum two HTTP attempts and 1,000 returned observations, no automatic retry;
-- record source observation date, retrieval timestamp, covered sessions, missing
-  values, licensing/source attribution, artifact hash, and freshness.
-
-FRED lag must remain explicit. It may support a premarket snapshot using the last
-completed T only when the observation was available before evaluation time. Never
-forward-fill a missing VIX session or substitute VXX/VIXY/VX futures.
-
-## Phase 4 — aligned exposure, population, and features
-
-Rebuild and recoverably publish exposure-policy-v3 against the completed September
-master. Preserve exact-case reference identity and use the compatibility boundary;
-do not apply proposed mappings.
-
-Build the first dated Aperture research/trade schedule from only the explicitly
-covered initial population. Apply the immutable `aperture-universe-v1` rules as
-written: price, market-cap, ADV20-dollar, ADR20, exposure/type, and all identity
-requirements. Obtain market-cap/reference facts only for the covered candidates
-when missing, using `GET /v3/reference/tickers/{ticker}`:
-
-- maximum 110 HTTP attempts and 110 returned records;
-- one attempt per exact ticker, no retry or redirect;
-- stage and validate before publication;
-- retain source/as-of timestamps and explicit missing fields.
-
-Do not claim this 100-symbol covered population is the complete U.S. equity market.
-Its scope and all leadership/breadth denominators must be labeled exactly. If the
-existing engine contract cannot truthfully represent a bounded initial population,
-stop schedule/snapshot publication and report that single contract blocker rather
-than changing formulas.
-
-Rebuild derived feature tables from the corrected and updated bars through a
-temporary/candidate path with DOUBLE volume. Verify formulas and row-level parity
-against the existing pure engines before recoverable publication. Preserve old
-feature outputs until replacement validates; do not silently migrate legacy
-fields or thresholds.
-
-## Phase 5 — first real local Workstation snapshot
-
-Select the latest completed market session `T` when all signal-forming market
-inputs through its close are valid and the next XNYS action session `A` is known.
-`T` must be on or after the immutable Aperture rules effective date 2026-08-25.
-For execution on September 6, use September 4 as `T`, the actual September 6
-evaluation time as `E`, and September 8 as `A`.
-
-The 2026-09-05 master is valid decision-time identity/control evidence for an
-evaluation on September 6 and action on September 8. Consume it in that role while
-preserving its true effective and availability dates. Do not require a completed
-September 8 market session merely because the master is dated September 5, and do
-not back-project it into September 4 signal formation.
-
-Only report a clock/data wait if an input genuinely required for September 4
-signal formation, or a decision-time input required by September 6 evaluation, is
-unavailable. A lagging or absent optional source must retain its contractually
-defined `UNKNOWN`/refused behavior and must not silently block unrelated valid
-state unless an existing engine contract makes it a hard gate.
-
-When a valid T exists, run materializer plan and audit. With zero hard blockers,
-build and validate one real normalized `workstation-snapshot-v2` in the authorized
-local staging location. Enforce the 24 MiB materializer target and 32 MiB loader
-ceiling without dropping records. Start the local API only long enough to verify
-health, Brief, Tape, Groups/detail, Sizer, and Rules against that exact snapshot;
-run desktop/mobile browser smoke checks and shut it down afterward.
-
-The result must visibly identify LOCAL_SNAPSHOT mode, as-of/action sessions,
-freshness, initial-population scope, source/rules fingerprints, denominators,
-UNKNOWN/refused evidence, funnel counts, bytes, and logical fingerprint. Do not
-call a stale, partial, or historical artifact live/current.
-
-## Verification and report
-
-Run focused tests for changed code, then one complete Python suite; run frontend
-component/browser tests, schema/OpenAPI/type synchronization, TypeScript typecheck,
-production build, lint/format, and `git diff --check` where applicable. Prove
-production/staging/settings preservation around every operation and report exact
-intentional production changes separately.
-
-Success is the first fully validated real local snapshot, or completion of every
-safe prerequisite with one irreducible external/time blocker. Do not stop merely
-because an intermediate planned phase completed.
-
-
-## Execution receipt
-
-The approved milestone was executed through all safe current-source and derived
-feature publications. See [PROJECT_STATE](PROJECT_STATE.md) and
-[current foundation V1](current-foundation-v1.md) for exact versions, counts,
-fingerprints, backups and verification.
-
-Completed: corrected-bar certification; exact September master precision fix and
-publication; pinned XNYS publication; bounded aggregate/FRED/reference retrieval
-and offline validation; recoverable current-bar and exposure publication; complete
-DOUBLE feature rebuild; new source provenance; compatible three-clock snapshot/
-API/UI metadata. No additional routine approval was requested.
-
-The candidate schedule is staged with 75 research and 49 trade members, effective
-September 8. Publishing it as September 4 research membership would backdate
-current controls and rewrite signal denominators. Existing replay also cannot
-represent five eligible stocks' different historical index origins. Schedule and
-snapshot publication therefore remain blocked under this handoff's explicit
-contract/honesty stop condition. No real snapshot or production API was started.
-
-Next: supply verifiable historical population evidence or review a versioned
-current-state bootstrap/replay contract covering unknown membership and per-symbol
-calendar alignment. The approved three-clock distinction is implemented; another
-calendar wait or simple timestamp relabeling cannot resolve this boundary.
-
-
-Observed verification: 18 new focused tests; 2,864 passing full-suite Python tests;
-12 frontend tests; two fixture browser tests. Final clock regressions, schema/API
-synchronization, typecheck, build, lint/format and whitespace checks passed. All
-completed publication states and retained backups independently verified. Only
-the intended database/100 existing bar files changed; 257 other protected hashes
-remain unchanged, with seven explicitly recorded new production artifacts.
+Success means a real, loadable local current-state snapshot and verified Workstation
+smoke result. Do not reopen completed master, bars, calendar, exposure, feature, or
+source-publication work unless its preserved validation evidence actually fails.
