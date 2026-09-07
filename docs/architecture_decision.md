@@ -1,5 +1,11 @@
 # Architecture Decision: Aperture Hybrid Application
 
+> **Historical architecture decision record.** The React/TypeScript plus FastAPI
+> direction described here is now implemented. Statements that it is merely proposed
+> or not implemented reflect the date of this record. Use
+> [APERTURE_CURRENT_AUTHORITY.md](APERTURE_CURRENT_AUTHORITY.md) and
+> [PROJECT_STATE.md](PROJECT_STATE.md) for current status.
+
 > Read [PROJECT_STATE.md](PROJECT_STATE.md) for current progress and work order.
 > This proposal is not a claim that the frontend/API layout is implemented.
 > Engine contracts and foundation reconciliation now precede engine coding.

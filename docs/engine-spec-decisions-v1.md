@@ -1,5 +1,13 @@
 # Aperture engine decisions — V1
 
+> **Implemented runtime V1 decision record.** This file remains authoritative for
+> reproducing `structure-engine-v1` and `setup-engine-v1`; it is not the current
+> target product authority. The owner subsequently selected the Word specification's
+> SMA20/SMA50 Structure design, transitional-only shock targets, and longer-lived
+> RANGE/CONTRACTION behavior for a future version. See
+> [APERTURE_CURRENT_AUTHORITY.md](APERTURE_CURRENT_AUTHORITY.md). Do not alter or
+> relabel V1 history.
+
 Status: **APPROVED FOR IMPLEMENTATION**. Owner authorization recorded 2026-09-05.
 
 This document closes every item in `engine-spec-open-issues.md`. It is the

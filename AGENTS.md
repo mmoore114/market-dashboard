@@ -2,103 +2,141 @@
 
 ## Purpose
 
-This repository is the local research and decision-support engine for Aperture, a transparent daily-chart momentum and growth swing-trading workflow. It is not a broker, autonomous trading bot, or source of personalized financial advice.
+This repository contains Aperture, a local research and decision-support
+workstation for daily U.S. equity swing and momentum trading. It is not a broker,
+an autonomous trading bot, a charting platform, or a source of personalized
+financial advice.
 
-Keep equity research in this repository. Do not mix in separate options-tradability work.
+## Mandatory reading order
 
-## Non-negotiable safety rules
+Before changing anything, read only this current-authority sequence first:
 
-- Never commit .env files, API keys, credentials, DuckDB databases, Parquet datasets, raw or processed market data, ingestion manifests, generated reports containing licensed market data, virtual environments, caches, or machine-specific paths.
-- Massive.com credentials remain local and server-side.
-- Never start a real Massive.com ingestion or other potentially costly external-data job without explicit user approval. Use a bounded dry run first.
-- Preserve point-in-time discipline: form a signal using information available at session T close and evaluate fills no earlier than T+1.
-- Do not add broker routing, automated order submission, or unattended trade execution.
-- Do not silently change thresholds, formulas, labels, or historical classifications. Version changes that alter research meaning.
+1. `AGENTS.md`
+2. `docs/APERTURE_CURRENT_AUTHORITY.md`
+3. `docs/PROJECT_STATE.md`
+4. `docs/CODEX_NEXT_TASK.md`
+5. `docs/LEGACY_BOUNDARY.md`
 
-## Current environment
+Read additional documents only when the current task or authority file routes to
+them. Historical session reports, archived sources, old product contracts, and
+completed task receipts are evidence, not current instructions.
 
-- Chromebook Linux
-- VS Code with Codex
-- Python 3.13.5 locally; project supports Python 3.11+
-- Virtual environment: .venv
-- Prefer .venv/bin/python for commands
-- GitHub is the remote source of truth
-- Work on a feature branch and use a pull request; do not develop new Aperture work directly on main
+If two documents conflict, follow the precedence in
+`docs/APERTURE_CURRENT_AUTHORITY.md`. Do not reconstruct current rules from chat
+memory or select whichever historical formula appears most detailed.
 
-Before editing:
+## Before editing
 
-1. Run git status --short --branch.
-2. Read docs/PROJECT_STATE.md first, then docs/CODEX_NEXT_TASK.md immediately afterward, followed by README.md, docs/session_progress_2026-07-26.md, docs/session_progress_2026-08-25.md, docs/aperture_product_contract.md, docs/deepvue_audit.md, and docs/architecture_decision.md.
-3. Preserve unrelated or user-owned changes.
-4. Confirm the requested milestone and its acceptance criteria.
+1. Run `git status --short --branch`.
+2. Confirm the exact branch, baseline commit, task ID, and authorization boundary.
+3. Preserve unrelated and user-owned changes, especially `.vscode/settings.json`.
+4. Inspect the active code path before assuming a legacy field controls Aperture.
+5. Stop for a material contract contradiction or action outside the authorization.
 
-For structure/setup work, also read docs/structure-state-engine-v1.md,
-docs/setup-classification-engine-v1.md, docs/engine-spec-decisions-v1.md, and
-docs/engine-spec-open-issues.md. The decisions file is the authoritative overlay
-that closes the recovered conflicts. Explicit amendments supersede older design
-candidates and the archived sources under docs/reference/. Update
-docs/PROJECT_STATE.md after meaningful milestones.
+## Product boundaries
 
-## Required verification
+- Python owns ingestion, validation, storage, canonical calculations, and snapshot
+  materialization.
+- React/TypeScript and FastAPI form the primary Workstation interface.
+- Streamlit is a legacy diagnostic/admin surface, not the primary product.
+- Deepvue remains the chart-review, drawing, replay, and alerting workspace.
+- Do not implement price charts, drawing tools, technical overlays, or a competing
+  chart engine inside Aperture unless the owner explicitly reverses this decision.
+- Do not add broker routing, automated orders, or unattended execution.
+- Keep separate options-tradability work outside this repository.
 
-For Python changes, run the smallest relevant test set first, then the full suite when practical:
+## Domain model
 
-~~~bash
-.venv/bin/python -m pytest
-~~~
+Keep these concepts independent in code, storage, APIs, and UI:
 
-Also run:
-
-~~~bash
-git diff --check
-~~~
-
-For data-pipeline changes, use the existing validation scripts and report row counts, date ranges, duplicate keys, nulls, publication state, fingerprints, and DuckDB/Parquet agreement as applicable.
-
-Do not claim a command, data build, deployment, or test passed unless its output was actually observed.
-
-## Domain modeling rules
-
-Keep these concepts separate in code and storage:
-
-- instrument/exposure classification;
-- research universe and trade universe;
+- instrument and exposure classification;
+- market-mapping, equity-research, and equity-trade universes;
 - market regime;
 - sector, industry, and theme leadership;
 - relative and absolute strength;
-- structural stage;
+- Structure state;
 - extension;
-- setup;
-- action state;
+- Setup family and lifecycle;
+- actionability and vetoes;
 - position sizing and portfolio heat;
-- trade outcomes and benchmark performance.
+- outcomes, journal, and benchmarks.
 
-A structural stage is not a setup. Extension is not a stage. A high score is not an entry signal. A setup is not actionable until all relevant universe, regime, group, extension, earnings, and risk checks pass.
+A Structure state is not a Setup. Extension is not Structure. A score is not an
+entry signal. Setup invalidation is not a trade stop. `ACT` means perform
+discretionary review; it is not an order instruction.
 
-Prefer explicit component fields and reason codes over opaque composite scores. Any composite score must remain decomposable, versioned, and labeled experimental until validated.
+## Current and target engine authority
 
-## Compatibility and migration
+The current deployed prototype uses the versioned V1 Structure and Setup engines
+documented in their implementation files. Those outputs must remain reproducible.
 
-- Existing exposure-policy-v2 results are immutable and must remain reproducible.
-- Exposure-policy-v3 extends v2 and is the configured default.
-- Do not delete the completed adjusted bars for the original ranks 1-50.
-- Keep legacy fields only when necessary for backward compatibility and mark their replacement clearly.
-- Add new metrics alongside old metrics when definitions differ. For example, do not silently replace the existing simple rolling ATR with Wilder ATR.
+The owner has settled a target alignment that differs from parts of runtime V1:
 
-## UI direction
+- Structure should use the final Word specification's SMA20/SMA50 ATR-normalized
+  model; EMA10 is context, not a Structure voter.
+- Shock transitions should initially produce `EMERGING` or `DETERIORATING`, not a
+  mature trend by themselves.
+- Long-lived horizontal bases and tightening phases must not stale after only a
+  few sessions solely because of age.
+- The Git V1 no-look-ahead, frozen-reference, identity, event-order, lifecycle,
+  missing-data, corporate-action, and corrected-replay safeguards remain accepted.
 
-The primary Aperture interface will be a dense React and TypeScript application. Python remains the computation, ingestion, validation, and API layer. Streamlit may remain as an internal diagnostic/admin surface, but it is not the target production experience.
+These are target decisions, not permission to relabel current V1 output. Implement
+them only under a new version and an explicit task. Use
+`docs/APERTURE_CURRENT_AUTHORITY.md` for exact status and remaining provisional
+choices.
 
-The primary review flow is:
+## Legacy boundary
 
-Brief -> Groups/Tape -> Stock detail -> Sizer/Book -> Rules/Journal
+Legacy Opportunity Score, Leadership Score, `trend_stage`, `price_action_state`,
+EMA9, simple ATR, and the original Streamlit dashboard remain preserved for
+compatibility and historical research. They must not vote in current Aperture
+Structure, Setup, Actionability, or `WATCH/TRADE/ACT` decisions.
 
-Deepvue remains the preferred chart-review, drawing, replay, and alerting workspace. Aperture should complement it with proprietary rules, ranking, state, sizing, journaling, and benchmarking rather than duplicate every charting feature.
+Do not delete or silently rewrite legacy outputs. Do not copy their labels or
+thresholds into new Aperture work. See `docs/LEGACY_BOUNDARY.md`.
+
+## Safety rules
+
+- Never commit `.env`, credentials, API keys, DuckDB files, Parquet datasets, raw
+  or processed market data, provider exports, ingestion manifests, licensed-data
+  reports, generated snapshots, receipts, backups, virtual environments, caches,
+  or machine-specific paths.
+- Massive.com credentials stay local and server-side.
+- Do not start a provider request or potentially costly ingestion without explicit
+  user authorization. Use a bounded dry run first unless the active task explicitly
+  authorizes a bounded fetch.
+- Preserve point-in-time discipline and source provenance.
+- Never invent, backdate, forward-fill, or silently drop observations or membership.
+- Do not silently change thresholds, formulas, labels, version identities, or
+  historical classifications.
+- Never delete retained backups or protected historical artifacts without explicit
+  authorization.
 
 ## Change discipline
 
 - Keep pure calculation logic separate from ingestion, persistence, and UI code.
-- Put thresholds in named, versioned configuration or immutable policy objects.
-- Add tests for threshold boundaries, missing data, precedence, persistence, and point-in-time behavior.
-- Use concise commit messages that identify the milestone.
-- Update relevant documentation in the same change when formulas or state semantics change.
+- Put thresholds in named, immutable, versioned configuration or policy objects.
+- Return explicit nulls and reason codes.
+- Add focused tests for boundaries, missing data, precedence, persistence,
+  point-in-time behavior, and version isolation.
+- Update current documentation in the same change as semantic code changes.
+- Use a feature branch and draft pull request; do not develop directly on `main`.
+- Do not merge a pull request unless explicitly authorized.
+
+## Verification
+
+Run the smallest relevant checks first. For Python changes, run the focused tests
+and then the complete suite when practical:
+
+```bash
+.venv/bin/python -m pytest
+git diff --check
+```
+
+For frontend changes, run the applicable component/browser tests, typecheck,
+production build, schema synchronization, and lint/format checks.
+
+Documentation-only work must at minimum verify links/paths, Markdown whitespace,
+the declared authority chain, branch status, and the absence of unintended code or
+data changes. Never claim a check passed unless its output was observed.
