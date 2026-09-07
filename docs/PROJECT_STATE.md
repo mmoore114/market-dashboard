@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-CURRENT-FOUNDATION-001 has published the verified current master, bars, calendar, spot/reference evidence, exposure and derived features. Schedule and real snapshot publication are blocked by missing historical research membership and the existing replay/index contract. T=2026-09-04 and A=2026-09-08 are valid; this is not a calendar wait.
+Current milestone: AP-CURRENT-BOOTSTRAP-001 is ready on `codex/current-bootstrap-handoff`. The verified current foundation is published. Build the first real Workstation snapshot as an explicitly bounded CURRENT_STATE_BOOTSTRAP using T=2026-09-04, the recorded September 6 New York evaluation time, and A=2026-09-08. Publish membership only from September 8; preserve unknown prior membership and sparse per-symbol histories without imputation.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
