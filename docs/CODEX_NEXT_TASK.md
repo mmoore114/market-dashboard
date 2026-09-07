@@ -81,6 +81,40 @@ strings, proprietary rows, or unsanitized provider errors.
   boundary/regression tests needed by changed behavior, then run the complete
   suite once at the end.
 
+## Three-clock current-state contract
+
+The first real Workstation snapshot must separate three clocks instead of forcing
+all evidence onto one date:
+
+- `market_as_of_session` (`T`): the latest completed XNYS session whose close
+  supplies market observations and signal inputs;
+- `evaluation_timestamp` (`E`): the actual time the current state is evaluated,
+  after the close of `T`;
+- `action_session` (`A`): the next XNYS session after `T` on which the decision
+  state could be acted upon.
+
+For an evaluation on 2026-09-06, these are `T=2026-09-04`, `E=2026-09-06`, and
+`A=2026-09-08`. The September 7 market holiday does not make the September 4
+close stale or prevent a truthful current weekend/holiday snapshot.
+
+Market-derived signals, ranks, structure, setups, leadership, and regime may use
+no observation dated after `T`. Data for `T` may be retrieved, validated, or
+published after its close as long as it is available by `E` and the receipt
+preserves the observation and availability times.
+
+Reference, identity, eligibility, and other decision-time control evidence that
+became effective after `T` but is known by `E` may govern current identity and
+tradability for `A`. In particular, the validated 2026-09-05 security master may
+support identity and action eligibility for September 8. It must not be backdated,
+claimed available at the September 4 close, or used to rewrite September 4 market
+signals, historical ranks, or point-in-time membership.
+
+Every materialized snapshot, API contract, and Workstation surface must preserve
+and clearly display all three clocks and bind each input to its role, effective or
+observation date, and availability/observed-at timestamp. Extend the snapshot
+contract compatibly if it currently conflates these clocks; do not change any
+engine formula to accomplish this.
+
 ## Phase 1 — certify the corrected adjusted-bar foundation
 
 Revalidate the completed production correction recorded in PROJECT_STATE:
@@ -208,14 +242,23 @@ fields or thresholds.
 
 ## Phase 5 — first real local Workstation snapshot
 
-Select the latest T only when all inputs are valid at completed T close and the
-next XNYS action session T+1 is known. T must be on or after the immutable Aperture
-rules effective date 2026-08-25. The 2026-09-05 master cannot justify T=2026-09-04;
-its first possible later session is 2026-09-08.
+Select the latest completed market session `T` when all signal-forming market
+inputs through its close are valid and the next XNYS action session `A` is known.
+`T` must be on or after the immutable Aperture rules effective date 2026-08-25.
+For execution on September 6, use September 4 as `T`, the actual September 6
+evaluation time as `E`, and September 8 as `A`.
 
-If the necessary post-September-5 completed session or source observations are not
-yet available, finish all preceding ready work and report only the exact clock/data
-wait. Do not weaken timing rules.
+The 2026-09-05 master is valid decision-time identity/control evidence for an
+evaluation on September 6 and action on September 8. Consume it in that role while
+preserving its true effective and availability dates. Do not require a completed
+September 8 market session merely because the master is dated September 5, and do
+not back-project it into September 4 signal formation.
+
+Only report a clock/data wait if an input genuinely required for September 4
+signal formation, or a decision-time input required by September 6 evaluation, is
+unavailable. A lagging or absent optional source must retain its contractually
+defined `UNKNOWN`/refused behavior and must not silently block unrelated valid
+state unless an existing engine contract makes it a hard gate.
 
 When a valid T exists, run materializer plan and audit. With zero hard blockers,
 build and validate one real normalized `workstation-snapshot-v2` in the authorized
