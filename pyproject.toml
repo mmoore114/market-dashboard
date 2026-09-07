@@ -9,7 +9,9 @@ description = "Equity discovery, ranking, and discretionary market research dash
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "exchange-calendars==4.13.2",
     "httpx",
+    "numpy",
     "pandas",
     "polars",
     "pyarrow",
@@ -20,11 +22,14 @@ dependencies = [
     "streamlit",
     "boto3",
     "botocore",
+    "fastapi==0.141.1",
+    "uvicorn>=0.34,<1",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "ruff==0.16.6",
 ]
 
 [tool.setuptools.packages.find]

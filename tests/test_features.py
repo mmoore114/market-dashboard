@@ -38,6 +38,39 @@ def test_volatility_features_preserve_history_nulls_and_formula_values() -> None
     assert result.loc[19, "adr_percent_20"] == 20.0
 
 
+def test_wilder_atr_uses_exact_seed_and_recursive_values_without_replacing_legacy_atr() -> None:
+    true_ranges = [float(value) for value in range(1, 16)]
+    bars = make_bars("SPY", [100.0] * len(true_ranges))
+    bars["high"] = [100.0 + value / 2 for value in true_ranges]
+    bars["low"] = [100.0 - value / 2 for value in true_ranges]
+
+    result = add_volatility_features(bars)
+
+    assert result.loc[:12, "wilder_atr_14"].isna().all()
+    assert result.loc[13, "wilder_atr_14"] == pytest.approx(sum(range(1, 15)) / 14)
+    assert result.loc[14, "wilder_atr_14"] == pytest.approx((7.5 * 13 + 15) / 14)
+    assert result.loc[14, "atr_14"] == pytest.approx(sum(range(2, 16)) / 14)
+    assert result.loc[14, "wilder_atr_percent_14"] == pytest.approx(
+        result.loc[14, "wilder_atr_14"]
+    )
+
+
+def test_wilder_atr_is_independent_per_ticker() -> None:
+    first = make_bars("AAA", [100.0] * 15)
+    first["high"] = 101.0
+    first["low"] = 99.0
+    second = make_bars("BBB", [100.0] * 15)
+    second["high"] = 105.0
+    second["low"] = 95.0
+    bars = pd.concat([first, second], ignore_index=True).sample(frac=1, random_state=7)
+
+    result = add_volatility_features(bars)
+    latest = result.groupby("ticker").tail(1).set_index("ticker")
+
+    assert latest.loc["AAA", "wilder_atr_14"] == pytest.approx(2.0)
+    assert latest.loc["BBB", "wilder_atr_14"] == pytest.approx(10.0)
+
+
 def test_range_and_close_location_features() -> None:
     bars = make_bars("SPY", [10.0] * 20)
     bars.loc[0, ["high", "low"]] = [10.0, 10.0]
@@ -148,6 +181,39 @@ def test_moving_average_distances_and_slope_lookbacks() -> None:
     assert last["sma_50_slope_20d_percent"] == pytest.approx(
         (last["sma_50"] / result.loc[last_index - 20, "sma_50"] - 1) * 100
     )
+
+
+def test_wilder_extension_features_and_sma_200_distance_are_additive_and_null_safe() -> None:
+    bars = make_bars("SPY", [float(value) for value in range(1, 201)])
+    bars = add_volatility_features(bars)
+
+    result = add_trend_features(bars)
+    last = result.iloc[-1]
+
+    assert last["distance_from_sma_200_percent"] == pytest.approx(
+        (last["close"] - last["sma_200"]) / last["sma_200"] * 100
+    )
+    assert last["atr_extension_from_sma_20_wilder"] == pytest.approx(
+        (last["close"] - last["sma_20"]) / last["wilder_atr_14"]
+    )
+    assert last["atr_extension_from_sma_50_wilder"] == pytest.approx(
+        (last["close"] - last["sma_50"]) / last["wilder_atr_14"]
+    )
+
+    bars.loc[bars.index[-1], "wilder_atr_14"] = 0.0
+    zero_denominator = add_trend_features(bars).iloc[-1]
+    assert pd.isna(zero_denominator["atr_extension_from_sma_20_wilder"])
+    assert pd.isna(zero_denominator["atr_extension_from_sma_50_wilder"])
+
+
+def test_wilder_percent_is_null_for_nonpositive_close() -> None:
+    bars = make_bars("SPY", [10.0] * 13 + [0.0])
+    bars.loc[13, ["high", "low"]] = [1.0, -1.0]
+
+    result = add_volatility_features(bars)
+
+    assert pd.notna(result.loc[13, "wilder_atr_14"])
+    assert pd.isna(result.loc[13, "wilder_atr_percent_14"])
 
 
 @pytest.mark.parametrize(

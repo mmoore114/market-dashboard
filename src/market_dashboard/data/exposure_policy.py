@@ -1,20 +1,25 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
-from datetime import date
 import hashlib
 import json
 import os
-from pathlib import Path
 import re
-from typing import Any, Callable, Iterable
+from collections.abc import Callable, Iterable
+from contextlib import nullcontext
+from dataclasses import asdict, dataclass
+from datetime import date
+from pathlib import Path
+from typing import Any
 
 import duckdb
 import pandas as pd
 import yaml
 
+from market_dashboard.data.security_identity import (
+    MarketDataSymbol,
+    compatibility_projection,
+)
 from market_dashboard.data.storage import DUCKDB_PATH, PROCESSED_DIRECTORY
-
 
 EXPOSURE_SCOPES = {
     "direct_equity",
@@ -23,9 +28,7 @@ EXPOSURE_SCOPES = {
     "non_equity",
     "review_needed",
 }
-SINGLE_SECURITY_EXCLUSION = (
-    "Single-security product excluded from core swing universe"
-)
+SINGLE_SECURITY_EXCLUSION = "Single-security product excluded from core swing universe"
 REVIEW_NEEDED_EXCLUSION = "Exposure classification requires review"
 CLASSIFICATION_COLUMNS = [
     "snapshot_date",
@@ -56,7 +59,7 @@ def load_exposure_policy_config(
     with policy_path.open("r", encoding="utf-8") as handle:
         raw = yaml.safe_load(handle) or {}
     if not isinstance(raw, dict):
-        raise ValueError(f"exposure policy must be a mapping: {policy_path}")
+        raise ValueError(f"exposure policy must be a mapping: {policy_path}")  # noqa: TRY004 — preserve public error contract
 
     extends = raw.get("extends")
     if extends:
@@ -113,9 +116,7 @@ def _expand_review_resolutions(config: dict[str, Any] | None) -> list[dict[str, 
             str(ticker).strip().upper(): str(reference).strip()
             for ticker, reference in group.get("reference_exposures", {}).items()
         }
-        tickers = [
-            str(ticker).strip().upper() for ticker in group.get("tickers", [])
-        ]
+        tickers = [str(ticker).strip().upper() for ticker in group.get("tickers", [])]
         if underlyings:
             tickers.extend(underlyings)
         for ticker in tickers:
@@ -192,13 +193,17 @@ class ExposurePolicy:
             reason = str(group.get("reason", "")).strip()
             provenance = str(group.get("provenance", "")).strip()
             if not reason or not provenance:
-                raise ValueError(f"maintained {scope} classifications need reason and provenance")
+                raise ValueError(
+                    f"maintained {scope} classifications need reason and provenance"
+                )
             for ticker in group.get("tickers", []):
                 normalized = str(ticker).strip().upper()
                 if not normalized:
                     raise ValueError("maintained classification ticker cannot be empty")
                 if normalized in self.registry:
-                    raise ValueError(f"duplicate maintained classification: {normalized}")
+                    raise ValueError(
+                        f"duplicate maintained classification: {normalized}"
+                    )
                 self.registry[normalized] = (scope, reason, provenance)
         self.overrides = self._parse_overrides(config.get("overrides", []))
 
@@ -208,13 +213,20 @@ class ExposurePolicy:
         snapshot_date: str | date,
     ) -> pd.DataFrame:
         snapshot = date.fromisoformat(str(snapshot_date))
-        frame = records.copy() if isinstance(records, pd.DataFrame) else pd.DataFrame(records)
+        frame = (
+            records.copy()
+            if isinstance(records, pd.DataFrame)
+            else pd.DataFrame(records)
+        )
         if frame.empty:
             return pd.DataFrame(columns=CLASSIFICATION_COLUMNS)
         required = {"ticker", "name", "security_type", "normalized_category"}
         missing = required - set(frame.columns)
         if missing:
-            raise ValueError(f"exposure classification missing columns: {sorted(missing)}")
+            raise ValueError(
+                f"exposure classification missing columns: {sorted(missing)}"
+            )
+        frame, projection = compatibility_projection(frame)
         known_equities = set(
             frame.loc[frame["normalized_category"] == "Common Stock", "ticker"]
             .astype(str)
@@ -224,9 +236,15 @@ class ExposurePolicy:
             self.classify_record(row._asdict(), snapshot, known_equities)
             for row in frame.itertuples(index=False)
         ]
-        return pd.DataFrame(
-            [row.to_dict() for row in rows], columns=CLASSIFICATION_COLUMNS
-        ).sort_values("ticker").reset_index(drop=True)
+        result = (
+            pd.DataFrame(
+                [row.to_dict() for row in rows], columns=CLASSIFICATION_COLUMNS
+            )
+            .sort_values("ticker")
+            .reset_index(drop=True)
+        )
+        result.attrs["identity_projection"] = projection.to_dict("records")
+        return result
 
     def classify_record(
         self,
@@ -234,7 +252,7 @@ class ExposurePolicy:
         snapshot: date,
         known_equities: set[str],
     ) -> ExposureClassification:
-        ticker = str(record.get("ticker", "")).strip().upper()
+        ticker = MarketDataSymbol(record.get("ticker", "")).value
         category = str(record.get("normalized_category", "")).strip()
         raw_type = str(record.get("security_type", "")).strip().upper()
         name = str(record.get("name", "")).strip()
@@ -348,10 +366,14 @@ class ExposurePolicy:
             and (item.effective_end_date is None or snapshot <= item.effective_end_date)
         ]
         if len(matches) > 1:
-            raise ValueError(f"multiple active exposure overrides for {ticker} on {snapshot}")
+            raise ValueError(
+                f"multiple active exposure overrides for {ticker} on {snapshot}"
+            )
         return matches[0] if matches else None
 
-    def _parse_overrides(self, rows: Iterable[dict[str, Any]]) -> list[ExposureOverride]:
+    def _parse_overrides(
+        self, rows: Iterable[dict[str, Any]]
+    ) -> list[ExposureOverride]:
         overrides: list[ExposureOverride] = []
         for row in rows:
             scope = str(row.get("exposure_scope", "")).strip()
@@ -375,10 +397,16 @@ class ExposurePolicy:
                 provenance=str(row.get("provenance", "")).strip(),
             )
             if not override.ticker or not override.reason or not override.provenance:
-                raise ValueError("exposure overrides need ticker, reason, and provenance")
+                raise ValueError(
+                    "exposure overrides need ticker, reason, and provenance"
+                )
             for existing in overrides:
-                if existing.ticker == override.ticker and _ranges_overlap(existing, override):
-                    raise ValueError(f"overlapping exposure overrides for {override.ticker}")
+                if existing.ticker == override.ticker and _ranges_overlap(
+                    existing, override
+                ):
+                    raise ValueError(
+                        f"overlapping exposure overrides for {override.ticker}"
+                    )
             overrides.append(override)
         return overrides
 
@@ -424,11 +452,22 @@ class ExposureClassificationStore:
         parquet_directory: str | Path = PROCESSED_DIRECTORY / "exposure_classification",
         failure_injector: Callable[[str], None] | None = None,
         atomic_replace: Callable[[Path, Path], None] | None = None,
+        connection: duckdb.DuckDBPyConnection | None = None,
     ) -> None:
         self.duckdb_path = Path(duckdb_path)
         self.parquet_directory = Path(parquet_directory)
         self.failure_injector = failure_injector
         self.atomic_replace = atomic_replace or self._replace
+        self.connection = connection
+
+    def _connect(self, *, read_only=False):
+        # An operator may hold one exclusive maintenance connection throughout
+        # staging, commit, filesystem publication and recovery verification.
+        return (
+            nullcontext(self.connection)
+            if self.connection is not None
+            else duckdb.connect(str(self.duckdb_path), read_only=read_only)
+        )
 
     def persist(self, frame: pd.DataFrame) -> Path:
         if frame.empty:
@@ -469,7 +508,7 @@ class ExposureClassificationStore:
         committed = False
         try:
             self._checkpoint("before_transaction")
-            with duckdb.connect(str(self.duckdb_path)) as connection:
+            with self._connect() as connection:
                 connection.execute("BEGIN TRANSACTION")
                 try:
                     self._ensure_tables(connection)
@@ -542,9 +581,7 @@ class ExposureClassificationStore:
         version = str(policy_version).strip()
         record = self.publication_record(snapshot_date, version)
         if not record:
-            raise ValueError(
-                f"publication record not found: {snapshot_date}/{version}"
-            )
+            raise ValueError(f"publication record not found: {snapshot_date}/{version}")
         if record["publication_state"] not in PUBLICATION_STATES:
             raise ValueError(
                 f"invalid publication state: {record['publication_state']}"
@@ -560,7 +597,11 @@ class ExposureClassificationStore:
             try:
                 self.require_complete(snapshot_date, version)
                 expected_staged.unlink(missing_ok=True)
-                return {"state_found": "complete", "action": "none", "state": "complete"}
+                return {
+                    "state_found": "complete",
+                    "action": "none",
+                    "state": "complete",
+                }
             except ValueError as exc:
                 self._mark_recovery_required(snapshot_date, version, exc)
                 record["publication_state"] = "recovery_required"
@@ -568,9 +609,13 @@ class ExposureClassificationStore:
         authoritative = self._read_duckdb_slice(snapshot_date, version)
         actual_fingerprint = classification_fingerprint(authoritative)
         if len(authoritative) != record["expected_row_count"]:
-            raise ValueError("committed DuckDB row count disagrees with publication record")
+            raise ValueError(
+                "committed DuckDB row count disagrees with publication record"
+            )
         if actual_fingerprint != record["content_fingerprint"]:
-            raise ValueError("committed DuckDB fingerprint disagrees with publication record")
+            raise ValueError(
+                "committed DuckDB fingerprint disagrees with publication record"
+            )
 
         action = "verified_existing_final"
         if not self._parquet_matches_record(expected_path, record):
@@ -594,7 +639,9 @@ class ExposureClassificationStore:
             "state": "complete",
         }
 
-    def require_complete(self, snapshot: str | date, policy_version: str) -> dict[str, Any]:
+    def require_complete(
+        self, snapshot: str | date, policy_version: str
+    ) -> dict[str, Any]:
         snapshot_date = date.fromisoformat(str(snapshot))
         record = self.publication_record(snapshot_date, policy_version)
         if not record:
@@ -618,7 +665,7 @@ class ExposureClassificationStore:
         if not self.duckdb_path.exists():
             return None
         snapshot_date = date.fromisoformat(str(snapshot))
-        with duckdb.connect(str(self.duckdb_path), read_only=True) as connection:
+        with self._connect(read_only=True) as connection:
             exists = connection.execute(
                 """
                 SELECT COUNT(*) FROM information_schema.tables
@@ -702,10 +749,8 @@ class ExposureClassificationStore:
             """
         )
 
-    def _read_duckdb_slice(
-        self, snapshot: date, policy_version: str
-    ) -> pd.DataFrame:
-        with duckdb.connect(str(self.duckdb_path), read_only=True) as connection:
+    def _read_duckdb_slice(self, snapshot: date, policy_version: str) -> pd.DataFrame:
+        with self._connect(read_only=True) as connection:
             frame = connection.execute(
                 f"""
                 SELECT {", ".join(CLASSIFICATION_COLUMNS)}
@@ -724,10 +769,9 @@ class ExposureClassificationStore:
             frame = canonicalize_classification(pd.read_parquet(path))
             return (
                 len(frame) == record["expected_row_count"]
-                and classification_fingerprint(frame)
-                == record["content_fingerprint"]
+                and classification_fingerprint(frame) == record["content_fingerprint"]
             )
-        except Exception:
+        except Exception:  # noqa: BLE001 — corrupted publications fail closed
             return False
 
     def _verify_committed_output(self, snapshot: date, policy_version: str) -> None:
@@ -752,7 +796,7 @@ class ExposureClassificationStore:
             raise ValueError("published fingerprint disagrees with publication record")
 
     def _mark_complete(self, snapshot: date, policy_version: str) -> None:
-        with duckdb.connect(str(self.duckdb_path)) as connection:
+        with self._connect() as connection:
             connection.execute("BEGIN TRANSACTION")
             try:
                 connection.execute(
@@ -774,7 +818,7 @@ class ExposureClassificationStore:
         self, snapshot: date, policy_version: str, error: Exception
     ) -> None:
         message = _sanitize_failure(error)
-        with duckdb.connect(str(self.duckdb_path)) as connection:
+        with self._connect() as connection:
             connection.execute(
                 """
                 UPDATE exposure_classification_publication
@@ -813,9 +857,7 @@ def canonicalize_classification(frame: pd.DataFrame) -> pd.DataFrame:
     result["snapshot_date"] = pd.to_datetime(result["snapshot_date"]).dt.date
     for column in CLASSIFICATION_COLUMNS[1:]:
         result[column] = result[column].astype("string")
-    result["underlying_ticker"] = result["underlying_ticker"].replace(
-        {"": pd.NA}
-    )
+    result["underlying_ticker"] = result["underlying_ticker"].replace({"": pd.NA})
     return result.sort_values(CLASSIFICATION_KEY, kind="stable").reset_index(drop=True)
 
 
@@ -845,8 +887,12 @@ def compare_classification_frames(
     right = canonicalize_classification(parquet_frame)
     left_duplicates = int(left.duplicated(CLASSIFICATION_KEY, keep=False).sum())
     right_duplicates = int(right.duplicated(CLASSIFICATION_KEY, keep=False).sum())
-    left_keys = set(map(tuple, left[CLASSIFICATION_KEY].itertuples(index=False, name=None)))
-    right_keys = set(map(tuple, right[CLASSIFICATION_KEY].itertuples(index=False, name=None)))
+    left_keys = set(
+        map(tuple, left[CLASSIFICATION_KEY].itertuples(index=False, name=None))
+    )
+    right_keys = set(
+        map(tuple, right[CLASSIFICATION_KEY].itertuples(index=False, name=None))
+    )
     missing_keys = sorted(left_keys - right_keys)
     extra_keys = sorted(right_keys - left_keys)
     field_mismatches: dict[str, int] = {}
@@ -859,7 +905,9 @@ def compare_classification_frames(
             suffixes=("_duckdb", "_parquet"),
             validate="one_to_one",
         )
-        for column in [item for item in CLASSIFICATION_COLUMNS if item not in CLASSIFICATION_KEY]:
+        for column in [
+            item for item in CLASSIFICATION_COLUMNS if item not in CLASSIFICATION_KEY
+        ]:
             left_values = merged[f"{column}_duckdb"].fillna("<NULL>")
             right_values = merged[f"{column}_parquet"].fillna("<NULL>")
             mismatch = left_values.ne(right_values)
@@ -928,6 +976,10 @@ def _validate_classification_frame(frame: pd.DataFrame) -> None:
     missing = set(CLASSIFICATION_COLUMNS) - set(frame.columns)
     if missing:
         raise ValueError(f"classification frame missing columns: {sorted(missing)}")
+    for ticker in frame["ticker"]:
+        MarketDataSymbol(ticker)
+    for ticker in frame.loc[frame["underlying_ticker"].notna(), "underlying_ticker"]:
+        MarketDataSymbol(ticker)
     if frame["policy_version"].astype(str).str.strip().eq("").any():
         raise ValueError("classification policy version cannot be empty")
     invalid = set(frame["exposure_scope"]) - EXPOSURE_SCOPES
@@ -951,4 +1003,7 @@ def _validate_classification_frame(frame: pd.DataFrame) -> None:
 def _ranges_overlap(left: ExposureOverride, right: ExposureOverride) -> bool:
     left_end = left.effective_end_date or date.max
     right_end = right.effective_end_date or date.max
-    return left.effective_start_date <= right_end and right.effective_start_date <= left_end
+    return (
+        left.effective_start_date <= right_end
+        and right.effective_start_date <= left_end
+    )

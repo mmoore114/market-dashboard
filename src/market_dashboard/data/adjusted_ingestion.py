@@ -1,19 +1,25 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
-from datetime import UTC, date, datetime, timedelta
+import hashlib
+import json
 import os
-from pathlib import Path
 import re
 import time
-from typing import Any, Callable
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
+from datetime import UTC, date, datetime, timedelta
+from pathlib import Path
+from typing import Any
 
 import duckdb
 
+from market_dashboard.data.adjusted_authority import (
+    AggregateResponseEvidenceV1,
+    check_volume_schema,
+)
 from market_dashboard.data.daily_ingestion import DailyBarIngestor
 from market_dashboard.data.massive_client import MassiveClient
 from market_dashboard.data.storage import DUCKDB_PATH, PROCESSED_DIRECTORY
-
 
 MANIFEST_STATUSES = {
     "pending",
@@ -195,6 +201,27 @@ class AdjustedIngestionManifest:
                 [*values.values(), job_id, ticker],
             )
 
+    def record_response_evidence(self, job_id, ticker, records):
+        validated = [AggregateResponseEvidenceV1.model_validate(r) for r in records]
+        if any(r.ticker != ticker for r in validated):
+            raise ValueError("RESPONSE_RECEIPT_IDENTITY_MISMATCH")
+        if not validated:
+            return
+        with duckdb.connect(str(self.path)) as connection:
+            connection.execute(
+                "CREATE TABLE IF NOT EXISTS adjusted_response_evidence (job_id VARCHAR, ticker VARCHAR, fingerprint VARCHAR, evidence_json VARCHAR, PRIMARY KEY(job_id,ticker,fingerprint))"
+            )
+            for record in validated:
+                connection.execute(
+                    "INSERT INTO adjusted_response_evidence VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING",
+                    [
+                        job_id,
+                        ticker,
+                        hashlib.sha256(record.model_dump_json().encode()).hexdigest(),
+                        json.dumps(record.model_dump(mode="json"), sort_keys=True),
+                    ],
+                )
+
     def _ensure_table(self) -> None:
         with duckdb.connect(str(self.path)) as connection:
             connection.execute(
@@ -279,7 +306,9 @@ class AdjustedBackfillRunner:
                 ).fetchall()
             }
             if policy_version and "policy_version" not in plan_columns:
-                raise ValueError("adjusted backfill plan does not support policy versions")
+                raise ValueError(
+                    "adjusted backfill plan does not support policy versions"
+                )
             if "policy_version" in plan_columns and not policy_version:
                 versions = connection.execute(
                     """
@@ -293,9 +322,7 @@ class AdjustedBackfillRunner:
                     raise ValueError(
                         "policy_version is required when multiple plan versions exist"
                     )
-            policy_predicate = (
-                "AND policy_version = ?" if policy_version else ""
-            )
+            policy_predicate = "AND policy_version = ?" if policy_version else ""
             parameters: list[Any] = [
                 plan_date,
                 tier,
@@ -344,7 +371,9 @@ class AdjustedBackfillRunner:
             requested_start = (
                 date.fromisoformat(str(start_date)) if start_date else planned_start
             )
-            requested_end = date.fromisoformat(str(end_date)) if end_date else planned_end
+            requested_end = (
+                date.fromisoformat(str(end_date)) if end_date else planned_end
+            )
             existing_max = existing_dates.get(ticker)
             effective_start, kind = plan_effective_start(
                 requested_start,
@@ -389,9 +418,7 @@ class AdjustedBackfillRunner:
         summary_counts = {
             "current": sum(item.request_kind == "current" for item in requests),
             "full": sum(item.request_kind == "full" for item in requests),
-            "incremental": sum(
-                item.request_kind == "incremental" for item in requests
-            ),
+            "incremental": sum(item.request_kind == "incremental" for item in requests),
         }
         requested_start = min(item.requested_start_date for item in requests)
         requested_end = max(item.requested_end_date for item in requests)
@@ -409,6 +436,7 @@ class AdjustedBackfillRunner:
                 dry_run=True,
             )
 
+        check_volume_schema(self.duckdb_path)
         manifest = AdjustedIngestionManifest(self.manifest_path)
         client = self.client or MassiveClient()
         ingestor = (
@@ -434,9 +462,7 @@ class AdjustedBackfillRunner:
                 continue
             manifest.upsert_pending(
                 job_id=job_id,
-                source_plan_snapshot_date=date.fromisoformat(
-                    str(plan_snapshot_date)
-                ),
+                source_plan_snapshot_date=date.fromisoformat(str(plan_snapshot_date)),
                 tier=tier,
                 ticker=item.ticker,
                 requested_start_date=item.requested_start_date,
@@ -464,6 +490,9 @@ class AdjustedBackfillRunner:
             attempt_count = int(
                 (existing_manifest["attempt_count"] if existing_manifest else 0)
                 + (getattr(client, "last_attempt_count", 1) or 1)
+            )
+            manifest.record_response_evidence(
+                job_id, item.ticker, result.get("response_evidence", [])
             )
             http_status = getattr(client, "last_http_status", None)
             error_type = getattr(client, "last_error_type", None)
@@ -509,10 +538,7 @@ class AdjustedBackfillRunner:
                     last_http_status=http_status,
                 )
                 completed += 1
-            if (
-                self.request_pause_seconds > 0
-                and requests_made < planned_request_count
-            ):
+            if self.request_pause_seconds > 0 and requests_made < planned_request_count:
                 self._sleep(self.request_pause_seconds)
 
         return self._summary(

@@ -1,21 +1,25 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from datetime import UTC, date, datetime
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Any, Iterable
+from typing import Any
 
 import duckdb
 import pandas as pd
 
+from market_dashboard.data.adjusted_authority import (
+    check_volume_schema,
+    require_double_volume,
+)
 from market_dashboard.data.massive_client import MassiveClient
 from market_dashboard.data.storage import (
     DUCKDB_PATH,
     PROCESSED_DIRECTORY,
 )
-
 
 DAILY_BARS_COLUMNS = [
     "ticker",
@@ -43,6 +47,7 @@ class IngestionSummary:
     start_date: str
     end_date: str
     elapsed_time: float
+    response_evidence: list[dict[str, Any]]
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -72,8 +77,12 @@ class DailyBarIngestor:
         start_date: str | date,
         end_date: str | date,
     ) -> dict[str, Any]:
+        check_volume_schema(self.duckdb_path)
         started_at = time.perf_counter()
-        requested_tickers = [ticker.upper().strip() for ticker in tickers if ticker.strip()]
+        evidence = []
+        requested_tickers = [
+            ticker.upper().strip() for ticker in tickers if ticker.strip()
+        ]
         successful_tickers: list[str] = []
         failed_tickers: dict[str, str] = {}
         raw_records: list[dict[str, Any]] = []
@@ -81,7 +90,9 @@ class DailyBarIngestor:
 
         for index, ticker in enumerate(requested_tickers):
             try:
-                records = self.client.get_adjusted_daily_bars(ticker, start_date, end_date)
+                records = self.client.get_adjusted_daily_bars(
+                    ticker, start_date, end_date
+                )
             except Exception as exc:  # noqa: BLE001 - batch ingestion should continue per ticker.
                 failed_tickers[ticker] = str(exc)
                 continue
@@ -89,6 +100,9 @@ class DailyBarIngestor:
             successful_tickers.append(ticker)
             rows_fetched += len(records)
             raw_records.extend(records)
+            response = getattr(self.client, "last_response_evidence", None)
+            if response is not None:
+                evidence.append(response.model_dump(mode="json"))
 
             if self.request_pause_seconds > 0 and index < len(requested_tickers) - 1:
                 time.sleep(self.request_pause_seconds)
@@ -116,6 +130,7 @@ class DailyBarIngestor:
             start_date=str(start_date),
             end_date=str(end_date),
             elapsed_time=elapsed_time,
+            response_evidence=evidence,
         ).to_dict()
 
     def _prepare_storage(self) -> None:
@@ -136,9 +151,18 @@ class DailyBarIngestor:
         frame["date"] = pd.to_datetime(frame["date"], errors="coerce").dt.date
         frame["ingested_at"] = ingested_at
 
-        for column in ("open", "high", "low", "close", "volume", "vwap", "transactions"):
+        for column in (
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume",
+            "vwap",
+            "transactions",
+        ):
             frame[column] = pd.to_numeric(frame.get(column), errors="coerce")
 
+        frame["volume"] = frame["volume"].astype("float64")
         return frame.reindex(columns=DAILY_BARS_COLUMNS)
 
     def _validate_frame(self, frame: pd.DataFrame) -> tuple[pd.DataFrame, int]:
@@ -160,10 +184,14 @@ class DailyBarIngestor:
             & (frame["low"] <= frame["close"])
             & frame["volume"].notna()
             & (frame["volume"] >= 0)
-            & (frame["transactions"].isna() | (frame["transactions"] >= 0))
+            & (
+                frame["transactions"].isna()
+                | ((frame["transactions"] >= 0) & (frame["transactions"] % 1 == 0))
+            )
         )
 
         valid_frame = frame.loc[valid_mask, DAILY_BARS_COLUMNS].copy()
+        valid_frame["transactions"] = valid_frame["transactions"].astype("Int64")
         invalid_rows = int((~valid_mask).sum())
         return valid_frame, invalid_rows
 
@@ -177,15 +205,24 @@ class DailyBarIngestor:
         )
 
     def _write_parquet(self, frame: pd.DataFrame) -> int:
+        check_volume_schema(self.duckdb_path)
+        frame = frame.copy()
+        frame["volume"] = frame["volume"].astype("float64")
         rows_written = 0
         for ticker, ticker_frame in frame.groupby("ticker", sort=True):
             parquet_path = self.daily_bars_directory / f"{ticker}.parquet"
             existing_frame = (
-                pd.read_parquet(parquet_path) if parquet_path.exists() else pd.DataFrame()
+                pd.read_parquet(parquet_path)
+                if parquet_path.exists()
+                else pd.DataFrame()
             )
             merged_frame = pd.concat([existing_frame, ticker_frame], ignore_index=True)
-            merged_frame["date"] = pd.to_datetime(merged_frame["date"], errors="coerce").dt.date
-            merged_frame = self._deduplicate_frame(merged_frame.reindex(columns=DAILY_BARS_COLUMNS))
+            merged_frame["date"] = pd.to_datetime(
+                merged_frame["date"], errors="coerce"
+            ).dt.date
+            merged_frame = self._deduplicate_frame(
+                merged_frame.reindex(columns=DAILY_BARS_COLUMNS)
+            )
 
             self._atomic_write_parquet(merged_frame, parquet_path)
             rows_written += len(ticker_frame)
@@ -211,6 +248,7 @@ class DailyBarIngestor:
         if frame.empty:
             return 0
 
+        check_volume_schema(self.duckdb_path)
         with duckdb.connect(str(self.duckdb_path)) as connection:
             self._ensure_daily_bars_table(connection)
             connection.register("incoming_daily_bars", frame)
@@ -234,6 +272,7 @@ class DailyBarIngestor:
         return len(frame)
 
     def _ensure_daily_bars_table(self, connection: duckdb.DuckDBPyConnection) -> None:
+        require_double_volume(connection)
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS daily_bars (
@@ -243,7 +282,7 @@ class DailyBarIngestor:
                 high DOUBLE,
                 low DOUBLE,
                 close DOUBLE,
-                volume BIGINT,
+                volume DOUBLE,
                 vwap DOUBLE,
                 transactions BIGINT,
                 ingested_at TIMESTAMP
