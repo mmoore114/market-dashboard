@@ -1,242 +1,242 @@
 # Codex Next Task
 
-**Task ID:** AP-FOUNDATION-AUTHORITY-001
+**Task ID:** AP-CURRENT-FOUNDATION-001
 
-**Status:** COMPLETE
+**Status:** READY — approved end-to-end current-foundation milestone
 
-**Issued:** 2026-09-06
+**Issued:** 2026-09-07
 
-**Product baseline:** `ccf31f8f95f090830d2a2f3ff52a173b24c064d2`
+**Product baseline:** `f1250d733ec9f2192fd7c361b8c3cbbccccc226c`
 
-**Handoff branch:** `codex/foundation-authority-handoff`
+**Handoff branch:** `codex/current-foundation-handoff`
 
-## Goal
+## Outcome
 
-Implement the reviewed calendar, adjusted-volume, and source-provenance authority
-decisions needed by the local materializer. Produce verified staged evidence and
-an exact recoverable migration/publication plan, but do not mutate production or
-build a real workstation snapshot.
+Advance Aperture from verified engine/UI/materializer code to the first truthful
+real local Workstation V1 snapshot for the initial covered population. Complete
+the remaining foundation work in one autonomously sequenced milestone instead of
+requesting approval after each ordinary implementation, staging, validation, or
+recoverable publication step.
 
-This milestone should eliminate conceptual ambiguity, not bypass missing data.
-The remaining QQQE, spot, identity, and Aperture schedule inputs stay deferred to
-later bounded acquisition/publication work.
+The deterministic V1 product logic is already built. Reuse the existing Structure,
+Setup, Leadership/RS, Regime, Decision/Risk, snapshot V2, API, React Workstation,
+identity, publication, reconciliation, and materializer contracts. Do not redesign
+them, add a new scoring model, or expand test matrices merely for reassurance.
 
 ## Branch and completion protocol
 
-1. Fetch origin and create `codex/foundation-authority-v1` from the current remote
-   head of the handoff branch above. Verify ancestry from the product baseline.
-2. Target a draft PR to `codex/foundation-reconciliation-v1`.
-3. Read `AGENTS.md`, `docs/PROJECT_STATE.md`, this file,
-   `docs/foundation-reconciliation-v1.md`, `docs/local-materializer-v1.md`, the
-   adjusted-ingestion code/contracts, and snapshot V2 before editing.
-4. Complete the bounded milestone autonomously unless a destructive action or
-   materially contradictory authoritative contract is encountered.
-5. Update this file and `docs/PROJECT_STATE.md`, run verification, commit, push,
-   and open the draft PR. Return only the commit SHA, test totals, PR link,
-   authority/migration results, remaining blockers, and next bounded action.
+1. Fetch origin and create `codex/current-foundation-v1` from the current remote
+   head of this handoff branch. Verify ancestry from the product baseline.
+2. Target a draft PR to `codex/foundation-authority-v1`.
+3. Read `AGENTS.md`, `docs/PROJECT_STATE.md`, this file, the completed foundation
+   contracts, publication contracts, universe rules, and materializer contract.
+4. Execute all authorized phases below without returning for routine approvals.
+   Each phase must validate before the next phase can consume it.
+5. Stop only for a material contract contradiction, unavailable credential or
+   entitlement, a cap/safety failure, inability to obtain exclusive maintenance,
+   or evidence that would make the resulting snapshot dishonest.
+6. At completion update this file and `docs/PROJECT_STATE.md`, commit, push, open
+   the draft PR, and return the commit SHA, test totals, PR link, published input
+   versions, snapshot status/path/date, and only genuine remaining blockers.
 
-## Explicit authority
+## Authorization boundary
 
-Authorized:
+This assignment explicitly authorizes:
 
-- code, tests, documentation, immutable source-contract configuration, and a
-  direct pinned dependency on `exchange-calendars==4.13.2`;
-- installation of that exact PyPI package and only its resolver-required Python
-  dependencies when not already available locally;
-- no-market-data network access strictly necessary for that package installation;
-- read-only inspection of production inputs and existing private staged evidence;
-- generation of calendar, provenance, comparison, and migration-simulation
-  artifacts only in the existing nonproduction workstation staging workspace;
-- isolated migration/recovery simulations using copied fixtures;
-- one commit, push, and draft PR for this milestone.
+- code, configuration, tests, and documentation needed for this milestone;
+- bounded Massive and FRED data retrieval described below using already configured
+  credentials where required;
+- isolated staging, full backups, exclusive-maintenance production corrections,
+  recoverable publication, exposure/universe/feature rebuilding, and creation of
+  a real local Workstation snapshot when every gate passes;
+- deterministic offline validation after every network or production phase;
+- one commit, push, and draft PR.
 
-Not authorized:
+It does not authorize:
 
-- unbounded provider access, any endpoint/identity outside the conditional staging
-  authority below, or any fetch before its prerequisites pass;
-- production DuckDB, Parquet, manifest, calendar, master, exposure, universe, or
-  workstation snapshot writes;
-- applying a schema migration or publishing a provenance/calendar artifact;
-- VIX, security-master, market-cap, taxonomy, earnings, or other acquisition
-  outside the exact conditional scope below;
-- security-master publication, exposure rebuild, Aperture schedule publication,
-  crosswalk application, real snapshot build, production API startup, merge,
-  brokerage behavior, or `.vscode/settings.json` changes.
+- unbounded discovery or downloading the full U.S. market history;
+- use of raw Deepvue exports, applying any of the 23 proposed crosswalks, or
+  changing the exact 29-record non-security disposition;
+- overwriting the immutable July or September staged source artifacts;
+- weakening point-in-time, identity, publication, coverage, or freshness gates;
+- brokerage connectivity, order placement, portfolio automation, cloud hosting,
+  PR merging, or `.vscode/settings.json` changes.
 
-## Conditional bounded current-data authority
+Preserve exact backups until the user separately chooses to remove them. Never
+log credentials, authorization headers, cookies, environment contents, full query
+strings, proprietary rows, or unsanitized provider errors.
 
-Current data may be fetched only if the offline calendar, adjusted-volume writer,
-path safety, and staging validator pass first and the exact missing range is
-resolved deterministically. A fetch is optional; do not perform it merely because
-it is authorized.
+## Execution policy
 
-If those gates pass, one staged Massive adjusted-aggregate update is authorized:
+- Start with source hashes, Git state, current production schema, backup presence,
+  staging inventory, credential-presence checks, and exclusive-maintenance plan.
+- Reuse the proven plan/stage/validate/publish/recover patterns. Production writes
+  require fresh preflight hashes, complete backup, no active WAL/readers/writers,
+  atomic or transactional application, post-close independent validation, and a
+  tested rollback path.
+- A failed or incomplete phase cannot feed the next phase. Preserve its evidence
+  and continue with independent work that remains safe; stop only when nothing
+  useful in this milestone can progress.
+- Prefer a working, explainable V1 over additional abstraction. Add only focused
+  boundary/regression tests needed by changed behavior, then run the complete
+  suite once at the end.
 
-- endpoint only: `GET /v2/aggs/ticker/{ticker}/range/1/day/{from}/{to}`;
-- `adjusted=true`, `sort=asc`, `limit=50000`;
-- symbols only: the exact tickers in the existing reviewed 100-symbol adjusted-
-  backfill plan, plus deduplicated SPY, QQQ, IWM, RSP, and QQQE;
-- for existing symbols, start at the first missing session after verified local
-  coverage; for absent QQQE, no earlier than 2024-01-02;
-- end at the last completed XNYS session established by the pinned calendar;
-- maximum 125 total HTTP attempts and 25,000 returned records;
-- every failed request counts; one attempt per request with no automatic retry;
-- reject redirects, cross-origin URLs, unexpected pagination, schema/basis
-  disagreement, or any cap breach before writing the affected page;
-- write exact provider-returned values only beneath a new explicit staging
-  subdirectory; never invoke the existing immediate production writer;
-- preserve sanitized per-request receipts and completed evidence after failure;
-- validate the complete staged candidate offline with exact keys, fractional
-  volume, session coverage, hashes, and logical fingerprints.
+## Phase 1 — certify the corrected adjusted-bar foundation
 
-No spot/VIX request is authorized until its exact non-security provider identity,
-dataset, endpoint, and entitlement are reviewed. No security-master refetch is
-needed. A successful staged bar fetch still does not authorize database/Parquet
-publication, universe construction, exposure rebuild, or a real snapshot build.
+Revalidate the completed production correction recorded in PROJECT_STATE:
 
-## Reviewed authority decisions
+- `daily_bars.volume` is DOUBLE;
+- 63,279 existing rows and 11,607 fractional values exactly match all 100 original
+  Parquet copies;
+- ticker/date uniqueness and all non-volume fields agree;
+- the verified full backup remains readable and matches its recorded pre-change
+  hash;
+- the seven other tables and protected files remain unchanged.
 
-Implement these decisions exactly:
+Create fresh post-correction source evidence rather than resealing historical
+pre-correction receipts. Preserve the old receipts as immutable history.
 
-1. Calendar implementation: `exchange-calendars==4.13.2`, calendar `XNYS`.
-   Record the package version, XNYS identity, timezone, ordered sessions, regular
-   and early closes, generation range, artifact hash, and deterministic command.
-   Do not infer sessions from observed bars.
-2. Massive adjusted aggregate endpoint semantics: `adjusted=true` means adjusted
-   for splits. It is not a dividend-total-return series. Preserve this distinction
-   explicitly in the source contract.
-3. Provider aggregate `v` is numeric, and the provider-returned fractional values
-   written to the existing Parquet files are the authoritative representation of
-   those observed rows. The current DuckDB `BIGINT` values are a lossy rounded
-   derivative, not an alternative canonical source.
-4. Canonical adjusted volume must preserve the provider-returned numeric value as
-   `DOUBLE` end to end. Never round, truncate, cast to integer, or silently choose
-   between copies. Transaction count remains integral.
-5. This decision establishes representation authority; it does not authenticate
-   missing historical provider receipts or declare the existing database repaired
-   or published.
+## Phase 2 — exact September security-master publication
 
-Authoritative references reviewed 2026-09-06:
+Use the immutable validated 2026-09-05 staged artifact. Do not refetch it or change
+its Parquet bytes, exact-case identities, compatibility projection, exclusions,
+collision evidence, Deepvue reconciliation, or unapplied crosswalk reports.
 
-- `https://massive.com/docs/rest/stocks/aggregates/custom-bars`
-- `https://github.com/gerrymanoim/exchange_calendars`
-- `https://github.com/gerrymanoim/exchange_calendars/releases/tag/4.13.2`
+Fix the nanosecond/microsecond `last_updated_utc` publication mismatch with an
+explicit exact-precision schema/serialization contract. Add real-artifact tests
+and repeat isolated first-publication, identical no-op, interruption/recovery,
+changed-same-date rejection, July preservation, and DuckDB/Parquet full-field
+agreement simulations.
 
-## Calendar implementation
+If every simulation passes, publish that exact September artifact using the
+existing confirmed, recoverable publication protocol during exclusive maintenance.
+Back up the complete database and affected partition state first. Independently
+verify after closing the publishing connection:
 
-- Add a narrow adapter that converts the pinned XNYS schedule into the existing
-  frozen `CalendarV1` without changing that contract.
-- Preserve timezone-aware actual closes and correctly identify early closes.
-- Reject unsupported calendar identity/version, duplicate or unordered sessions,
-  naive or non-UTC-convertible closes, out-of-range requests, and a package-version
-  mismatch.
-- Generate and independently validate a candidate calendar in staging covering
-  all sessions required to assess the current bar history and candidate T/T+1.
-- Bind calendar logical fingerprint and bytes to the candidate provenance evidence.
-  The staged calendar is not production publication.
+- 13,155 exact reference rows;
+- unchanged logical fingerprint
+  `7d22fab5f8dbffea1c9254124e9c2731006648391519e55543f6058c77c7112b`;
+- unchanged Parquet SHA-256
+  `d3bd5b75665c646e109e22514839da6771b49070f4ed2998b5e879cdb16fc8fc`;
+- exact field-level DuckDB/Parquet agreement;
+- July logical content and bytes unchanged;
+- complete publication state.
 
-## Adjusted-volume and provenance implementation
+Do not apply crosswalks or publish exposure as a side effect.
 
-- Change new `daily_bars` table creation and new writes so `volume` is `DOUBLE`.
-- Add schema checks that fail closed when an existing table remains `BIGINT`; do
-  not auto-alter it from ordinary ingestion or materialization.
-- Preserve fractional volume through API mapping, pandas, Parquet, DuckDB, hashing,
-  comparison, features, and replay. Audit every downstream integer assumption.
-- Record sanitized response-level evidence needed for future ingestion receipts,
-  including endpoint class, requested/returned adjusted flag, source version,
-  requested and observed bounds, and artifact fingerprints. Do not persist keys,
-  authorization headers, query strings, or raw responses.
-- Define a versioned provenance profile stating split-adjusted price, no dividend
-  total-return adjustment, and matching provider-returned split-adjusted numeric
-  volume. Unsupported publication/observation facts remain UNKNOWN.
-- Re-evaluate the staged candidate manifest field by field. Do not relabel it as a
-  complete `ManifestV1` unless every required field has verifiable evidence.
+## Phase 3 — calendar, provenance, and current market inputs
 
-## Recoverable migration simulation
+Publish a versioned local `CalendarV1` from pinned
+`exchange-calendars==4.13.2`, calendar `XNYS`, with ordered sessions, aware closes,
+early closes, source version, bytes hash, and logical fingerprint. Do not derive
+sessions from bars.
 
-Implement an explicit offline plan/simulate/validate workflow for a future
-`daily_bars.volume BIGINT -> DOUBLE` correction.
+Create a new post-correction provenance/publication manifest bound to exact source
+artifacts and retrieval receipts. The reviewed source profile is:
 
-- Plan mode opens no files/databases, performs no network calls, and writes nothing.
-- Simulation uses copies only and creates a replacement table/database outside
-  production. Load exact Parquet volume values by `(ticker,date)`, require identical
-  keys and all non-volume fields, and reject missing/extra/duplicate rows.
-- Verify all 63,279 current keys and all 11,607 fractional values can be restored,
-  with full DuckDB/Parquet field equality and deterministic fingerprints.
-- Exercise pending, complete, interrupted/recovery-required, verified recovery,
-  identical rerun/no-op, and changed-input rejection states.
-- Produce exact backup, maintenance-window, apply, verification, and rollback
-  commands for later approval. Do not expose an executable production apply mode
-  under this task.
+- Massive custom daily stock aggregates with `adjusted=true`;
+- split-adjusted prices, not dividend total return;
+- provider-returned split-adjusted numeric volume preserved as DOUBLE;
+- transaction counts integral;
+- calendar bound to the published XNYS artifact.
 
-## Rules-date and forward-target handling
+Unknown historical facts remain UNKNOWN, but newly retrieved inputs must have
+complete observed/fetch/publication timestamps and hashes. Do not invent historical
+attestations.
 
-The separate `APERTURE_RULES_AFTER_CANDIDATE_T` result is correct, not a formula
-bug. `aperture-rules-v1` must not be projected before its 2026-08-25 effective
-date. Retain it as a timing constraint and state that a real target T must be a
-valid XNYS session on or after that date with master, exposure, universe, bars,
-benchmarks, and spot evidence valid for the same point in time.
+After offline plan validation, update the initial covered population:
 
-Do not use the unpublished 2026-09-05 security master, project July 26 identity
-backward, or invent a feasible T/T+1 pair.
+- exact symbols from the reviewed existing 100-symbol adjusted-backfill plan;
+- required market ETFs SPY, QQQ, IWM, RSP, and QQQE, deduplicated;
+- for covered existing symbols, fetch only missing sessions after verified local
+  maxima; for absent QQQE, fetch from 2024-01-02;
+- end at the latest completed XNYS session at execution time;
+- Massive endpoint only:
+  `GET /v2/aggs/ticker/{ticker}/range/1/day/{from}/{to}` with
+  `adjusted=true`, `sort=asc`, `limit=50000`;
+- at most 125 total HTTP attempts and 25,000 returned rows; one attempt per request,
+  failures count, no automatic retry, no redirects or unexpected pagination.
 
-## Reconciliation and acceptance
+Stage exact results first. Validate identities, response adjusted flags, sessions,
+keys, OHLCV, fractional volume, coverage, hashes, and source receipts offline.
+Publish only the exact validated staged increment through a recoverable path, then
+prove complete DuckDB/Parquet equality. Preserve prior history.
 
-Rerun the existing offline reconciliation using the pinned calendar and reviewed
-authority profile. Report separately:
+For spot volatility, implement and use the versioned non-security source:
 
-- calendar finding disposition;
-- volume representation authority versus still-unapplied production correction;
-- provenance fields established and fields still UNKNOWN;
-- exact migration simulation row/mismatch/fingerprint results;
-- original eight-finding conservation and any separate findings;
-- remaining prerequisites for an identity-valid post-2026-08-25 target;
-- the next minimal acquisition/publication milestone.
+- canonical Aperture identity `$VIX`;
+- provider/dataset `Federal Reserve Bank of St. Louis FRED / VIXCLS`;
+- source is Cboe Market Statistics;
+- daily close, not a security, ETF, futures contract, or intraday proxy;
+- retrieve only 2024-01-02 through the latest available observation;
+- maximum two HTTP attempts and 1,000 returned observations, no automatic retry;
+- record source observation date, retrieval timestamp, covered sessions, missing
+  values, licensing/source attribution, artifact hash, and freshness.
 
-Tests must cover the pin/version gate, known XNYS holidays and early closes,
-timezone conversion, deterministic calendar generation, fractional volume
-round-trips, existing BIGINT refusal, response metadata sanitization, migration
-state/recovery/no-op/rejection behavior, zero market-data calls, no production
-writes, protected-file preservation, and unchanged engine/snapshot semantics.
+FRED lag must remain explicit. It may support a premarket snapshot using the last
+completed T only when the observation was available before evaluation time. Never
+forward-fill a missing VIX session or substitute VXX/VIXY/VX futures.
 
-Run focused tests, the full Python suite, applicable frontend/browser and
-schema/type synchronization checks, and `git diff --check`.
+## Phase 4 — aligned exposure, population, and features
 
-Do not build a real workstation snapshot in this milestone. Success means calendar
-and representation authority are deterministic and the real correction/acquisition
-boundary is ready for one later reviewed action.
+Rebuild and recoverably publish exposure-policy-v3 against the completed September
+master. Preserve exact-case reference identity and use the compatibility boundary;
+do not apply proposed mappings.
 
+Build the first dated Aperture research/trade schedule from only the explicitly
+covered initial population. Apply the immutable `aperture-universe-v1` rules as
+written: price, market-cap, ADV20-dollar, ADR20, exposure/type, and all identity
+requirements. Obtain market-cap/reference facts only for the covered candidates
+when missing, using `GET /v3/reference/tickers/{ticker}`:
 
-## Completion receipt — 2026-09-06
+- maximum 110 HTTP attempts and 110 returned records;
+- one attempt per exact ticker, no retry or redirect;
+- stage and validate before publication;
+- retain source/as-of timestamps and explicit missing fields.
 
-AP-FOUNDATION-AUTHORITY-001 is complete. See
-[PROJECT_STATE](PROJECT_STATE.md#ap-foundation-authority-001--completed-2026-09-06)
-and the [authority contract](foundation-authority-v1.md) for observed results,
-fingerprints, remaining findings and the copied-only migration workflow.
+Do not claim this 100-symbol covered population is the complete U.S. equity market.
+Its scope and all leadership/breadth denominators must be labeled exactly. If the
+existing engine contract cannot truthfully represent a bounded initial population,
+stop schedule/snapshot publication and report that single contract blocker rather
+than changing formulas.
 
-Verification: 163 focused Python tests (36 new), 2,846 full-suite Python tests,
-11 frontend tests and two fixture browser tests passed; schema/type, build, lint
-and whitespace checks passed. All 348 protected files and production/provider
-file sets remain unchanged. No production correction or real snapshot was run.
+Rebuild derived feature tables from the corrected and updated bars through a
+temporary/candidate path with DOUBLE volume. Verify formulas and row-level parity
+against the existing pure engines before recoverable publication. Preserve old
+feature outputs until replacement validates; do not silently migrate legacy
+fields or thresholds.
 
-The next bounded action requires separate authority: review and approve the exact
-staged BIGINT-to-DOUBLE production correction, backup and exclusive maintenance
-window. This completed handoff does not authorize applying it. Identity-valid
-post-August-25 inputs, QQQE/current history, spot, provenance and Aperture schedule
-publication remain unresolved prerequisites for a later real snapshot.
+## Phase 5 — first real local Workstation snapshot
 
+Select the latest T only when all inputs are valid at completed T close and the
+next XNYS action session T+1 is known. T must be on or after the immutable Aperture
+rules effective date 2026-08-25. The 2026-09-05 master cannot justify T=2026-09-04;
+its first possible later session is 2026-09-08.
 
-## Subsequent owner approval and execution — 2026-09-06
+If the necessary post-September-5 completed session or source observations are not
+yet available, finish all preceding ready work and report only the exact clock/data
+wait. Do not weaken timing rules.
 
-The user subsequently approved the exact production volume correction, superseding
-only this completed handoff's prohibition on applying that correction. It is now
-complete: 63,279 rows, 11,607 fractional volumes restored, zero full-field Parquet
-mismatches, verified full backup retained. Seven other tables and 347 other
-protected files are unchanged. An existing ticker/date index was identically
-recreated within the correction transaction after a successful full-copy rehearsal.
+When a valid T exists, run materializer plan and audit. With zero hard blockers,
+build and validate one real normalized `workstation-snapshot-v2` in the authorized
+local staging location. Enforce the 24 MiB materializer target and 32 MiB loader
+ceiling without dropping records. Start the local API only long enough to verify
+health, Brief, Tape, Groups/detail, Sizer, and Rules against that exact snapshot;
+run desktop/mobile browser smoke checks and shut it down afterward.
 
-See the latest PROJECT_STATE entry for hashes and independent verification. Old
-pre-correction receipts remain historical and cannot validate the new database
-hash. The next bounded work is fresh post-correction evidence and a reviewed
-calendar/provenance publication plan. No publication, acquisition, derived-feature
-rebuild or real snapshot is authorized by this volume-only approval.
+The result must visibly identify LOCAL_SNAPSHOT mode, as-of/action sessions,
+freshness, initial-population scope, source/rules fingerprints, denominators,
+UNKNOWN/refused evidence, funnel counts, bytes, and logical fingerprint. Do not
+call a stale, partial, or historical artifact live/current.
+
+## Verification and report
+
+Run focused tests for changed code, then one complete Python suite; run frontend
+component/browser tests, schema/OpenAPI/type synchronization, TypeScript typecheck,
+production build, lint/format, and `git diff --check` where applicable. Prove
+production/staging/settings preservation around every operation and report exact
+intentional production changes separately.
+
+Success is the first fully validated real local snapshot, or completion of every
+safe prerequisite with one irreducible external/time blocker. Do not stop merely
+because an intermediate planned phase completed.
