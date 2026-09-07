@@ -220,6 +220,38 @@
         "title": "Eligibility",
         "type": "string"
       },
+      "EngineComparisonV1": {
+        "additionalProperties": false,
+        "properties": {
+          "baseline_snapshot_fingerprint": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Baseline Snapshot Fingerprint",
+            "type": "string"
+          },
+          "kind": {
+            "const": "ENGINE_VERSION_COMPARISON",
+            "default": "ENGINE_VERSION_COMPARISON",
+            "title": "Kind",
+            "type": "string"
+          },
+          "note": {
+            "default": "Recomputed with V2 rules using original T/E/A clocks; not a new market refresh.",
+            "title": "Note",
+            "type": "string"
+          },
+          "source_spec_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Source Spec Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "baseline_snapshot_fingerprint",
+          "source_spec_sha256"
+        ],
+        "title": "EngineComparisonV1",
+        "type": "object"
+      },
       "EvaluationV1": {
         "additionalProperties": false,
         "description": "Current decision clocks; never a historical-membership attestation.",
@@ -233,6 +265,17 @@
             "anyOf": [
               {
                 "$ref": "#/$defs/BootstrapContextV1"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "comparison": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/EngineComparisonV1"
               },
               {
                 "type": "null"
@@ -399,6 +442,12 @@
                 "81": "#/$defs/NormalizedUniverseMemberships",
                 "82": "#/$defs/NormalizedVolatilityInputV1",
                 "83": "#/$defs/NormalizedVolatilitySleeveV1",
+                "84": "#/$defs/NormalizedSetupInputV2",
+                "85": "#/$defs/NormalizedSetupOutputV2",
+                "86": "#/$defs/NormalizedStructureConditionsV2",
+                "87": "#/$defs/NormalizedStructureEvidenceV2",
+                "88": "#/$defs/NormalizedStructureInputV2",
+                "89": "#/$defs/NormalizedStructureMeasuresV2",
                 "9": "#/$defs/NormalizedDecisionRiskOutputV1"
               },
               "propertyName": "model_type"
@@ -561,6 +610,9 @@
                 "$ref": "#/$defs/NormalizedSetupInputV1"
               },
               {
+                "$ref": "#/$defs/NormalizedSetupInputV2"
+              },
+              {
                 "$ref": "#/$defs/NormalizedSetupInstanceV1"
               },
               {
@@ -568,6 +620,9 @@
               },
               {
                 "$ref": "#/$defs/NormalizedSetupOutputV1"
+              },
+              {
+                "$ref": "#/$defs/NormalizedSetupOutputV2"
               },
               {
                 "$ref": "#/$defs/NormalizedSetupStrengthContextV1"
@@ -612,16 +667,28 @@
                 "$ref": "#/$defs/NormalizedStructureConditionsV1"
               },
               {
+                "$ref": "#/$defs/NormalizedStructureConditionsV2"
+              },
+              {
                 "$ref": "#/$defs/NormalizedStructureContextV1"
               },
               {
                 "$ref": "#/$defs/NormalizedStructureEvidenceV1"
               },
               {
+                "$ref": "#/$defs/NormalizedStructureEvidenceV2"
+              },
+              {
                 "$ref": "#/$defs/NormalizedStructureInputV1"
               },
               {
+                "$ref": "#/$defs/NormalizedStructureInputV2"
+              },
+              {
                 "$ref": "#/$defs/NormalizedStructureMeasuresV1"
+              },
+              {
+                "$ref": "#/$defs/NormalizedStructureMeasuresV2"
               },
               {
                 "$ref": "#/$defs/NormalizedStructureSourceV1"
@@ -4840,6 +4907,314 @@
         "title": "NormalizedSetupInputV1",
         "type": "object"
       },
+      "NormalizedSetupInputV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 33,
+            "minItems": 33,
+            "prefixItems": [
+              {
+                "const": "setup-input-v2",
+                "type": "string"
+              },
+              {
+                "const": "setup-features-v2",
+                "type": "string"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "$ref": "#/$defs/CorporateActionQA"
+              },
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "items": {
+                      "type": "number"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 84,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedSetupInputV2",
+        "type": "object"
+      },
       "NormalizedSetupInstanceV1": {
         "additionalProperties": false,
         "properties": {
@@ -5091,6 +5466,87 @@
           "fields"
         ],
         "title": "NormalizedSetupOutputV1",
+        "type": "object"
+      },
+      "NormalizedSetupOutputV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 11,
+            "minItems": 11,
+            "prefixItems": [
+              {
+                "const": "setup-output-v2",
+                "type": "string"
+              },
+              {
+                "const": "setup-engine-v2",
+                "type": "string"
+              },
+              {
+                "const": "setup-features-v2",
+                "type": "string"
+              },
+              {
+                "const": "setup-thresholds-v2",
+                "type": "string"
+              },
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 85,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedSetupOutputV2",
         "type": "object"
       },
       "NormalizedSetupStrengthContextV1": {
@@ -6062,6 +6518,79 @@
         "title": "NormalizedStructureConditionsV1",
         "type": "object"
       },
+      "NormalizedStructureConditionsV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 11,
+            "minItems": 11,
+            "prefixItems": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "items": {
+                  "maxItems": 3,
+                  "minItems": 3,
+                  "prefixItems": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "type": "array"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 86,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedStructureConditionsV2",
+        "type": "object"
+      },
       "NormalizedStructureContextV1": {
         "additionalProperties": false,
         "properties": {
@@ -6297,6 +6826,238 @@
           "fields"
         ],
         "title": "NormalizedStructureEvidenceV1",
+        "type": "object"
+      },
+      "NormalizedStructureEvidenceV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 31,
+            "minItems": 31,
+            "prefixItems": [
+              {
+                "const": "structure-evidence-v2",
+                "type": "string"
+              },
+              {
+                "const": "structure-engine-v2",
+                "type": "string"
+              },
+              {
+                "const": "structure-features-v2",
+                "type": "string"
+              },
+              {
+                "const": "structure-thresholds-v2",
+                "type": "string"
+              },
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/StructureState"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/StructureState"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/StructureState"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/StructureState"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "insufficient_history",
+                      "missing_data",
+                      "nonpositive_input"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "items": {
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "prefixItems": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ],
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "anyOf": [
+                  {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 87,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedStructureEvidenceV2",
         "type": "object"
       },
       "NormalizedStructureInputV1": {
@@ -6545,6 +7306,284 @@
         "title": "NormalizedStructureInputV1",
         "type": "object"
       },
+      "NormalizedStructureInputV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 28,
+            "minItems": 28,
+            "prefixItems": [
+              {
+                "const": "structure-input-v2",
+                "type": "string"
+              },
+              {
+                "const": "structure-features-v2",
+                "type": "string"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "anyOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "maximum": 15,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "maximum": 15,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "maximum": 15,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "maximum": 15,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 88,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedStructureInputV2",
+        "type": "object"
+      },
       "NormalizedStructureMeasuresV1": {
         "additionalProperties": false,
         "properties": {
@@ -6617,6 +7656,48 @@
           "fields"
         ],
         "title": "NormalizedStructureMeasuresV1",
+        "type": "object"
+      },
+      "NormalizedStructureMeasuresV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 6,
+            "minItems": 6,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 89,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedStructureMeasuresV2",
         "type": "object"
       },
       "NormalizedStructureSourceV1": {
@@ -7279,8 +8360,11 @@
             "type": "integer"
           },
           "registry_fingerprint": {
-            "const": "454a474905e65a3c1b74af17161ca5a839c0ef5709c4fdb6544abf2d4341d291",
-            "default": "454a474905e65a3c1b74af17161ca5a839c0ef5709c4fdb6544abf2d4341d291",
+            "default": "8a0c2a762f0ec293fa107ebc87fde5881559606a5808ecf361ce0c381772a148",
+            "enum": [
+              "8a0c2a762f0ec293fa107ebc87fde5881559606a5808ecf361ce0c381772a148",
+              "454a474905e65a3c1b74af17161ca5a839c0ef5709c4fdb6544abf2d4341d291"
+            ],
             "title": "Registry Fingerprint",
             "type": "string"
           },
@@ -7412,26 +8496,38 @@
             "type": "string"
           },
           "setup": {
-            "const": "setup-engine-v1",
             "default": "setup-engine-v1",
+            "enum": [
+              "setup-engine-v1",
+              "setup-engine-v2"
+            ],
             "title": "Setup",
             "type": "string"
           },
           "setup_fingerprint": {
-            "const": "823647ca53b5c4623fef7f00beb294a18b5a8e8166d398ef8290b534cdcbfc38",
             "default": "823647ca53b5c4623fef7f00beb294a18b5a8e8166d398ef8290b534cdcbfc38",
+            "enum": [
+              "823647ca53b5c4623fef7f00beb294a18b5a8e8166d398ef8290b534cdcbfc38",
+              "0f2acac1a4fa4546467db39098d33383212f0149f8bb9af1c660088e7f229aa2"
+            ],
             "title": "Setup Fingerprint",
             "type": "string"
           },
           "structure": {
-            "const": "structure-engine-v1",
             "default": "structure-engine-v1",
+            "enum": [
+              "structure-engine-v1",
+              "structure-engine-v2"
+            ],
             "title": "Structure",
             "type": "string"
           },
           "structure_fingerprint": {
-            "const": "b0faf4774c772c0f4d09120f8eafd311853c59d751fe5bc7649a9a1b380bcf0d",
             "default": "b0faf4774c772c0f4d09120f8eafd311853c59d751fe5bc7649a9a1b380bcf0d",
+            "enum": [
+              "b0faf4774c772c0f4d09120f8eafd311853c59d751fe5bc7649a9a1b380bcf0d",
+              "b9c2ae96d1cf00ef23168af4ca188f41101f3823dc5e827216ca77b02897d071"
+            ],
             "title": "Structure Fingerprint",
             "type": "string"
           },
@@ -8283,6 +9379,44 @@
         "window30"
       ]
     },
+    "SetupInputV2": {
+      "code": 84,
+      "fields": [
+        "schema_version",
+        "feature_version",
+        "symbol",
+        "session_date",
+        "session_index",
+        "bar_timestamp_utc",
+        "source",
+        "structure",
+        "corporate_action_qa",
+        "corporate_action_evidence",
+        "open",
+        "high",
+        "low",
+        "close",
+        "previous_close",
+        "atr5",
+        "atr14",
+        "atr20",
+        "previous_atr14",
+        "volume",
+        "prior_volume20",
+        "mean_volume5",
+        "mean_volume20",
+        "s20",
+        "averages",
+        "window20",
+        "window30",
+        "tr5",
+        "tr20",
+        "median_atr20",
+        "word_s20",
+        "median_volume5",
+        "median_volume20"
+      ]
+    },
     "SetupInstanceV1": {
       "code": 52,
       "fields": [
@@ -8318,6 +9452,22 @@
     },
     "SetupOutputV1": {
       "code": 54,
+      "fields": [
+        "schema_version",
+        "engine_version",
+        "feature_version",
+        "threshold_version",
+        "rules_fingerprint",
+        "inputs",
+        "setups",
+        "detections",
+        "rejected_ep",
+        "archived_ids",
+        "errors"
+      ]
+    },
+    "SetupOutputV2": {
+      "code": 85,
       "fields": [
         "schema_version",
         "engine_version",
@@ -8517,6 +9667,22 @@
         "SHOCK_DN"
       ]
     },
+    "StructureConditionsV2": {
+      "code": 86,
+      "fields": [
+        "emerging",
+        "uptrend",
+        "hold_up",
+        "damage_down",
+        "deteriorating",
+        "decline",
+        "hold_down",
+        "damage_up",
+        "shock_up",
+        "shock_down",
+        "predicates"
+      ]
+    },
     "StructureContextV1": {
       "code": 69,
       "fields": [
@@ -8555,6 +9721,42 @@
         "context_only"
       ]
     },
+    "StructureEvidenceV2": {
+      "code": 87,
+      "fields": [
+        "schema_version",
+        "engine_version",
+        "feature_version",
+        "threshold_version",
+        "rules_fingerprint",
+        "inputs",
+        "state",
+        "state_before",
+        "previous_state",
+        "state_entered_date",
+        "sessions_in_state",
+        "previous_state_duration",
+        "candidate",
+        "candidate_streak",
+        "transition_today",
+        "shock_override",
+        "blocked_transition",
+        "blocked_transition_count",
+        "reason_codes",
+        "error",
+        "missing_inputs",
+        "measures",
+        "conditions",
+        "failed_for_adjacent",
+        "context_only",
+        "qualification_counts",
+        "retention_failure_count",
+        "transition_count_20d",
+        "transition_count_60d",
+        "last_transition_date",
+        "last_transition_reason"
+      ]
+    },
     "StructureInputV1": {
       "code": 71,
       "fields": [
@@ -8585,6 +9787,39 @@
         "hh63"
       ]
     },
+    "StructureInputV2": {
+      "code": 88,
+      "fields": [
+        "schema_version",
+        "feature_version",
+        "symbol",
+        "session_date",
+        "bar_timestamp_utc",
+        "source",
+        "prior_sessions",
+        "close",
+        "previous_close",
+        "ema10",
+        "sma20",
+        "sma50",
+        "atr14",
+        "previous_atr14",
+        "sma20_10_ago",
+        "sma50_20_ago",
+        "above20_15",
+        "above50_15",
+        "below20_15",
+        "below50_15",
+        "sma200",
+        "sma200_60_ago",
+        "hh20",
+        "ll20",
+        "hh63",
+        "median_atr10",
+        "median_atr20",
+        "p20"
+      ]
+    },
     "StructureMeasuresV1": {
       "code": 72,
       "fields": [
@@ -8600,6 +9835,17 @@
         "pct_slope_sma50_20",
         "rng20_atr",
         "dd63_atr"
+      ]
+    },
+    "StructureMeasuresV2": {
+      "code": 89,
+      "fields": [
+        "dist20",
+        "dist50",
+        "spread2050",
+        "s20",
+        "s50",
+        "p20"
       ]
     },
     "StructureSourceV1": {
@@ -8713,5 +9959,5 @@
       ]
     }
   },
-  "registry_fingerprint": "454a474905e65a3c1b74af17161ca5a839c0ef5709c4fdb6544abf2d4341d291"
+  "registry_fingerprint": "8a0c2a762f0ec293fa107ebc87fde5881559606a5808ecf361ce0c381772a148"
 }

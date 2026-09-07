@@ -249,6 +249,37 @@ def rules_view(snapshot, meta):
             ),
         ),
     )
+    if snapshot.versions.structure == "structure-engine-v2":
+        from market_dashboard.aperture.setup_v2_detection import EXPIRY, OBSERVATION
+        from market_dashboard.aperture.setup_v2_detection import P as setup_parameters
+        from market_dashboard.aperture.structure_v2 import P as structure_parameters
+
+        sections += (
+            RuleSectionV1(
+                title="Structure V2",
+                lines=(
+                    "Word SMA20/SMA50 model; EMA10 and SMA200 are context only.",
+                    "Median-ATR slopes; P20 counts strictly above SMA20 over ten sessions.",
+                    "Shocks enter EMERGING/DETERIORATING only; two-session transitions, three-session mature trends.",
+                    *(
+                        f"{name}: {value}"
+                        for name, value in asdict(structure_parameters).items()
+                    ),
+                ),
+            ),
+            RuleSectionV1(
+                title="Setup V2",
+                lines=(
+                    "Closing-dispersion CONTRACTION; 20-session robust RANGE; pullbacks require mature directional Structure.",
+                    f"Maximum pre-trigger ages: {dict(EXPIRY)}; observation sessions: {dict(OBSERVATION)}.",
+                    "Failure before resolution; prior-session trigger references; terminal states never reactivate.",
+                    *(
+                        f"{name}: {value}"
+                        for name, value in asdict(setup_parameters).items()
+                    ),
+                ),
+            ),
+        )
     return RulesViewV1(
         meta=meta,
         versions=snapshot.versions,

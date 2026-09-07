@@ -111,6 +111,11 @@ export function Context({ meta }: { meta: Meta }) {
       </span>
       {meta.evaluation && (
         <>
+          {meta.evaluation.comparison && (
+            <span>
+              <b>ENGINE_VERSION_COMPARISON</b> {meta.evaluation.comparison.note}
+            </span>
+          )}
           <span>
             Evaluated{" "}
             <b>

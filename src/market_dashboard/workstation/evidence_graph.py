@@ -17,6 +17,8 @@ from market_dashboard.aperture.contracts import ContractModel
 from market_dashboard.aperture.decision_contracts import DecisionRiskOutputV1
 from market_dashboard.aperture.leadership import fingerprint
 
+from .legacy_registry import LEGACY_TYPE_CODES
+
 Digest = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 NodeRef = Annotated[int, Field(ge=0, strict=True)]
 
@@ -61,7 +63,13 @@ def _reference_type(annotation, reference):
     return annotation
 
 
-TYPE_CODES = {name: i for i, name in enumerate(sorted(CANONICAL))}
+TYPE_CODES = dict(LEGACY_TYPE_CODES)
+TYPE_CODES.update(
+    {
+        name: len(LEGACY_TYPE_CODES) + i
+        for i, name in enumerate(sorted(set(CANONICAL) - set(LEGACY_TYPE_CODES)))
+    }
+)
 TYPE_NAMES = {i: name for name, i in TYPE_CODES.items()}
 
 
@@ -254,6 +262,20 @@ class EvidenceReader:
             nonnull = [a for a in args if a is not type(None)]
             if len(nonnull) == 1:
                 return self._value(value, nonnull[0])
+            if all(isinstance(a, type) and issubclass(a, BaseModel) for a in nonnull):
+                node = self.nodes.get(value)
+                expected = next(
+                    (
+                        a
+                        for a in nonnull
+                        if node is not None
+                        and a.__name__ == TYPE_NAMES[node.value.model_type]
+                    ),
+                    None,
+                )
+                if expected is None:
+                    raise ValueError("Wrong-type versioned evidence reference")
+                return self.get(value, expected)
         if origin is tuple:
             return tuple(
                 self._value(v, args[0] if args[-1] is Ellipsis else args[i])
@@ -277,6 +299,8 @@ def map_references(value, annotation, convert):
         nonnull = [a for a in args if a is not type(None)]
         if len(nonnull) == 1:
             return map_references(value, nonnull[0], convert)
+        if all(isinstance(a, type) and issubclass(a, BaseModel) for a in nonnull):
+            return convert(value)
     if origin is tuple:
         return tuple(
             map_references(v, args[0] if args[-1] is Ellipsis else args[i], convert)

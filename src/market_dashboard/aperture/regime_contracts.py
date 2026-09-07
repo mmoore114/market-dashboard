@@ -13,6 +13,10 @@ from market_dashboard.aperture.leadership_contracts import (
     StrengthSourceV1,
 )
 from market_dashboard.aperture.structure_contracts import StructureEvidenceV1
+from market_dashboard.aperture.structure_v2 import (
+    RULES_FINGERPRINT as STRUCTURE_V2_RULES,
+)
+from market_dashboard.aperture.structure_v2 import StructureEvidenceV2
 from market_dashboard.data.security_identity import MarketDataSymbol
 
 
@@ -90,7 +94,7 @@ class StructureBreadthContextV1(ContractModel):
     session_date: date
     source: StrengthSourceV1
     universe: ResearchUniverseV1
-    evidence: tuple[StructureEvidenceV1, ...]
+    evidence: tuple[StructureEvidenceV1 | StructureEvidenceV2, ...]
 
 
 class RegimeInputV1(ContractModel):
@@ -143,7 +147,12 @@ class RegimeInputV1(ContractModel):
             if any(
                 e.inputs.session_date != self.session_date
                 or e.inputs.source.model_dump() != basis
-                or e.rules_fingerprint != structure_rules
+                or e.rules_fingerprint
+                != (
+                    STRUCTURE_V2_RULES
+                    if e.engine_version == "structure-engine-v2"
+                    else structure_rules
+                )
                 for e in c.evidence
             ):
                 raise ValueError("Structure evidence date/source/version mismatch")

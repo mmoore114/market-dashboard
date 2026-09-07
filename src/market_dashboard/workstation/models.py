@@ -29,7 +29,11 @@ from market_dashboard.aperture.regime_contracts import RegimeOutputV1
 from market_dashboard.aperture.regime_policy import RULES_FINGERPRINT as REGIME_RULES
 from market_dashboard.aperture.rules import ApertureRules
 from market_dashboard.aperture.setup import RULES_FINGERPRINT as SETUP_RULES
+from market_dashboard.aperture.setup_v2 import RULES_FINGERPRINT as SETUP_V2_RULES
 from market_dashboard.aperture.structure import RULES_FINGERPRINT as STRUCTURE_RULES
+from market_dashboard.aperture.structure_v2 import (
+    RULES_FINGERPRINT as STRUCTURE_V2_RULES,
+)
 
 Mode = Literal["FIXTURE", "LOCAL_SNAPSHOT"]
 Freshness = Literal["FRESH", "STALE", "UNKNOWN"]
@@ -40,17 +44,36 @@ class VersionsV1(ContractModel):
     exposure: Literal["exposure-policy-v3"] = "exposure-policy-v3"
     universe: Literal["aperture-universe-v1"] = "aperture-universe-v1"
     feature: Literal["decision-risk-features-v1"] = "decision-risk-features-v1"
-    structure: Literal["structure-engine-v1"] = "structure-engine-v1"
-    setup: Literal["setup-engine-v1"] = "setup-engine-v1"
+    structure: Literal["structure-engine-v1", "structure-engine-v2"] = (
+        "structure-engine-v1"
+    )
+    setup: Literal["setup-engine-v1", "setup-engine-v2"] = "setup-engine-v1"
     leadership: Literal["leadership-formulas-v1"] = "leadership-formulas-v1"
     regime: Literal["market-regime-v1"] = "market-regime-v1"
     decision_risk: Literal["decision-risk-v1"] = "decision-risk-v1"
     rules: Literal["aperture-rules-v1"] = "aperture-rules-v1"
-    structure_fingerprint: Literal[STRUCTURE_RULES] = STRUCTURE_RULES
-    setup_fingerprint: Literal[SETUP_RULES] = SETUP_RULES
+    structure_fingerprint: Literal[STRUCTURE_RULES, STRUCTURE_V2_RULES] = (
+        STRUCTURE_RULES
+    )
+    setup_fingerprint: Literal[SETUP_RULES, SETUP_V2_RULES] = SETUP_RULES
     leadership_fingerprint: Literal[LEADERSHIP_RULES] = LEADERSHIP_RULES
     regime_fingerprint: Literal[REGIME_RULES] = REGIME_RULES
     decision_fingerprint: Literal[DECISION_RULES] = DECISION_RULES
+
+    @model_validator(mode="after")
+    def engine_pair(self):
+        expected = {
+            ("structure-engine-v1", "setup-engine-v1"): (STRUCTURE_RULES, SETUP_RULES),
+            ("structure-engine-v2", "setup-engine-v2"): (
+                STRUCTURE_V2_RULES,
+                SETUP_V2_RULES,
+            ),
+        }.get((self.structure, self.setup))
+        if expected != (self.structure_fingerprint, self.setup_fingerprint):
+            raise ValueError(
+                "Explicit coherent Structure/Setup version and fingerprint pair required"
+            )
+        return self
 
 
 class FreshnessV1(ContractModel):
@@ -89,6 +112,13 @@ class InputClockBindingV1(ContractModel):
     artifact_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
+class EngineComparisonV1(ContractModel):
+    kind: Literal["ENGINE_VERSION_COMPARISON"] = "ENGINE_VERSION_COMPARISON"
+    baseline_snapshot_fingerprint: str = Field(pattern=r"^[0-9a-f]{64}$")
+    source_spec_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    note: str = "Recomputed with V2 rules using original T/E/A clocks; not a new market refresh."
+
+
 class EvaluationV1(ContractModel):
     """Current decision clocks; never a historical-membership attestation."""
 
@@ -101,6 +131,9 @@ class EvaluationV1(ContractModel):
         default=None, pattern=r"^[0-9a-f]{64}$", exclude_if=lambda v: v is None
     )
     bootstrap: BootstrapContextV1 | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
+    comparison: EngineComparisonV1 | None = Field(
         default=None, exclude_if=lambda v: v is None
     )
 

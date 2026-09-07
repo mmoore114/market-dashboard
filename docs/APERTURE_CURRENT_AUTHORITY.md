@@ -68,7 +68,9 @@ pre-trigger only. Terminal instances never reactivate.
 
 ## 5. Settled target Structure design
 
-The next Structure version will align to the final consolidated Word specification:
+Structure V2 implements the final consolidated Word specification under
+`AP-ENGINE-ALIGNMENT-001`; see [the V2 contract](engine-alignment-v2.md) for
+source provenance, exact version selection, and explicit interpretations:
 
 - SMA20 and SMA50 are the voting averages.
 - EMA10 and SMA200 are calculated context but do not vote.
@@ -86,9 +88,9 @@ The next Structure version will align to the final consolidated Word specificati
   `DECLINE`.
 
 The current runtime `structure-engine-v1` uses an EMA10/SMA20/SMA50 stack and a
-different predicate/transition model. It remains valid historical V1 output until
-a separately authorized, newly versioned alignment is implemented. Do not silently
-replace or relabel it.
+different predicate/transition model. It remains reproducible V1 output alongside
+the explicitly selected V2 implementation. The original snapshot and default V1
+materialization selection are preserved; no production default was switched.
 
 ## 6. Settled Setup decisions
 
@@ -116,32 +118,38 @@ Retain the implemented Git V1 safety corrections:
   session was unobservable;
 - removal of mathematically unreachable failure predicates.
 
-Settled lifecycle-age direction for the next Setup version:
+Implemented Setup V2 lifecycle-age limits:
 
 - `RANGE` may remain active for up to 60 trading sessions while its geometry and
   qualifying behavior remain valid.
 - `CONTRACTION` must not become stale after only 15 sessions solely because of age.
-  Use 40 trading sessions as the initial target maximum while compression and
+  Use 40 trading sessions as the versioned maximum while compression and
   geometry remain valid.
 - If a RANGE persists, expands, and later tightens again, retain the valid RANGE,
   stale the ceased CONTRACTION, and create a new CONTRACTION instance.
 - Loss of qualifying behavior, meaningful geometry change, trigger, failure, and
   terminal lifecycle rules remain independent of maximum age.
 
-## 7. Provisional choices requiring only a bounded comparison
+## 7. Choices settled for V2
 
-The following are not reasons to delay documentation or product alignment. Compare
-them quickly on identical existing data before freezing a new engine version:
+The authorized bounded comparison is complete. V2 selects:
 
-- final CONTRACTION measurement formula and thresholds;
-- 20-session-only versus 30-first RANGE detection;
-- exact geometry-shift ATR threshold;
-- whether EMA10/SMA20 pullbacks in `EMERGING` are labeled
-  `TREND_PULLBACK` or remain contextual evidence until `UPTREND`;
-- exact post-trigger observation clocks for CONTRACTION and RANGE.
+- Word closing-dispersion CONTRACTION ratios .75/.75 and true-range ratio .80;
+- a single robust 20-session RANGE;
+- geometry shift strictly greater than 1 inception ATR;
+- TREND_PULLBACK only in UPTREND/DECLINE; EMERGING remains context;
+- five-session CONTRACTION/RANGE observation, with five-/three-session failure
+  windows respectively.
 
-This is a classification sanity comparison, not threshold optimization or a large
-backtest. Do not tune rules to famous winners or future returns.
+The [V2 contract](engine-alignment-v2.md) explicitly documents incomplete Word
+transition details, P20 equality/complement handling, initialization and counters,
+transitional exits, and retained Git safeguards. These interpretations must not be
+mistaken for verbatim Word rules. Change them only under a new version.
+
+The small identical-input comparison measured classification changes and churn,
+not future returns. It does not establish improved predictive performance or
+reduced churn. Results and limitations are in the
+[completion receipt](engine-alignment-v2-receipt.md).
 
 ## 8. Current implementation truth
 
@@ -157,6 +165,16 @@ As of commit `401e1b0afd6ad2a4678af4f1040014b5c9b568e9`:
   Aperture decision voting;
 - Groups lacks published membership in the first snapshot;
 - Deepvue remains external to runtime.
+
+### AP-ENGINE-ALIGNMENT-001 implementation
+
+Structure/Setup V2 now exist as independent versioned implementations with explicit
+materializer dispatch, typed API evidence, and rules fingerprints. The original V1
+snapshot still decodes with its original fingerprint. A separate, labeled V2
+comparison snapshot preserves its T/E/A clocks and original expiry. It is not a
+new market refresh or a production source-data publication. Groups and other
+known evidence gaps remain. See the completion receipt for observed test and
+browser results, classification differences, and operational limits.
 
 ## 9. Document precedence
 

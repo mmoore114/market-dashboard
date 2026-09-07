@@ -12,18 +12,23 @@ from market_dashboard.aperture.leadership import RULES_FINGERPRINT as LEADERSHIP
 from market_dashboard.aperture.leadership import validate_calendar
 from market_dashboard.aperture.regime import calendar_hash
 from market_dashboard.aperture.setup import RULES_FINGERPRINT as SETUP_RULES
+from market_dashboard.aperture.setup_v2 import RULES_FINGERPRINT as SETUP_V2_RULES
 from market_dashboard.aperture.structure import RULES_FINGERPRINT as STRUCTURE_RULES
+from market_dashboard.aperture.structure_v2 import (
+    RULES_FINGERPRINT as STRUCTURE_V2_RULES,
+)
 
 
 def features_from_structure(evidence, *, source, calendar):
     i = evidence.inputs
     expected = source.model_dump(exclude={"schema_version", "calendar_id"})
-    if (
-        i.source.model_dump() != expected
-        or evidence.rules_fingerprint != STRUCTURE_RULES
+    if i.source.model_dump() != expected or evidence.rules_fingerprint != (
+        STRUCTURE_V2_RULES
+        if evidence.engine_version == "structure-engine-v2"
+        else STRUCTURE_RULES
     ):
         raise ValueError(
-            "Feature adapter requires aligned current Structure V1 evidence"
+            "Feature adapter requires aligned versioned Structure evidence"
         )
     if i.session_date not in calendar:
         raise ValueError("Structure session outside calendar")
@@ -88,6 +93,15 @@ def universe_from_snapshot(
 def validate_inputs(inputs, calendar):
     # Also validate nested models passed via Pydantic's unvalidated model_copy API.
     inputs = DecisionInputV1.model_validate(inputs.model_dump())
+    if (
+        inputs.structure is not None
+        and inputs.setups is not None
+        and (
+            inputs.structure.engine_version.rsplit("-", 1)[-1]
+            != inputs.setups.engine_version.rsplit("-", 1)[-1]
+        )
+    ):
+        raise ValueError("Mixed Structure/Setup engine generations are not supported")
     rules = validate_rules(inputs.rules)
     positions = validate_calendar(calendar)
     f = inputs.features
@@ -130,8 +144,20 @@ def validate_inputs(inputs, calendar):
     engine_positions = p.engine_positions(calendar, f.symbol)
     expected = f.source.model_dump(exclude={"schema_version", "calendar_id"})
     for evidence, version in (
-        (inputs.structure, STRUCTURE_RULES),
-        (inputs.setups, SETUP_RULES),
+        (
+            inputs.structure,
+            STRUCTURE_V2_RULES
+            if inputs.structure is not None
+            and inputs.structure.engine_version == "structure-engine-v2"
+            else STRUCTURE_RULES,
+        ),
+        (
+            inputs.setups,
+            SETUP_V2_RULES
+            if inputs.setups is not None
+            and inputs.setups.engine_version == "setup-engine-v2"
+            else SETUP_RULES,
+        ),
     ):
         if evidence is None:
             continue
