@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-CURRENT-FOUNDATION-001 ready; execute the approved end-to-end current-data, aligned-publication, rebuild, and first-real-snapshot milestone. The production adjusted-volume correction is complete and verified.
+Current milestone: AP-CURRENT-FOUNDATION-001 ready; execute the approved end-to-end current-data, aligned-publication, rebuild, and first-real-snapshot milestone. The production adjusted-volume correction is complete and verified. Current-state timing uses separate market-as-of, evaluation, and action clocks: for evaluation on 2026-09-06, use the 2026-09-04 close and next XNYS session 2026-09-08; the 2026-09-05 master may govern decision-time identity for that action session without being back-projected into September 4 signals.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
