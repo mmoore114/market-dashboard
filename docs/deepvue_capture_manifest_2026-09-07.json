@@ -1,0 +1,115 @@
+{
+  "status": "CAPTURED_NOT_PUBLISHED",
+  "source": "Deepvue authenticated user-interface CSV export",
+  "hierarchy_capture_utc": "2026-09-07T23:00:54.984488+00:00",
+  "source_url": "https://app.deepvue.com/?p=screener",
+  "files": [
+    {
+      "filename": "deepvue_hierarchy_2026-09-07.csv",
+      "capture_date": "2026-09-07",
+      "sha256": "ab1f47868e5f70c6abd8a532ccfc5124e93acc302c1c7336c61b624bbf4ae1fc",
+      "bytes": 558087,
+      "rows": 11368,
+      "columns": [
+        "Symbol",
+        "Sub-Industry",
+        "Industry",
+        "Group",
+        "Sector"
+      ]
+    },
+    {
+      "filename": "deepvue_all_stock_export_2026-09-05.csv",
+      "capture_date": "2026-09-05",
+      "sha256": "629acf325b8ddadd4881333a7f5e3d4b9be893c5ddd49bf7636ba3d8af6b1c9b",
+      "bytes": 818176,
+      "rows": 11370,
+      "columns": [
+        "Symbol",
+        "Next Earnings Date",
+        "Relative Measured Volatility - 15 Days",
+        "Avg $ Volume - 20 Day",
+        "ADR % - 20 Days",
+        "Last",
+        "Industry Rank - 3 Month",
+        "Sub-Industry",
+        "Absolute Strength - 1 Month",
+        "Absolute Strength - 3 Month",
+        "Stan Weinstein Stages"
+      ]
+    },
+    {
+      "filename": "deepvue_theme_membership_2026-09-05.csv",
+      "capture_date": "2026-09-05",
+      "sha256": "d2b010c52f7ec4f799f637eb293c693ada600ea9b31acddd3cb8973ffcfba894",
+      "bytes": 28783,
+      "rows": 1795,
+      "columns": [
+        "Theme",
+        "Symbol"
+      ]
+    }
+  ],
+  "hierarchy_total_symbols": 11368,
+  "hierarchy_unique_symbols": 11368,
+  "coverage": {
+    "Sector": {
+      "classified_symbols": 5461,
+      "distinct_labels": 11
+    },
+    "Group": {
+      "classified_symbols": 5461,
+      "distinct_labels": 25
+    },
+    "Industry": {
+      "classified_symbols": 5461,
+      "distinct_labels": 73
+    },
+    "Sub-Industry": {
+      "classified_symbols": 5458,
+      "distinct_labels": 164
+    }
+  },
+  "parent_conflicts": [
+    {
+      "child_level": "Sub-Industry",
+      "child_label": "Retail REITs",
+      "parent_level": "Industry",
+      "observed_parents": [
+        "Diversified REITs",
+        "Retail REITs"
+      ]
+    },
+    {
+      "child_level": "Sub-Industry",
+      "child_label": "Health Care REITs",
+      "parent_level": "Industry",
+      "observed_parents": [
+        "Diversified REITs",
+        "Health Care REITs"
+      ]
+    },
+    {
+      "child_level": "Industry",
+      "child_label": "Real Estate Management & Development",
+      "parent_level": "Group",
+      "observed_parents": [
+        "Equity Real Estate Investment Trusts (REITs)",
+        "Real Estate Management & Development"
+      ]
+    },
+    {
+      "child_level": "Industry",
+      "child_label": "Ground Transportation",
+      "parent_level": "Group",
+      "observed_parents": [
+        "Commercial & Professional Services",
+        "Transportation"
+      ]
+    }
+  ],
+  "theme_note": "September 5 capture: 31 themes, 1794 nonempty memberships and one empty-symbol row for Bitcoin (zero members). Not refreshed September 7.",
+  "local_path_status": "LAPTOP_PATHS_PENDING_VERIFICATION",
+  "path_template": "${DEEPVUE_SOURCE_DIR}/<filename>",
+  "instructions": "Keep raw captures private and outside Git. Resolve local paths and hashes on laptop. Preserve source dates and row-level conflicts; do not infer a canonical parent or historical membership."
+}
