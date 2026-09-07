@@ -1,13 +1,15 @@
 import os
 import random
 import time
+from collections.abc import Callable
 from datetime import UTC, date, datetime
 from email.utils import parsedate_to_datetime
-from typing import Any, Callable
+from typing import Any
 
 import httpx
 from dotenv import load_dotenv
 
+from market_dashboard.data.adjusted_authority import response_evidence
 
 MASSIVE_BASE_URL = "https://api.massive.com"
 PLACEHOLDER_API_KEYS = {
@@ -78,6 +80,7 @@ class MassiveClient:
         self.last_attempt_count = 0
         self.last_http_status: int | None = None
         self.last_error_type: str | None = None
+        self.last_response_evidence = None
 
     def get_adjusted_daily_bars(
         self,
@@ -90,6 +93,7 @@ class MassiveClient:
         if not normalized_ticker:
             raise ValueError("ticker is required.")
 
+        self.last_response_evidence = None
         self.last_attempt_count = 0
         self.last_http_status = None
         self.last_error_type = None
@@ -161,9 +165,11 @@ class MassiveClient:
                 error_type=self.last_error_type or "unknown",
             )
 
+        if response.history:
+            raise ValueError("AGGREGATE_REDIRECT_REFUSED")
         payload = response.json()
         results = payload.get("results") or []
-        return [
+        mapped = [
             {
                 "ticker": normalized_ticker,
                 "date": self._timestamp_to_date(result.get("t")),
@@ -177,6 +183,10 @@ class MassiveClient:
             }
             for result in results
         ]
+        self.last_response_evidence = response_evidence(
+            normalized_ticker, start_date, end_date, payload, mapped
+        )
+        return mapped
 
     def _retry_delay(
         self,

@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-FOUNDATION-AUTHORITY-001 ready; implement the reviewed XNYS calendar, adjusted-volume, and provenance authority boundary offline. AP-FOUNDATION-RECONCILE-001 is complete and no real snapshot was built.
+Current milestone: AP-FOUNDATION-AUTHORITY-001 complete; pinned XNYS and adjusted-volume authority verified offline. Production correction remains unapplied; no real snapshot was built.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
@@ -830,3 +830,62 @@ history fetch require separately bounded authority. No real snapshot build,
 production API startup, provider request, source mutation/publication, exposure
 rebuild, crosswalk application or PR merge occurred. The September master
 publication issue remains deferred.
+
+
+## AP-FOUNDATION-AUTHORITY-001 — completed 2026-09-06
+
+Implemented the [foundation authority contract](foundation-authority-v1.md) on
+`codex/foundation-authority-v1`, based on the authority handoff and targeting a
+draft PR to `codex/foundation-reconciliation-v1`.
+
+Pinned exchange-calendars 4.13.2 produces an independently verified staged XNYS
+calendar: 673 sessions and six early closes, January 2, 2024–September 8, 2026.
+Calendar-only latest completed T/T+1 is September 4/8 at the explicit evaluation
+clock; this is not an identity-valid materializer target. Historical SPY, QQQ,
+IWM and RSP cover 642/642 expected sessions through July 24; QQQE covers none.
+
+The immutable reviewed profile establishes split-adjusted prices, no dividend
+total-return adjustment and matching fractional numeric volume. New ingestion and
+feature schemas retain DOUBLE volume; existing BIGINT schemas fail closed before
+ordinary writes. Future sanitized response receipts retain only allowlisted
+metadata. Missing historical observation/publication/validity facts stay UNKNOWN;
+the staged candidate is not a complete ManifestV1.
+
+Copied-only migration restored all 11,607 fractional volumes across 63,279 rows,
+with exact full-field agreement against all 100 declared Parquet copies, zero
+mismatches, duplicate keys or invalid/null OHLCV. Pending interruption,
+recovery-required, verified completion and byte-preserving no-op passed. Plans
+include exact future backup/maintenance/apply/verification/rollback instructions;
+there is no executable production apply mode.
+
+Authority evidence fingerprint:
+`c48a1d5705d8b8cc0cd940b14077d5f2276a13c229feeffa63866a770551964c`.
+Calendar fingerprint:
+`951e46f98b60d704a82fcceed8a6b9fa33fbe029aa47a912769a21b0a4e7537d`.
+Corrected logical rows:
+`922654711bd0040fab863afa35631fafc86f859ad6df944184dd49c96ee3076b`.
+Staged database SHA256:
+`c1aefcb29535570a7be9069d8ed86898085e343f7e341b443c54358de2cdf386`.
+
+All eight original findings are conserved: two resolved, two requiring local
+review, two requiring publication/correction and two requiring bounded acquisition.
+The rules-effective-date constraint remains; production correction is separately
+reported as unapplied. No feasible target is invented, July identity is not
+back-projected and the unpublished September master is not consumed.
+
+Observed verification: **163 focused Python tests passed**, including **36 new
+authority tests**, then **2,846 full-suite tests passed**. Frontend components
+(**11**) and desktop/mobile fixture browsers (**2**) passed, as did API/schema/type
+synchronization, TypeScript, build, lint/format and whitespace checks. The existing
+Starlette TestClient httpx deprecation warning remains nonblocking.
+All **348 protected files** retained their pre-work hashes, and production/provider
+file sets remain unchanged. User VS Code settings remain untouched and uncommitted.
+No market-data calls, production writes, real snapshot build, production API
+startup, publication, exposure rebuild or merge occurred. The optional staged
+current-bar fetch was unnecessary and was not used.
+
+Next bounded action: separately review/approve the exact production volume
+correction with verified backup and an exclusive maintenance window. Calendar and
+provenance publication, feature rebuilding, identity/population prerequisites,
+QQQE/current history, spot identity/history and Aperture schedule publication
+remain separate later boundaries.

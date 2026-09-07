@@ -98,6 +98,7 @@ def test_successful_multi_ticker_ingestion_and_structured_summary(tmp_path: Path
         "start_date",
         "end_date",
         "elapsed_time",
+        "response_evidence",
     }
     assert summary["requested_tickers"] == ["SPY", "QQQ"]
     assert summary["successful_tickers"] == ["SPY", "QQQ"]
@@ -242,7 +243,7 @@ def test_duckdb_table_creation_schema_and_timestamp_types(tmp_path: Path) -> Non
         "high": "DOUBLE",
         "low": "DOUBLE",
         "close": "DOUBLE",
-        "volume": "BIGINT",
+        "volume": "DOUBLE",
         "vwap": "DOUBLE",
         "transactions": "BIGINT",
         "ingested_at": "TIMESTAMP",
@@ -307,7 +308,7 @@ def create_daily_bars_table(duckdb_path: Path) -> None:
                 high DOUBLE,
                 low DOUBLE,
                 close DOUBLE,
-                volume BIGINT,
+                volume DOUBLE,
                 vwap DOUBLE,
                 transactions BIGINT,
                 ingested_at TIMESTAMP

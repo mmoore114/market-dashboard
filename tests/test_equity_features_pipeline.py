@@ -37,7 +37,7 @@ def seed_daily_bars(duckdb_path: Path, frame: pd.DataFrame) -> None:
                 high DOUBLE,
                 low DOUBLE,
                 close DOUBLE,
-                volume BIGINT,
+                volume DOUBLE,
                 vwap DOUBLE,
                 transactions BIGINT,
                 ingested_at TIMESTAMP

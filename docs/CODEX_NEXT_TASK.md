@@ -2,7 +2,7 @@
 
 **Task ID:** AP-FOUNDATION-AUTHORITY-001
 
-**Status:** READY
+**Status:** COMPLETE
 
 **Issued:** 2026-09-06
 
@@ -205,3 +205,22 @@ schema/type synchronization checks, and `git diff --check`.
 Do not build a real workstation snapshot in this milestone. Success means calendar
 and representation authority are deterministic and the real correction/acquisition
 boundary is ready for one later reviewed action.
+
+
+## Completion receipt — 2026-09-06
+
+AP-FOUNDATION-AUTHORITY-001 is complete. See
+[PROJECT_STATE](PROJECT_STATE.md#ap-foundation-authority-001--completed-2026-09-06)
+and the [authority contract](foundation-authority-v1.md) for observed results,
+fingerprints, remaining findings and the copied-only migration workflow.
+
+Verification: 163 focused Python tests (36 new), 2,846 full-suite Python tests,
+11 frontend tests and two fixture browser tests passed; schema/type, build, lint
+and whitespace checks passed. All 348 protected files and production/provider
+file sets remain unchanged. No production correction or real snapshot was run.
+
+The next bounded action requires separate authority: review and approve the exact
+staged BIGINT-to-DOUBLE production correction, backup and exclusive maintenance
+window. This completed handoff does not authorize applying it. Identity-valid
+post-August-25 inputs, QQQE/current history, spot, provenance and Aperture schedule
+publication remain unresolved prerequisites for a later real snapshot.

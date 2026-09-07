@@ -136,6 +136,15 @@ def inspect(plan):
             else:
                 if a.format == "json":
                     raise Refusal("TABULAR_SOURCE_REQUIRED")
+                if a.role == "bars" and a.format == "duckdb":
+                    from market_dashboard.data.adjusted_authority import (
+                        check_volume_schema,
+                    )
+
+                    try:
+                        check_volume_schema(a.paths[0], (a.table,))
+                    except ValueError:
+                        hard("bars", "ADJUSTED_VOLUME_MIGRATION_REQUIRED")
                 value = read_table(a, plan)
             digest, n = logical(value), count_rows(value)
             first, last = date_bounds(value)

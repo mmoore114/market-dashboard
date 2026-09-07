@@ -8,12 +8,15 @@ from typing import Any
 import duckdb
 import pandas as pd
 
+from market_dashboard.data.adjusted_authority import (
+    check_volume_schema,
+    require_double_volume,
+)
 from market_dashboard.data.storage import DUCKDB_PATH
 from market_dashboard.features.liquidity import add_liquidity_features
 from market_dashboard.features.momentum import add_momentum_features
 from market_dashboard.features.trend import add_trend_features
 from market_dashboard.features.volatility import add_volatility_features
-
 
 FEATURE_COLUMNS = [
     "ticker",
@@ -109,6 +112,10 @@ class EquityFeaturePipeline:
 
     def run(self) -> dict[str, Any]:
         """Read daily bars, calculate features, and write DuckDB feature tables."""
+        check_volume_schema(
+            self.duckdb_path,
+            ("daily_bars", "daily_equity_features", "latest_equity_snapshot"),
+        )
         started_at = time.perf_counter()
         bars = self._read_daily_bars()
 
@@ -120,7 +127,9 @@ class EquityFeaturePipeline:
         self._write_feature_tables(features)
         elapsed_time = round(time.perf_counter() - started_at, 3)
         return FeatureBuildSummary(
-            tickers=sorted(features["ticker"].dropna().unique().tolist()) if not features.empty else [],
+            tickers=sorted(features["ticker"].dropna().unique().tolist())
+            if not features.empty
+            else [],
             rows_read=len(bars),
             rows_written_to_daily_features=len(features),
             rows_written_to_latest_snapshot=self._count_latest_snapshot_rows(),
@@ -142,8 +151,10 @@ class EquityFeaturePipeline:
         frame = add_trend_features(frame)
         frame = self._add_spy_relative_features(frame)
         frame["date"] = pd.to_datetime(frame["date"]).dt.date
-        return frame.reindex(columns=FEATURE_COLUMNS).sort_values(["ticker", "date"]).reset_index(
-            drop=True
+        return (
+            frame.reindex(columns=FEATURE_COLUMNS)
+            .sort_values(["ticker", "date"])
+            .reset_index(drop=True)
         )
 
     def _read_daily_bars(self) -> pd.DataFrame:
@@ -169,7 +180,12 @@ class EquityFeaturePipeline:
         spy_returns = (
             frame.loc[
                 frame["ticker"] == "SPY",
-                ["date", "return_20d_percent", "return_60d_percent", "return_120d_percent"],
+                [
+                    "date",
+                    "return_20d_percent",
+                    "return_60d_percent",
+                    "return_120d_percent",
+                ],
             ]
             .rename(
                 columns={
@@ -189,6 +205,10 @@ class EquityFeaturePipeline:
         return frame
 
     def _write_feature_tables(self, features: pd.DataFrame) -> None:
+        check_volume_schema(
+            self.duckdb_path,
+            ("daily_bars", "daily_equity_features", "latest_equity_snapshot"),
+        )
         self.duckdb_path.parent.mkdir(parents=True, exist_ok=True)
         with duckdb.connect(str(self.duckdb_path)) as connection:
             self._ensure_feature_tables(connection)
@@ -231,9 +251,15 @@ class EquityFeaturePipeline:
             self._ensure_indexes(connection)
 
     def _ensure_feature_tables(self, connection: duckdb.DuckDBPyConnection) -> None:
+        for table in ("daily_equity_features", "latest_equity_snapshot"):
+            require_double_volume(connection, table)
         columns_sql = self._feature_columns_sql()
-        connection.execute(f"CREATE TABLE IF NOT EXISTS daily_equity_features ({columns_sql})")
-        connection.execute(f"CREATE TABLE IF NOT EXISTS latest_equity_snapshot ({columns_sql})")
+        connection.execute(
+            f"CREATE TABLE IF NOT EXISTS daily_equity_features ({columns_sql})"
+        )
+        connection.execute(
+            f"CREATE TABLE IF NOT EXISTS latest_equity_snapshot ({columns_sql})"
+        )
         self._ensure_feature_columns(connection, "daily_equity_features")
         self._ensure_feature_columns(connection, "latest_equity_snapshot")
         self._ensure_snapshot_score_columns(connection)
@@ -263,7 +289,9 @@ class EquityFeaturePipeline:
             ).fetchone()[0]
             if not table_exists:
                 return 0
-            return connection.execute("SELECT COUNT(*) FROM latest_equity_snapshot").fetchone()[0]
+            return connection.execute(
+                "SELECT COUNT(*) FROM latest_equity_snapshot"
+            ).fetchone()[0]
 
     def _feature_columns_sql(self) -> str:
         return """
@@ -273,7 +301,7 @@ class EquityFeaturePipeline:
             high DOUBLE,
             low DOUBLE,
             close DOUBLE,
-            volume BIGINT,
+            volume DOUBLE,
             vwap DOUBLE,
             transactions BIGINT,
             true_range DOUBLE,
@@ -333,7 +361,10 @@ class EquityFeaturePipeline:
         table_name: str,
     ) -> None:
         existing_columns = {
-            row[1] for row in connection.execute(f"PRAGMA table_info('{table_name}')").fetchall()
+            row[1]
+            for row in connection.execute(
+                f"PRAGMA table_info('{table_name}')"
+            ).fetchall()
         }
         column_sql = self._feature_column_types()
         for column in FEATURE_COLUMNS:
@@ -350,7 +381,7 @@ class EquityFeaturePipeline:
             "high": "DOUBLE",
             "low": "DOUBLE",
             "close": "DOUBLE",
-            "volume": "BIGINT",
+            "volume": "DOUBLE",
             "vwap": "DOUBLE",
             "transactions": "BIGINT",
             "true_range": "DOUBLE",
@@ -404,10 +435,14 @@ class EquityFeaturePipeline:
             "return_120d_excess_vs_spy": "DOUBLE",
         }
 
-    def _ensure_snapshot_score_columns(self, connection: duckdb.DuckDBPyConnection) -> None:
+    def _ensure_snapshot_score_columns(
+        self, connection: duckdb.DuckDBPyConnection
+    ) -> None:
         existing_columns = {
             row[1]
-            for row in connection.execute("PRAGMA table_info('latest_equity_snapshot')").fetchall()
+            for row in connection.execute(
+                "PRAGMA table_info('latest_equity_snapshot')"
+            ).fetchall()
         }
         column_sql = {
             "eligible": "BOOLEAN",

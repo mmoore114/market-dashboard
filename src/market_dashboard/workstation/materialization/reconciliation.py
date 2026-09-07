@@ -634,7 +634,7 @@ def next_actions(coverage, start, end, calendar):
     }
 
 
-def reconcile_evidence(plan):
+def reconcile_evidence(plan, *, calendar_provider=None):
     """Recompute all evidence without writes; used identically by validation."""
     description = describe_reconciliation(plan)
     resolve_plan(plan.materialization)
@@ -680,7 +680,9 @@ def reconcile_evidence(plan):
         comparisons[role] = compare_copies(frames[role], copies[role], keys)
     bars = canonical_dates(frames["bars"])
     start, end = min(bars.date), plan.materialization.action_session
-    cal = calendar_evidence(start, end, plan.materialization.as_of_session, end)
+    cal = (calendar_provider or calendar_evidence)(
+        start, end, plan.materialization.as_of_session, end
+    )
     cal["existing_declared_artifact"] = before[str(artifacts["calendar"].paths[0])]
     cal["reproducibility"] = (
         "reconcile with exact receipt-bound plan and installed package version; candidate JSON is embedded in calendar evidence"

@@ -39,6 +39,7 @@ def seed_daily_bars(duckdb_path: Path) -> None:
     duckdb_path.parent.mkdir(parents=True, exist_ok=True)
     with duckdb.connect(str(duckdb_path)) as connection:
         bars["ingested_at"] = pd.Timestamp("2024-12-01 12:00:00")
+        bars["volume"] = bars["volume"].astype("float64")
         connection.register("bars", bars)
         connection.execute("CREATE TABLE daily_bars AS SELECT * FROM bars")
         connection.unregister("bars")

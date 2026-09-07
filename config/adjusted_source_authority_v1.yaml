@@ -1,0 +1,12 @@
+version: massive-adjusted-authority-v1
+reviewed_on: '2026-09-06'
+data_vendor: Massive.com
+dataset_id: stocks-custom-daily-aggregates
+price_basis: split_adjusted
+dividend_treatment: not_dividend_total_return_adjusted
+volume_convention: provider_returned_split_adjusted_numeric
+volume_storage: DOUBLE
+historical_authority: reviewed_existing_parquet_values
+authenticates_missing_receipts: false
+calendar_id: XNYS
+calendar_package: exchange-calendars==4.13.2

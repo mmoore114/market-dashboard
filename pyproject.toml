@@ -9,6 +9,7 @@ description = "Equity discovery, ranking, and discretionary market research dash
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "exchange-calendars==4.13.2",
     "httpx",
     "numpy",
     "pandas",
