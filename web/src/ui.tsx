@@ -102,6 +102,7 @@ export function Context({ meta }: { meta: Meta }) {
   return (
     <div className="context">
       <span>{meta.mode_label}</span>
+      {meta.evaluation?.bootstrap && <span>{meta.mode}</span>}
       <span>
         Market as of <b>{meta.as_of_session ?? "Unavailable"}</b>
       </span>
@@ -111,10 +112,41 @@ export function Context({ meta }: { meta: Meta }) {
       {meta.evaluation && (
         <>
           <span>
-            Evaluated <b>{meta.evaluation.evaluation_timestamp}</b>
+            Evaluated{" "}
+            <b>
+              {meta.evaluation.bootstrap
+                ? new Intl.DateTimeFormat("en-US", {
+                    timeZone: "America/New_York",
+                    dateStyle: "medium",
+                    timeStyle: "long",
+                  }).format(new Date(meta.evaluation.evaluation_timestamp))
+                : meta.evaluation.evaluation_timestamp}
+            </b>
           </span>
           <span>
             Population <b>{meta.evaluation.population_scope}</b>
+          </span>
+        </>
+      )}
+      {meta.evaluation?.source_fingerprint && (
+        <span>
+          Source fingerprint <code>{meta.evaluation.source_fingerprint}</code>
+        </span>
+      )}
+      {meta.evaluation?.bootstrap && (
+        <>
+          <span>{meta.evaluation.bootstrap.calculation_mode}</span>
+          <span>{meta.evaluation.bootstrap.historical_membership_status}</span>
+          <span>Ranks: {meta.evaluation.bootstrap.rank_basis}</span>
+          <span>
+            Covered {meta.evaluation.bootstrap.covered_population}; research{" "}
+            {meta.evaluation.bootstrap.first_observations.length}; strict trade{" "}
+            {meta.evaluation.bootstrap.strict_trade_members}; mapping{" "}
+            {meta.evaluation.bootstrap.mapping_members}
+          </span>
+          <span>
+            Not yet observed: {meta.evaluation.bootstrap.not_yet_observed};
+            missing: {meta.evaluation.bootstrap.missing_observations}
           </span>
         </>
       )}

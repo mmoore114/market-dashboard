@@ -229,3 +229,46 @@ it("displays separate market, evaluation and action clocks with population scope
   expect(screen.getByText("2026-09-06T21:00:00-04:00")).toBeInTheDocument();
   expect(screen.getByText("Initial covered population")).toBeInTheDocument();
 });
+
+it("labels bootstrap counts, retrospective limits and New York evaluation time", () => {
+  const meta = {
+    ...fixture.health.meta,
+    mode: "LOCAL_SNAPSHOT",
+    mode_label: "LOCAL SNAPSHOT",
+    as_of_session: "2026-09-04",
+    action_session: "2026-09-08",
+    evaluation: {
+      market_as_of_session: "2026-09-04",
+      evaluation_timestamp: "2026-09-07T01:53:42.451047+00:00",
+      action_session: "2026-09-08",
+      population_scope: "bounded initial covered population",
+      source_fingerprint: "a".repeat(64),
+      input_bindings: [],
+      bootstrap: {
+        version: "current-state-bootstrap-v1",
+        calculation_mode: "CURRENT_STATE_BOOTSTRAP",
+        historical_membership_status: "UNKNOWN_BEFORE_BOOTSTRAP",
+        population_scope: "bounded initial covered population",
+        rank_basis: "CURRENT_COHORT_AT_E",
+        market_as_of_session: "2026-09-04",
+        evaluation_timestamp: "2026-09-07T01:53:42.451047+00:00",
+        action_session: "2026-09-08",
+        calculation_start: "2024-01-02",
+        first_observations: [["SYNTHETIC", "2024-01-02"]],
+        covered_population: 1,
+        strict_trade_members: 1,
+        mapping_members: 0,
+        not_yet_observed: 0,
+        missing_observations: 0,
+      },
+    },
+  } as Meta;
+  render(<Context meta={meta} />);
+  expect(screen.getByText("CURRENT_STATE_BOOTSTRAP")).toBeVisible();
+  expect(screen.getByText("UNKNOWN_BEFORE_BOOTSTRAP")).toBeVisible();
+  expect(screen.getByText(/Sep 6, 2026/)).toBeVisible();
+  expect(
+    screen.getByText(/Covered 1; research 1; strict trade 1; mapping 0/),
+  ).toBeVisible();
+  expect(screen.getByText("a".repeat(64))).toBeVisible();
+});

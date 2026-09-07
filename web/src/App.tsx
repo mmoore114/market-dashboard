@@ -6,9 +6,17 @@ import { Brief } from "./Brief";
 import { Tape, initialFilters, type Filters } from "./Tape";
 import { Detail } from "./Detail";
 import { Sizer } from "./Sizer";
+import { Groups, History } from "./Groups";
 import { Rules } from "./Rules";
 
-const routes = ["brief", "tape", "sizer", "rules"] as const;
+const routes = [
+  "brief",
+  "tape",
+  "groups",
+  "sizer",
+  "rules",
+  "history",
+] as const;
 type Route = (typeof routes)[number];
 function currentRoute(): Route {
   const value = window.location.hash.slice(1);
@@ -83,13 +91,15 @@ export function App() {
               aria-current={route === r ? "page" : undefined}
             >
               <span className="nav-icon">{["◷", "▦", "⌗", "≡"][i]}</span>
-              {r[0].toUpperCase() + r.slice(1)}
+              {r === "history"
+                ? "Time Machine"
+                : r[0].toUpperCase() + r.slice(1)}
             </a>
           ))}
         </nav>
         <div className="future-nav">
           <span className="nav-label">LATER</span>
-          {["Groups", "Book", "Journal"].map((r) => (
+          {["Book", "Journal"].map((r) => (
             <button disabled key={r} aria-label={`${r} Planned`}>
               {r}
               <span>Planned</span>
@@ -154,6 +164,10 @@ export function App() {
               )}
               {route === "sizer" && <Sizer initialSymbol={sizerSymbol} />}
               {route === "rules" && <Rules />}
+              {route === "groups" && <Groups />}
+              {route === "history" && (
+                <History session={health.data?.meta.as_of_session ?? ""} />
+              )}
             </>
           )}
         </main>

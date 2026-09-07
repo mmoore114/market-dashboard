@@ -21,6 +21,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/groups": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Groups */
+    get: operations["groups_api_v1_groups_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/groups/{group_id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Group Detail */
+    get: operations["group_detail_api_v1_groups__group_id__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/health": {
     parameters: {
       query?: never;
@@ -106,6 +140,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/time-machine/{session}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Time Machine */
+    get: operations["time_machine_api_v1_time_machine__session__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -142,6 +193,71 @@ export interface components {
       /** Universe Policy Version */
       universe_policy_version: string;
     };
+    /** BootstrapContextV1 */
+    BootstrapContextV1: {
+      /**
+       * Action Session
+       * Format: date
+       */
+      action_session: string;
+      /**
+       * Calculation Mode
+       * @default CURRENT_STATE_BOOTSTRAP
+       * @constant
+       */
+      calculation_mode: "CURRENT_STATE_BOOTSTRAP";
+      /**
+       * Calculation Start
+       * Format: date
+       */
+      calculation_start: string;
+      /** Covered Population */
+      covered_population: number;
+      /**
+       * Evaluation Timestamp
+       * Format: date-time
+       */
+      evaluation_timestamp: string;
+      /** First Observations */
+      first_observations: [string, string][];
+      /**
+       * Historical Membership Status
+       * @default UNKNOWN_BEFORE_BOOTSTRAP
+       * @constant
+       */
+      historical_membership_status: "UNKNOWN_BEFORE_BOOTSTRAP";
+      /** Mapping Members */
+      mapping_members: number;
+      /**
+       * Market As Of Session
+       * Format: date
+       */
+      market_as_of_session: string;
+      /** Missing Observations */
+      missing_observations: number;
+      /** Not Yet Observed */
+      not_yet_observed: number;
+      /**
+       * Population Scope
+       * @default bounded initial covered population
+       * @constant
+       */
+      population_scope: "bounded initial covered population";
+      /**
+       * Rank Basis
+       * @default CURRENT_COHORT_AT_E
+       * @constant
+       */
+      rank_basis: "CURRENT_COHORT_AT_E";
+      /** Strict Trade Members */
+      strict_trade_members: number;
+      /**
+       * Version
+       * @default current-state-bootstrap-v1
+       * @constant
+       */
+      version: "current-state-bootstrap-v1";
+    };
     /** BoundedBand */
     BoundedBand: {
       /** Maximum Exclusive */
@@ -177,6 +293,11 @@ export interface components {
     BriefV1: {
       /** Act Candidates */
       act_candidates: components["schemas"]["TapeRowV1"][];
+      /**
+       * Denominators
+       * @default []
+       */
+      denominators: components["schemas"]["PopulationCountV1"][];
       funnel: components["schemas"]["FunnelV1"];
       /** Leading Groups */
       leading_groups: components["schemas"]["GroupSummaryV1"][];
@@ -213,6 +334,7 @@ export interface components {
       | "UNKNOWN";
     /** DatedProvenanceV1 */
     DatedProvenanceV1: {
+      bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
       /**
        * Effective Session
        * Format: date
@@ -540,6 +662,7 @@ export interface components {
        * Format: date
        */
       action_session: string;
+      bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
       /**
        * Evaluation Timestamp
        * Format: date-time
@@ -557,6 +680,8 @@ export interface components {
       market_as_of_session: string;
       /** Population Scope */
       population_scope: string;
+      /** Source Fingerprint */
+      source_fingerprint?: string | null;
     };
     /** EventCoverageV1 */
     EventCoverageV1: {
@@ -962,6 +1087,14 @@ export interface components {
      * @enum {string}
      */
     GroupType: "SECTOR" | "INDUSTRY" | "SUB_INDUSTRY" | "THEME";
+    /** GroupsViewV1 */
+    GroupsViewV1: {
+      /** Groups */
+      groups: components["schemas"]["GroupEvidenceV1"][];
+      meta: components["schemas"]["ViewMetaV1"];
+      /** Reasons */
+      reasons: components["schemas"]["ReasonV1"][];
+    };
     /** HealthV1 */
     HealthV1: {
       /** Available */
@@ -1168,6 +1301,17 @@ export interface components {
       prior_distances: number[] | null;
       /** Value */
       value: number | null;
+    };
+    /** PopulationCountV1 */
+    PopulationCountV1: {
+      /** Name */
+      name: string;
+      /** Numerator */
+      numerator: number | null;
+      /** Population Count */
+      population_count: number;
+      /** Valid Count */
+      valid_count: number;
     };
     /** PredicateV1 */
     PredicateV1: {
@@ -2776,6 +2920,120 @@ export interface operations {
       };
     };
   };
+  groups_api_v1_groups_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GroupsViewV1"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Unprocessable Content */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Service Unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+    };
+  };
+  group_detail_api_v1_groups__group_id__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        group_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["GroupsViewV1"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Unprocessable Content */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Service Unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+    };
+  };
   health_api_v1_health_get: {
     parameters: {
       query?: never;
@@ -3044,6 +3302,64 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["TapeV1"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Unprocessable Content */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Service Unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+    };
+  };
+  time_machine_api_v1_time_machine__session__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        session: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
         };
       };
       /** @description Not Found */

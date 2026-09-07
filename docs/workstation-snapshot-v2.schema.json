@@ -1,6 +1,118 @@
 {
   "json_schema": {
     "$defs": {
+      "BootstrapContextV1": {
+        "additionalProperties": false,
+        "properties": {
+          "action_session": {
+            "format": "date",
+            "title": "Action Session",
+            "type": "string"
+          },
+          "calculation_mode": {
+            "const": "CURRENT_STATE_BOOTSTRAP",
+            "default": "CURRENT_STATE_BOOTSTRAP",
+            "title": "Calculation Mode",
+            "type": "string"
+          },
+          "calculation_start": {
+            "format": "date",
+            "title": "Calculation Start",
+            "type": "string"
+          },
+          "covered_population": {
+            "exclusiveMinimum": 0,
+            "title": "Covered Population",
+            "type": "integer"
+          },
+          "evaluation_timestamp": {
+            "format": "date-time",
+            "title": "Evaluation Timestamp",
+            "type": "string"
+          },
+          "first_observations": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "format": "date",
+                  "type": "string"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "First Observations",
+            "type": "array"
+          },
+          "historical_membership_status": {
+            "const": "UNKNOWN_BEFORE_BOOTSTRAP",
+            "default": "UNKNOWN_BEFORE_BOOTSTRAP",
+            "title": "Historical Membership Status",
+            "type": "string"
+          },
+          "mapping_members": {
+            "minimum": 0,
+            "title": "Mapping Members",
+            "type": "integer"
+          },
+          "market_as_of_session": {
+            "format": "date",
+            "title": "Market As Of Session",
+            "type": "string"
+          },
+          "missing_observations": {
+            "minimum": 0,
+            "title": "Missing Observations",
+            "type": "integer"
+          },
+          "not_yet_observed": {
+            "minimum": 0,
+            "title": "Not Yet Observed",
+            "type": "integer"
+          },
+          "population_scope": {
+            "const": "bounded initial covered population",
+            "default": "bounded initial covered population",
+            "title": "Population Scope",
+            "type": "string"
+          },
+          "rank_basis": {
+            "const": "CURRENT_COHORT_AT_E",
+            "default": "CURRENT_COHORT_AT_E",
+            "title": "Rank Basis",
+            "type": "string"
+          },
+          "strict_trade_members": {
+            "minimum": 0,
+            "title": "Strict Trade Members",
+            "type": "integer"
+          },
+          "version": {
+            "const": "current-state-bootstrap-v1",
+            "default": "current-state-bootstrap-v1",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "market_as_of_session",
+          "evaluation_timestamp",
+          "action_session",
+          "calculation_start",
+          "first_observations",
+          "covered_population",
+          "strict_trade_members",
+          "mapping_members",
+          "not_yet_observed",
+          "missing_observations"
+        ],
+        "title": "BootstrapContextV1",
+        "type": "object"
+      },
       "CompactRecordV2": {
         "additionalProperties": false,
         "properties": {
@@ -117,6 +229,17 @@
             "title": "Action Session",
             "type": "string"
           },
+          "bootstrap": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/BootstrapContextV1"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
           "evaluation_timestamp": {
             "format": "date-time",
             "title": "Evaluation Timestamp",
@@ -139,6 +262,19 @@
             "minLength": 1,
             "title": "Population Scope",
             "type": "string"
+          },
+          "source_fingerprint": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source Fingerprint"
           }
         },
         "required": [
@@ -181,94 +317,98 @@
             "discriminator": {
               "mapping": {
                 "0": "#/$defs/NormalizedApertureRules",
-                "1": "#/$defs/NormalizedBoundedBand",
-                "10": "#/$defs/NormalizedEarningsEvidenceV1",
-                "11": "#/$defs/NormalizedEventCoverageV1",
-                "12": "#/$defs/NormalizedEventEvidenceV1",
-                "13": "#/$defs/NormalizedEventInputV1",
-                "14": "#/$defs/NormalizedExtensionEvidenceV1",
-                "15": "#/$defs/NormalizedExtensionInputV1",
-                "16": "#/$defs/NormalizedExtensionRules",
-                "17": "#/$defs/NormalizedFractionV1",
-                "18": "#/$defs/NormalizedGeometryV1",
-                "19": "#/$defs/NormalizedGroupEvidenceV1",
-                "2": "#/$defs/NormalizedBreadthSleeveV1",
-                "20": "#/$defs/NormalizedGroupGateV1",
-                "21": "#/$defs/NormalizedGroupMemberV1",
-                "22": "#/$defs/NormalizedIndexInputV1",
-                "23": "#/$defs/NormalizedIndexSleeveV1",
-                "24": "#/$defs/NormalizedIndexVoteV1",
-                "25": "#/$defs/NormalizedInternalsSleeveV1",
-                "26": "#/$defs/NormalizedLeadershipOutputV1",
-                "27": "#/$defs/NormalizedLegacyStrengthContextV1",
-                "28": "#/$defs/NormalizedMappingUniverseRules",
-                "29": "#/$defs/NormalizedMetricV1",
-                "3": "#/$defs/NormalizedDatedProvenanceV1",
-                "30": "#/$defs/NormalizedMovingAverageV1",
-                "31": "#/$defs/NormalizedPredicateV1",
-                "32": "#/$defs/NormalizedPriceFeaturesV1",
-                "33": "#/$defs/NormalizedPriceWindowV1",
-                "34": "#/$defs/NormalizedRankedReturnV1",
-                "35": "#/$defs/NormalizedRawReturnV1",
-                "36": "#/$defs/NormalizedReasonV1",
-                "37": "#/$defs/NormalizedRegimeGateV1",
-                "38": "#/$defs/NormalizedRegimeInputV1",
-                "39": "#/$defs/NormalizedRegimeMemoryV1",
-                "4": "#/$defs/NormalizedDecisionEvidenceV1",
-                "40": "#/$defs/NormalizedRegimeMultipliers",
-                "41": "#/$defs/NormalizedRegimeOutputV1",
-                "42": "#/$defs/NormalizedResearchUniverseRules",
-                "43": "#/$defs/NormalizedResearchUniverseV1",
-                "44": "#/$defs/NormalizedResidualV1",
-                "45": "#/$defs/NormalizedRetentionThresholds",
-                "46": "#/$defs/NormalizedRiskRules",
-                "47": "#/$defs/NormalizedRuleV1",
-                "48": "#/$defs/NormalizedSetupActionEvidenceV1",
-                "49": "#/$defs/NormalizedSetupEvidenceV1",
-                "5": "#/$defs/NormalizedDecisionFeaturesV1",
-                "50": "#/$defs/NormalizedSetupInputV1",
-                "51": "#/$defs/NormalizedSetupInstanceV1",
-                "52": "#/$defs/NormalizedSetupMemberCountV1",
-                "53": "#/$defs/NormalizedSetupOutputV1",
-                "54": "#/$defs/NormalizedSetupStrengthContextV1",
-                "55": "#/$defs/NormalizedSizeAmountsV1",
-                "56": "#/$defs/NormalizedSizingInputV1",
-                "57": "#/$defs/NormalizedSizingProposalV1",
-                "58": "#/$defs/NormalizedSizingResultV1",
-                "59": "#/$defs/NormalizedSleevesV1",
-                "6": "#/$defs/NormalizedDecisionGateV1",
-                "60": "#/$defs/NormalizedSpotVolatilityIdentityV1",
-                "61": "#/$defs/NormalizedStrengthContextV1",
-                "62": "#/$defs/NormalizedStrengthEvidenceV1",
-                "63": "#/$defs/NormalizedStrengthGateV1",
-                "64": "#/$defs/NormalizedStrengthInputV1",
-                "65": "#/$defs/NormalizedStrengthSourceV1",
-                "66": "#/$defs/NormalizedStructureBreadthContextV1",
-                "67": "#/$defs/NormalizedStructureConditionsV1",
-                "68": "#/$defs/NormalizedStructureContextV1",
-                "69": "#/$defs/NormalizedStructureEvidenceV1",
-                "7": "#/$defs/NormalizedDecisionInputV1",
-                "70": "#/$defs/NormalizedStructureInputV1",
-                "71": "#/$defs/NormalizedStructureMeasuresV1",
-                "72": "#/$defs/NormalizedStructureSourceV1",
-                "73": "#/$defs/NormalizedStyleInputV1",
-                "74": "#/$defs/NormalizedStyleSleeveV1",
-                "75": "#/$defs/NormalizedThresholdResultV1",
-                "76": "#/$defs/NormalizedTradeThresholds",
-                "77": "#/$defs/NormalizedTradeUniverseRules",
-                "78": "#/$defs/NormalizedUniverseDecisionInputV1",
-                "79": "#/$defs/NormalizedUniverseMembership",
-                "8": "#/$defs/NormalizedDecisionRiskOutputV1",
-                "80": "#/$defs/NormalizedUniverseMemberships",
-                "81": "#/$defs/NormalizedVolatilityInputV1",
-                "82": "#/$defs/NormalizedVolatilitySleeveV1",
-                "9": "#/$defs/NormalizedDetectionV1"
+                "1": "#/$defs/NormalizedBootstrapContextV1",
+                "10": "#/$defs/NormalizedDetectionV1",
+                "11": "#/$defs/NormalizedEarningsEvidenceV1",
+                "12": "#/$defs/NormalizedEventCoverageV1",
+                "13": "#/$defs/NormalizedEventEvidenceV1",
+                "14": "#/$defs/NormalizedEventInputV1",
+                "15": "#/$defs/NormalizedExtensionEvidenceV1",
+                "16": "#/$defs/NormalizedExtensionInputV1",
+                "17": "#/$defs/NormalizedExtensionRules",
+                "18": "#/$defs/NormalizedFractionV1",
+                "19": "#/$defs/NormalizedGeometryV1",
+                "2": "#/$defs/NormalizedBoundedBand",
+                "20": "#/$defs/NormalizedGroupEvidenceV1",
+                "21": "#/$defs/NormalizedGroupGateV1",
+                "22": "#/$defs/NormalizedGroupMemberV1",
+                "23": "#/$defs/NormalizedIndexInputV1",
+                "24": "#/$defs/NormalizedIndexSleeveV1",
+                "25": "#/$defs/NormalizedIndexVoteV1",
+                "26": "#/$defs/NormalizedInternalsSleeveV1",
+                "27": "#/$defs/NormalizedLeadershipOutputV1",
+                "28": "#/$defs/NormalizedLegacyStrengthContextV1",
+                "29": "#/$defs/NormalizedMappingUniverseRules",
+                "3": "#/$defs/NormalizedBreadthSleeveV1",
+                "30": "#/$defs/NormalizedMetricV1",
+                "31": "#/$defs/NormalizedMovingAverageV1",
+                "32": "#/$defs/NormalizedPredicateV1",
+                "33": "#/$defs/NormalizedPriceFeaturesV1",
+                "34": "#/$defs/NormalizedPriceWindowV1",
+                "35": "#/$defs/NormalizedRankedReturnV1",
+                "36": "#/$defs/NormalizedRawReturnV1",
+                "37": "#/$defs/NormalizedReasonV1",
+                "38": "#/$defs/NormalizedRegimeGateV1",
+                "39": "#/$defs/NormalizedRegimeInputV1",
+                "4": "#/$defs/NormalizedDatedProvenanceV1",
+                "40": "#/$defs/NormalizedRegimeMemoryV1",
+                "41": "#/$defs/NormalizedRegimeMultipliers",
+                "42": "#/$defs/NormalizedRegimeOutputV1",
+                "43": "#/$defs/NormalizedResearchUniverseRules",
+                "44": "#/$defs/NormalizedResearchUniverseV1",
+                "45": "#/$defs/NormalizedResidualV1",
+                "46": "#/$defs/NormalizedRetentionThresholds",
+                "47": "#/$defs/NormalizedRiskRules",
+                "48": "#/$defs/NormalizedRuleV1",
+                "49": "#/$defs/NormalizedSetupActionEvidenceV1",
+                "5": "#/$defs/NormalizedDecisionEvidenceV1",
+                "50": "#/$defs/NormalizedSetupEvidenceV1",
+                "51": "#/$defs/NormalizedSetupInputV1",
+                "52": "#/$defs/NormalizedSetupInstanceV1",
+                "53": "#/$defs/NormalizedSetupMemberCountV1",
+                "54": "#/$defs/NormalizedSetupOutputV1",
+                "55": "#/$defs/NormalizedSetupStrengthContextV1",
+                "56": "#/$defs/NormalizedSizeAmountsV1",
+                "57": "#/$defs/NormalizedSizingInputV1",
+                "58": "#/$defs/NormalizedSizingProposalV1",
+                "59": "#/$defs/NormalizedSizingResultV1",
+                "6": "#/$defs/NormalizedDecisionFeaturesV1",
+                "60": "#/$defs/NormalizedSleevesV1",
+                "61": "#/$defs/NormalizedSpotVolatilityIdentityV1",
+                "62": "#/$defs/NormalizedStrengthContextV1",
+                "63": "#/$defs/NormalizedStrengthEvidenceV1",
+                "64": "#/$defs/NormalizedStrengthGateV1",
+                "65": "#/$defs/NormalizedStrengthInputV1",
+                "66": "#/$defs/NormalizedStrengthSourceV1",
+                "67": "#/$defs/NormalizedStructureBreadthContextV1",
+                "68": "#/$defs/NormalizedStructureConditionsV1",
+                "69": "#/$defs/NormalizedStructureContextV1",
+                "7": "#/$defs/NormalizedDecisionGateV1",
+                "70": "#/$defs/NormalizedStructureEvidenceV1",
+                "71": "#/$defs/NormalizedStructureInputV1",
+                "72": "#/$defs/NormalizedStructureMeasuresV1",
+                "73": "#/$defs/NormalizedStructureSourceV1",
+                "74": "#/$defs/NormalizedStyleInputV1",
+                "75": "#/$defs/NormalizedStyleSleeveV1",
+                "76": "#/$defs/NormalizedThresholdResultV1",
+                "77": "#/$defs/NormalizedTradeThresholds",
+                "78": "#/$defs/NormalizedTradeUniverseRules",
+                "79": "#/$defs/NormalizedUniverseDecisionInputV1",
+                "8": "#/$defs/NormalizedDecisionInputV1",
+                "80": "#/$defs/NormalizedUniverseMembership",
+                "81": "#/$defs/NormalizedUniverseMemberships",
+                "82": "#/$defs/NormalizedVolatilityInputV1",
+                "83": "#/$defs/NormalizedVolatilitySleeveV1",
+                "9": "#/$defs/NormalizedDecisionRiskOutputV1"
               },
               "propertyName": "model_type"
             },
             "oneOf": [
               {
                 "$ref": "#/$defs/NormalizedApertureRules"
+              },
+              {
+                "$ref": "#/$defs/NormalizedBootstrapContextV1"
               },
               {
                 "$ref": "#/$defs/NormalizedBoundedBand"
@@ -776,6 +916,103 @@
         "title": "NormalizedApertureRules",
         "type": "object"
       },
+      "NormalizedBootstrapContextV1": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 15,
+            "minItems": 15,
+            "prefixItems": [
+              {
+                "const": "current-state-bootstrap-v1",
+                "type": "string"
+              },
+              {
+                "const": "CURRENT_STATE_BOOTSTRAP",
+                "type": "string"
+              },
+              {
+                "const": "UNKNOWN_BEFORE_BOOTSTRAP",
+                "type": "string"
+              },
+              {
+                "const": "bounded initial covered population",
+                "type": "string"
+              },
+              {
+                "const": "CURRENT_COHORT_AT_E",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "items": {
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "prefixItems": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "format": "date",
+                      "type": "string"
+                    }
+                  ],
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 1,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedBootstrapContextV1",
+        "type": "object"
+      },
       "NormalizedBoundedBand": {
         "additionalProperties": false,
         "properties": {
@@ -796,7 +1033,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 1,
+            "const": 2,
             "title": "Model Type",
             "type": "integer"
           }
@@ -877,7 +1114,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 2,
+            "const": 3,
             "title": "Model Type",
             "type": "integer"
           }
@@ -893,8 +1130,8 @@
         "additionalProperties": false,
         "properties": {
           "fields": {
-            "maxItems": 6,
-            "minItems": 6,
+            "maxItems": 7,
+            "minItems": 7,
             "prefixItems": [
               {
                 "minLength": 1,
@@ -919,13 +1156,24 @@
               {
                 "format": "date",
                 "type": "string"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             ],
             "title": "Fields",
             "type": "array"
           },
           "model_type": {
-            "const": 3,
+            "const": 4,
             "title": "Model Type",
             "type": "integer"
           }
@@ -1003,7 +1251,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 4,
+            "const": 5,
             "title": "Model Type",
             "type": "integer"
           }
@@ -1076,7 +1324,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 5,
+            "const": 6,
             "title": "Model Type",
             "type": "integer"
           }
@@ -1116,7 +1364,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 6,
+            "const": 7,
             "title": "Model Type",
             "type": "integer"
           }
@@ -1233,7 +1481,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 7,
+            "const": 8,
             "title": "Model Type",
             "type": "integer"
           }
@@ -1329,7 +1577,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 8,
+            "const": 9,
             "title": "Model Type",
             "type": "integer"
           }
@@ -1406,7 +1654,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 9,
+            "const": 10,
             "title": "Model Type",
             "type": "integer"
           }
@@ -1525,7 +1773,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 10,
+            "const": 11,
             "title": "Model Type",
             "type": "integer"
           }
@@ -1620,7 +1868,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 11,
+            "const": 12,
             "title": "Model Type",
             "type": "integer"
           }
@@ -1683,7 +1931,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 12,
+            "const": 13,
             "title": "Model Type",
             "type": "integer"
           }
@@ -1797,7 +2045,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 13,
+            "const": 14,
             "title": "Model Type",
             "type": "integer"
           }
@@ -1864,7 +2112,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 14,
+            "const": 15,
             "title": "Model Type",
             "type": "integer"
           }
@@ -1895,7 +2143,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 15,
+            "const": 16,
             "title": "Model Type",
             "type": "integer"
           }
@@ -1947,7 +2195,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 16,
+            "const": 17,
             "title": "Model Type",
             "type": "integer"
           }
@@ -2000,7 +2248,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 17,
+            "const": 18,
             "title": "Model Type",
             "type": "integer"
           }
@@ -2051,7 +2299,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 18,
+            "const": 19,
             "title": "Model Type",
             "type": "integer"
           }
@@ -2337,7 +2585,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 19,
+            "const": 20,
             "title": "Model Type",
             "type": "integer"
           }
@@ -2436,7 +2684,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 20,
+            "const": 21,
             "title": "Model Type",
             "type": "integer"
           }
@@ -2484,7 +2732,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 21,
+            "const": 22,
             "title": "Model Type",
             "type": "integer"
           }
@@ -2556,7 +2804,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 22,
+            "const": 23,
             "title": "Model Type",
             "type": "integer"
           }
@@ -2628,7 +2876,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 23,
+            "const": 24,
             "title": "Model Type",
             "type": "integer"
           }
@@ -2682,7 +2930,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 24,
+            "const": 25,
             "title": "Model Type",
             "type": "integer"
           }
@@ -2769,7 +3017,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 25,
+            "const": 26,
             "title": "Model Type",
             "type": "integer"
           }
@@ -2843,7 +3091,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 26,
+            "const": 27,
             "title": "Model Type",
             "type": "integer"
           }
@@ -2927,7 +3175,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 27,
+            "const": 28,
             "title": "Model Type",
             "type": "integer"
           }
@@ -2987,7 +3235,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 28,
+            "const": 29,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3024,7 +3272,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 29,
+            "const": 30,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3089,7 +3337,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 30,
+            "const": 31,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3126,7 +3374,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 31,
+            "const": 32,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3183,7 +3431,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 32,
+            "const": 33,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3225,7 +3473,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 33,
+            "const": 34,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3301,7 +3549,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 34,
+            "const": 35,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3355,7 +3603,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 35,
+            "const": 36,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3387,7 +3635,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 36,
+            "const": 37,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3470,7 +3718,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 37,
+            "const": 38,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3561,7 +3809,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 38,
+            "const": 39,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3633,7 +3881,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 39,
+            "const": 40,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3672,7 +3920,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 40,
+            "const": 41,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3833,7 +4081,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 41,
+            "const": 42,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3893,7 +4141,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 42,
+            "const": 43,
             "title": "Model Type",
             "type": "integer"
           }
@@ -3939,7 +4187,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 43,
+            "const": 44,
             "title": "Model Type",
             "type": "integer"
           }
@@ -4008,7 +4256,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 44,
+            "const": 45,
             "title": "Model Type",
             "type": "integer"
           }
@@ -4051,7 +4299,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 45,
+            "const": 46,
             "title": "Model Type",
             "type": "integer"
           }
@@ -4101,7 +4349,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 46,
+            "const": 47,
             "title": "Model Type",
             "type": "integer"
           }
@@ -4131,7 +4379,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 47,
+            "const": 48,
             "title": "Model Type",
             "type": "integer"
           }
@@ -4211,7 +4459,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 48,
+            "const": 49,
             "title": "Model Type",
             "type": "integer"
           }
@@ -4332,7 +4580,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 49,
+            "const": 50,
             "title": "Model Type",
             "type": "integer"
           }
@@ -4580,7 +4828,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 50,
+            "const": 51,
             "title": "Model Type",
             "type": "integer"
           }
@@ -4714,7 +4962,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 51,
+            "const": 52,
             "title": "Model Type",
             "type": "integer"
           }
@@ -4752,7 +5000,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 52,
+            "const": 53,
             "title": "Model Type",
             "type": "integer"
           }
@@ -4833,7 +5081,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 53,
+            "const": 54,
             "title": "Model Type",
             "type": "integer"
           }
@@ -4868,7 +5116,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 54,
+            "const": 55,
             "title": "Model Type",
             "type": "integer"
           }
@@ -4924,7 +5172,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 55,
+            "const": 56,
             "title": "Model Type",
             "type": "integer"
           }
@@ -4988,7 +5236,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 56,
+            "const": 57,
             "title": "Model Type",
             "type": "integer"
           }
@@ -5052,7 +5300,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 57,
+            "const": 58,
             "title": "Model Type",
             "type": "integer"
           }
@@ -5189,7 +5437,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 58,
+            "const": 59,
             "title": "Model Type",
             "type": "integer"
           }
@@ -5233,7 +5481,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 59,
+            "const": 60,
             "title": "Model Type",
             "type": "integer"
           }
@@ -5293,7 +5541,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 60,
+            "const": 61,
             "title": "Model Type",
             "type": "integer"
           }
@@ -5352,7 +5600,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 61,
+            "const": 62,
             "title": "Model Type",
             "type": "integer"
           }
@@ -5448,7 +5696,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 62,
+            "const": 63,
             "title": "Model Type",
             "type": "integer"
           }
@@ -5558,7 +5806,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 63,
+            "const": 64,
             "title": "Model Type",
             "type": "integer"
           }
@@ -5632,7 +5880,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 64,
+            "const": 65,
             "title": "Model Type",
             "type": "integer"
           }
@@ -5684,7 +5932,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 65,
+            "const": 66,
             "title": "Model Type",
             "type": "integer"
           }
@@ -5727,7 +5975,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 66,
+            "const": 67,
             "title": "Model Type",
             "type": "integer"
           }
@@ -5802,7 +6050,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 67,
+            "const": 68,
             "title": "Model Type",
             "type": "integer"
           }
@@ -5856,7 +6104,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 68,
+            "const": 69,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6039,7 +6287,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 69,
+            "const": 70,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6285,7 +6533,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 70,
+            "const": 71,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6359,7 +6607,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 71,
+            "const": 72,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6403,7 +6651,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 72,
+            "const": 73,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6446,7 +6694,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 73,
+            "const": 74,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6528,7 +6776,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 74,
+            "const": 75,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6578,7 +6826,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 75,
+            "const": 76,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6618,7 +6866,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 76,
+            "const": 77,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6678,7 +6926,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 77,
+            "const": 78,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6732,7 +6980,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 78,
+            "const": 79,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6774,7 +7022,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 79,
+            "const": 80,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6810,7 +7058,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 80,
+            "const": 81,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6868,7 +7116,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 81,
+            "const": 82,
             "title": "Model Type",
             "type": "integer"
           }
@@ -6947,7 +7195,7 @@
             "type": "array"
           },
           "model_type": {
-            "const": 82,
+            "const": 83,
             "title": "Model Type",
             "type": "integer"
           }
@@ -7031,8 +7279,8 @@
             "type": "integer"
           },
           "registry_fingerprint": {
-            "const": "1e18121c41325d5537a668d014582f85c5045b1f3c045ac4f656d80bc5b6a598",
-            "default": "1e18121c41325d5537a668d014582f85c5045b1f3c045ac4f656d80bc5b6a598",
+            "const": "454a474905e65a3c1b74af17161ca5a839c0ef5709c4fdb6544abf2d4341d291",
+            "default": "454a474905e65a3c1b74af17161ca5a839c0ef5709c4fdb6544abf2d4341d291",
             "title": "Registry Fingerprint",
             "type": "string"
           },
@@ -7329,15 +7577,35 @@
         "risk"
       ]
     },
-    "BoundedBand": {
+    "BootstrapContextV1": {
       "code": 1,
+      "fields": [
+        "version",
+        "calculation_mode",
+        "historical_membership_status",
+        "population_scope",
+        "rank_basis",
+        "market_as_of_session",
+        "evaluation_timestamp",
+        "action_session",
+        "calculation_start",
+        "first_observations",
+        "covered_population",
+        "strict_trade_members",
+        "mapping_members",
+        "not_yet_observed",
+        "missing_observations"
+      ]
+    },
+    "BoundedBand": {
+      "code": 2,
       "fields": [
         "minimum",
         "maximum_exclusive"
       ]
     },
     "BreadthSleeveV1": {
-      "code": 2,
+      "code": 3,
       "fields": [
         "state",
         "score",
@@ -7353,18 +7621,19 @@
       ]
     },
     "DatedProvenanceV1": {
-      "code": 3,
+      "code": 4,
       "fields": [
         "snapshot_id",
         "version",
         "source_as_of_date",
         "effective_session",
         "known_session",
-        "valid_through"
+        "valid_through",
+        "bootstrap"
       ]
     },
     "DecisionEvidenceV1": {
-      "code": 4,
+      "code": 5,
       "fields": [
         "symbol",
         "formula_version",
@@ -7380,7 +7649,7 @@
       ]
     },
     "DecisionFeaturesV1": {
-      "code": 5,
+      "code": 6,
       "fields": [
         "symbol",
         "schema_version",
@@ -7393,7 +7662,7 @@
       ]
     },
     "DecisionGateV1": {
-      "code": 6,
+      "code": 7,
       "fields": [
         "name",
         "rung",
@@ -7402,7 +7671,7 @@
       ]
     },
     "DecisionInputV1": {
-      "code": 7,
+      "code": 8,
       "fields": [
         "schema_version",
         "features",
@@ -7421,7 +7690,7 @@
       ]
     },
     "DecisionRiskOutputV1": {
-      "code": 8,
+      "code": 9,
       "fields": [
         "formula_version",
         "threshold_version",
@@ -7445,7 +7714,7 @@
       ]
     },
     "DetectionV1": {
-      "code": 9,
+      "code": 10,
       "fields": [
         "family",
         "direction",
@@ -7458,7 +7727,7 @@
       ]
     },
     "EarningsEvidenceV1": {
-      "code": 10,
+      "code": 11,
       "fields": [
         "symbol",
         "formula_version",
@@ -7478,7 +7747,7 @@
       ]
     },
     "EventCoverageV1": {
-      "code": 11,
+      "code": 12,
       "fields": [
         "symbol",
         "source",
@@ -7493,7 +7762,7 @@
       ]
     },
     "EventEvidenceV1": {
-      "code": 12,
+      "code": 13,
       "fields": [
         "formula_version",
         "threshold_version",
@@ -7506,7 +7775,7 @@
       ]
     },
     "EventInputV1": {
-      "code": 13,
+      "code": 14,
       "fields": [
         "symbol",
         "source",
@@ -7524,7 +7793,7 @@
       ]
     },
     "ExtensionEvidenceV1": {
-      "code": 14,
+      "code": 15,
       "fields": [
         "formula_version",
         "threshold_version",
@@ -7538,14 +7807,14 @@
       ]
     },
     "ExtensionInputV1": {
-      "code": 15,
+      "code": 16,
       "fields": [
         "features",
         "direction"
       ]
     },
     "ExtensionRules": {
-      "code": 16,
+      "code": 17,
       "fields": [
         "reference",
         "wilder_atr_period",
@@ -7557,7 +7826,7 @@
       ]
     },
     "FractionV1": {
-      "code": 17,
+      "code": 18,
       "fields": [
         "numerator",
         "valid_count",
@@ -7567,7 +7836,7 @@
       ]
     },
     "GeometryV1": {
-      "code": 18,
+      "code": 19,
       "fields": [
         "reference_as_of_session",
         "reference_kind",
@@ -7579,7 +7848,7 @@
       ]
     },
     "GroupEvidenceV1": {
-      "code": 19,
+      "code": 20,
       "fields": [
         "schema_version",
         "session_date",
@@ -7624,7 +7893,7 @@
       ]
     },
     "GroupGateV1": {
-      "code": 20,
+      "code": 21,
       "fields": [
         "formula_version",
         "threshold_version",
@@ -7639,7 +7908,7 @@
       ]
     },
     "GroupMemberV1": {
-      "code": 21,
+      "code": 22,
       "fields": [
         "group_id",
         "source_symbol",
@@ -7649,7 +7918,7 @@
       ]
     },
     "IndexInputV1": {
-      "code": 22,
+      "code": 23,
       "fields": [
         "symbol",
         "close",
@@ -7659,7 +7928,7 @@
       ]
     },
     "IndexSleeveV1": {
-      "code": 23,
+      "code": 24,
       "fields": [
         "state",
         "score",
@@ -7671,7 +7940,7 @@
       ]
     },
     "IndexVoteV1": {
-      "code": 24,
+      "code": 25,
       "fields": [
         "inputs",
         "vote",
@@ -7681,7 +7950,7 @@
       ]
     },
     "InternalsSleeveV1": {
-      "code": 25,
+      "code": 26,
       "fields": [
         "state",
         "score",
@@ -7697,7 +7966,7 @@
       ]
     },
     "LeadershipOutputV1": {
-      "code": 26,
+      "code": 27,
       "fields": [
         "schema_version",
         "research_status",
@@ -7713,7 +7982,7 @@
       ]
     },
     "LegacyStrengthContextV1": {
-      "code": 27,
+      "code": 28,
       "fields": [
         "return_20d_percent",
         "return_60d_percent",
@@ -7724,7 +7993,7 @@
       ]
     },
     "MappingUniverseRules": {
-      "code": 28,
+      "code": 29,
       "fields": [
         "required_locale",
         "active_only",
@@ -7736,14 +8005,14 @@
       ]
     },
     "MetricV1": {
-      "code": 29,
+      "code": 30,
       "fields": [
         "name",
         "value"
       ]
     },
     "MovingAverageV1": {
-      "code": 30,
+      "code": 31,
       "fields": [
         "kind",
         "value",
@@ -7752,14 +8021,14 @@
       ]
     },
     "PredicateV1": {
-      "code": 31,
+      "code": 32,
       "fields": [
         "name",
         "passed"
       ]
     },
     "PriceFeaturesV1": {
-      "code": 32,
+      "code": 33,
       "fields": [
         "symbol",
         "close",
@@ -7768,7 +8037,7 @@
       ]
     },
     "PriceWindowV1": {
-      "code": 33,
+      "code": 34,
       "fields": [
         "highs",
         "lows",
@@ -7776,7 +8045,7 @@
       ]
     },
     "RankedReturnV1": {
-      "code": 34,
+      "code": 35,
       "fields": [
         "horizon",
         "value",
@@ -7788,7 +8057,7 @@
       ]
     },
     "RawReturnV1": {
-      "code": 35,
+      "code": 36,
       "fields": [
         "horizon",
         "value",
@@ -7796,14 +8065,14 @@
       ]
     },
     "ReasonV1": {
-      "code": 36,
+      "code": 37,
       "fields": [
         "code",
         "explanation"
       ]
     },
     "RegimeGateV1": {
-      "code": 37,
+      "code": 38,
       "fields": [
         "formula_version",
         "threshold_version",
@@ -7817,7 +8086,7 @@
       ]
     },
     "RegimeInputV1": {
-      "code": 38,
+      "code": 39,
       "fields": [
         "schema_version",
         "session_date",
@@ -7833,7 +8102,7 @@
       ]
     },
     "RegimeMemoryV1": {
-      "code": 39,
+      "code": 40,
       "fields": [
         "confirmed_state",
         "entered_date",
@@ -7843,7 +8112,7 @@
       ]
     },
     "RegimeMultipliers": {
-      "code": 40,
+      "code": 41,
       "fields": [
         "green",
         "yellow",
@@ -7851,7 +8120,7 @@
       ]
     },
     "RegimeOutputV1": {
-      "code": 41,
+      "code": 42,
       "fields": [
         "schema_version",
         "engine_version",
@@ -7881,7 +8150,7 @@
       ]
     },
     "ResearchUniverseRules": {
-      "code": 42,
+      "code": 43,
       "fields": [
         "required_locale",
         "active_only",
@@ -7893,7 +8162,7 @@
       ]
     },
     "ResearchUniverseV1": {
-      "code": 43,
+      "code": 44,
       "fields": [
         "schema_version",
         "provenance",
@@ -7903,7 +8172,7 @@
       ]
     },
     "ResidualV1": {
-      "code": 44,
+      "code": 45,
       "fields": [
         "benchmark",
         "beta_252_qqq",
@@ -7914,7 +8183,7 @@
       ]
     },
     "RetentionThresholds": {
-      "code": 45,
+      "code": 46,
       "fields": [
         "minimum_price",
         "minimum_market_cap",
@@ -7924,7 +8193,7 @@
       ]
     },
     "RiskRules": {
-      "code": 46,
+      "code": 47,
       "fields": [
         "account_equity",
         "risk_per_idea_fraction",
@@ -7935,14 +8204,14 @@
       ]
     },
     "RuleV1": {
-      "code": 47,
+      "code": 48,
       "fields": [
         "name",
         "passed"
       ]
     },
     "SetupActionEvidenceV1": {
-      "code": 48,
+      "code": 49,
       "fields": [
         "formula_version",
         "threshold_version",
@@ -7961,7 +8230,7 @@
       ]
     },
     "SetupEvidenceV1": {
-      "code": 49,
+      "code": 50,
       "fields": [
         "schema_version",
         "instance",
@@ -7983,7 +8252,7 @@
       ]
     },
     "SetupInputV1": {
-      "code": 50,
+      "code": 51,
       "fields": [
         "schema_version",
         "feature_version",
@@ -8015,7 +8284,7 @@
       ]
     },
     "SetupInstanceV1": {
-      "code": 51,
+      "code": 52,
       "fields": [
         "schema_version",
         "setup_id",
@@ -8041,14 +8310,14 @@
       ]
     },
     "SetupMemberCountV1": {
-      "code": 52,
+      "code": 53,
       "fields": [
         "family",
         "member_count"
       ]
     },
     "SetupOutputV1": {
-      "code": 53,
+      "code": 54,
       "fields": [
         "schema_version",
         "engine_version",
@@ -8064,14 +8333,14 @@
       ]
     },
     "SetupStrengthContextV1": {
-      "code": 54,
+      "code": 55,
       "fields": [
         "family",
         "status"
       ]
     },
     "SizeAmountsV1": {
-      "code": 55,
+      "code": 56,
       "fields": [
         "shares",
         "pilot_shares",
@@ -8086,7 +8355,7 @@
       ]
     },
     "SizingInputV1": {
-      "code": 56,
+      "code": 57,
       "fields": [
         "symbol",
         "schema_version",
@@ -8100,7 +8369,7 @@
       ]
     },
     "SizingProposalV1": {
-      "code": 57,
+      "code": 58,
       "fields": [
         "account_equity",
         "available_buying_power",
@@ -8109,7 +8378,7 @@
       ]
     },
     "SizingResultV1": {
-      "code": 58,
+      "code": 59,
       "fields": [
         "formula_version",
         "threshold_version",
@@ -8128,7 +8397,7 @@
       ]
     },
     "SleevesV1": {
-      "code": 59,
+      "code": 60,
       "fields": [
         "index",
         "breadth",
@@ -8138,7 +8407,7 @@
       ]
     },
     "SpotVolatilityIdentityV1": {
-      "code": 60,
+      "code": 61,
       "fields": [
         "identity_version",
         "canonical_series",
@@ -8152,7 +8421,7 @@
       ]
     },
     "StrengthContextV1": {
-      "code": 61,
+      "code": 62,
       "fields": [
         "legacy",
         "structure_state",
@@ -8160,7 +8429,7 @@
       ]
     },
     "StrengthEvidenceV1": {
-      "code": 62,
+      "code": 63,
       "fields": [
         "schema_version",
         "inputs",
@@ -8176,7 +8445,7 @@
       ]
     },
     "StrengthGateV1": {
-      "code": 63,
+      "code": 64,
       "fields": [
         "formula_version",
         "threshold_version",
@@ -8192,7 +8461,7 @@
       ]
     },
     "StrengthInputV1": {
-      "code": 64,
+      "code": 65,
       "fields": [
         "schema_version",
         "symbol",
@@ -8206,7 +8475,7 @@
       ]
     },
     "StrengthSourceV1": {
-      "code": 65,
+      "code": 66,
       "fields": [
         "data_vendor",
         "dataset_id",
@@ -8218,7 +8487,7 @@
       ]
     },
     "StructureBreadthContextV1": {
-      "code": 66,
+      "code": 67,
       "fields": [
         "session_date",
         "source",
@@ -8227,7 +8496,7 @@
       ]
     },
     "StructureConditionsV1": {
-      "code": 67,
+      "code": 68,
       "fields": [
         "SMA20_RISING",
         "SMA20_FALLING",
@@ -8249,7 +8518,7 @@
       ]
     },
     "StructureContextV1": {
-      "code": 68,
+      "code": 69,
       "fields": [
         "close_gt_sma200",
         "sma200_atr_slope_60",
@@ -8257,7 +8526,7 @@
       ]
     },
     "StructureEvidenceV1": {
-      "code": 69,
+      "code": 70,
       "fields": [
         "schema_version",
         "engine_version",
@@ -8287,7 +8556,7 @@
       ]
     },
     "StructureInputV1": {
-      "code": 70,
+      "code": 71,
       "fields": [
         "schema_version",
         "feature_version",
@@ -8317,7 +8586,7 @@
       ]
     },
     "StructureMeasuresV1": {
-      "code": 71,
+      "code": 72,
       "fields": [
         "stack_up",
         "stack_dn",
@@ -8334,7 +8603,7 @@
       ]
     },
     "StructureSourceV1": {
-      "code": 72,
+      "code": 73,
       "fields": [
         "data_vendor",
         "dataset_id",
@@ -8344,14 +8613,14 @@
       ]
     },
     "StyleInputV1": {
-      "code": 73,
+      "code": 74,
       "fields": [
         "symbol",
         "R21"
       ]
     },
     "StyleSleeveV1": {
-      "code": 74,
+      "code": 75,
       "fields": [
         "state",
         "score",
@@ -8363,7 +8632,7 @@
       ]
     },
     "ThresholdResultV1": {
-      "code": 75,
+      "code": 76,
       "fields": [
         "name",
         "value",
@@ -8372,7 +8641,7 @@
       ]
     },
     "TradeThresholds": {
-      "code": 76,
+      "code": 77,
       "fields": [
         "minimum_price",
         "minimum_market_cap",
@@ -8381,7 +8650,7 @@
       ]
     },
     "TradeUniverseRules": {
-      "code": 77,
+      "code": 78,
       "fields": [
         "required_locale",
         "active_only",
@@ -8393,7 +8662,7 @@
       ]
     },
     "UniverseDecisionInputV1": {
-      "code": 78,
+      "code": 79,
       "fields": [
         "symbol",
         "session_date",
@@ -8406,7 +8675,7 @@
       ]
     },
     "UniverseMembership": {
-      "code": 79,
+      "code": 80,
       "fields": [
         "eligible",
         "membership_mode",
@@ -8415,7 +8684,7 @@
       ]
     },
     "UniverseMemberships": {
-      "code": 80,
+      "code": 81,
       "fields": [
         "market_mapping",
         "equity_research",
@@ -8423,7 +8692,7 @@
       ]
     },
     "VolatilityInputV1": {
-      "code": 81,
+      "code": 82,
       "fields": [
         "identity",
         "close",
@@ -8432,7 +8701,7 @@
       ]
     },
     "VolatilitySleeveV1": {
-      "code": 82,
+      "code": 83,
       "fields": [
         "state",
         "score",
@@ -8444,5 +8713,5 @@
       ]
     }
   },
-  "registry_fingerprint": "1e18121c41325d5537a668d014582f85c5045b1f3c045ac4f656d80bc5b6a598"
+  "registry_fingerprint": "454a474905e65a3c1b74af17161ca5a839c0ef5709c4fdb6544abf2d4341d291"
 }

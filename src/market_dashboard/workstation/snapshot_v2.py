@@ -146,10 +146,16 @@ class WorkstationSnapshotV2(ContractModel):
         prefix = calendar_hash(calendar, t)
         action_prefix = calendar_hash(calendar, self.action_session)
         p = universe.provenance
-        if (
-            not p.effective_session <= t <= p.valid_through
-            or p.effective_session not in positions
-        ):
+        if p.bootstrap:
+            if not self.evaluation or self.evaluation.bootstrap != p.bootstrap:
+                raise ValueError("Bootstrap provenance missing or contradictory")
+            if p.bootstrap.market_as_of_session != t:
+                raise ValueError("Retrospective bootstrap snapshot prohibited")
+            if set(dict(p.bootstrap.first_observations)) != set(universe.symbols):
+                raise ValueError("Bootstrap observation population mismatch")
+        elif self.evaluation and self.evaluation.bootstrap:
+            raise ValueError("Bootstrap membership provenance required")
+        if not p.supports_calculation(t) or p.effective_session not in positions:
             raise ValueError("Universe effective interval mismatch")
         if universe.policy_version != rules.universe_policy_version:
             raise ValueError("Universe policy mismatch")
@@ -308,11 +314,12 @@ class WorkstationSnapshotV2(ContractModel):
                     e.inputs.atr14,
                 ) != (f.symbol, t, basis, version, f.close, f.wilder_atr14):
                     raise ValueError("Structure/Setup identity or value mismatch")
+            engine_positions = p.engine_positions(calendar, f.symbol)
             if i.structure is not None:
                 s = i.structure.inputs
                 if (
                     s.sma50 != f.sma50
-                    or s.prior_sessions != positions[t]
+                    or s.prior_sessions != engine_positions[t]
                     or (
                         s.bar_timestamp_utc is not None
                         and s.bar_timestamp_utc > i.completed_at
@@ -325,7 +332,7 @@ class WorkstationSnapshotV2(ContractModel):
             ):
                 raise ValueError("Contradictory shared Structure evidence")
             if i.setups is not None:
-                self._setup_integrity(i, positions)
+                self._setup_integrity(i, engine_positions)
             strength = strengths.get(f.symbol)
             if strength is not None:
                 if (

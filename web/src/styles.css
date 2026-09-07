@@ -1065,7 +1065,8 @@ td small {
   }
   nav {
     flex-direction: row;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    justify-content: flex-start;
     gap: 3px;
   }
   nav a {
@@ -1226,4 +1227,11 @@ td small {
     animation: none !important;
     transition: none !important;
   }
+}
+
+.context span {
+  min-width: 0;
+}
+.context code {
+  overflow-wrap: anywhere;
 }

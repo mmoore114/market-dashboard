@@ -99,6 +99,26 @@ def brief(snapshot, meta):
         meta=meta,
         regime_state=snapshot.regime.status,
         regime_reason=snapshot.regime.transition_reason,
+        denominators=tuple(
+            {
+                "name": label,
+                "numerator": value.numerator,
+                "valid_count": value.valid_count,
+                "population_count": value.population_count,
+            }
+            for label, value in (
+                ("Above SMA20", snapshot.regime.sleeves.breadth.above_sma20),
+                ("Above SMA50", snapshot.regime.sleeves.breadth.above_sma50),
+                (
+                    "Strong leadership",
+                    snapshot.regime.sleeves.internals.strong_leadership,
+                ),
+                ("Strong rotation", snapshot.regime.sleeves.internals.strong_rotation),
+                ("Leading groups", snapshot.regime.sleeves.internals.leading_groups),
+            )
+        )
+        if meta.evaluation and meta.evaluation.bootstrap
+        else (),
         sleeves=tuple(
             SleeveViewV1(
                 name=k,

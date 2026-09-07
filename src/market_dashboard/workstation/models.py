@@ -20,6 +20,7 @@ from market_dashboard.aperture.decision_policy import validate_rules
 from market_dashboard.aperture.leadership import RULES_FINGERPRINT as LEADERSHIP_RULES
 from market_dashboard.aperture.leadership import fingerprint
 from market_dashboard.aperture.leadership_contracts import (
+    BootstrapContextV1,
     GroupEvidenceV1,
     StrengthSourceV1,
 )
@@ -96,6 +97,12 @@ class EvaluationV1(ContractModel):
     action_session: date
     population_scope: str = Field(min_length=1)
     input_bindings: tuple[InputClockBindingV1, ...] = ()
+    source_fingerprint: str | None = Field(
+        default=None, pattern=r"^[0-9a-f]{64}$", exclude_if=lambda v: v is None
+    )
+    bootstrap: BootstrapContextV1 | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
 
     @model_validator(mode="after")
     def clocks(self):
@@ -111,6 +118,18 @@ class EvaluationV1(ContractModel):
             )
         if len({b.name for b in self.input_bindings}) != len(self.input_bindings):
             raise ValueError("Duplicate input clock binding")
+        if self.bootstrap and (
+            self.bootstrap.market_as_of_session,
+            self.bootstrap.action_session,
+            self.bootstrap.evaluation_timestamp,
+            self.bootstrap.population_scope,
+        ) != (
+            self.market_as_of_session,
+            self.action_session,
+            self.evaluation_timestamp,
+            self.population_scope,
+        ):
+            raise ValueError("Bootstrap/evaluation mismatch")
         for binding in self.input_bindings:
             available = binding.available_at
             if available.utcoffset() is None or available > self.evaluation_timestamp:
@@ -329,10 +348,20 @@ class GroupSummaryV1(ContractModel):
     rotation_rank_advantage: float | None
 
 
+class PopulationCountV1(ContractModel):
+    name: str
+    numerator: int | None = Field(ge=0)
+    valid_count: int = Field(ge=0)
+    population_count: int = Field(ge=0)
+
+
 class BriefV1(ContractModel):
     meta: ViewMetaV1
     regime_state: str
     regime_reason: str
+    denominators: tuple[PopulationCountV1, ...] = Field(
+        default=(), exclude_if=lambda v: not v
+    )
     sleeves: tuple[SleeveViewV1, ...]
     funnel: FunnelV1
     leading_groups: tuple[GroupSummaryV1, ...]
@@ -387,3 +416,9 @@ class ErrorV1(ContractModel):
     code: str
     message: str
     fields: tuple[ErrorFieldV1, ...] = ()
+
+
+class GroupsViewV1(ContractModel):
+    meta: ViewMetaV1
+    groups: tuple[GroupEvidenceV1, ...]
+    reasons: tuple[ReasonV1, ...]

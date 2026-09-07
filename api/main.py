@@ -1,6 +1,7 @@
 """Local single-user workstation API. No provider clients or materialization."""
 
 import os
+from datetime import date
 from pathlib import Path
 from typing import Literal
 
@@ -20,6 +21,7 @@ from market_dashboard.workstation.models import (
     BriefV1,
     ErrorFieldV1,
     ErrorV1,
+    GroupsViewV1,
     HealthV1,
     RulesViewV1,
     SizerRequestV1,
@@ -241,5 +243,49 @@ def create_app(store=None):
     @app.get("/api/v1/rules", response_model=RulesViewV1)
     def rules():
         return projections.rules_view(store.require(), store.meta())
+
+    @app.get("/api/v1/groups", response_model=GroupsViewV1)
+    def groups():
+        snapshot = store.require()
+        return GroupsViewV1(
+            meta=store.meta(),
+            groups=snapshot.groups,
+            reasons=()
+            if snapshot.groups
+            else (
+                decision_components.reason(
+                    "GROUP_MEMBERSHIP_UNKNOWN",
+                    "No published group membership evidence is available.",
+                ),
+            ),
+        )
+
+    @app.get("/api/v1/groups/{group_id}", response_model=GroupsViewV1)
+    def group_detail(group_id: str):
+        snapshot = store.require()
+        selected = tuple(g for g in snapshot.groups if g.group_id == group_id)
+        if not selected:
+            raise ApiError(
+                404, "GROUP_NOT_FOUND", "No published evidence for this exact group."
+            )
+        return GroupsViewV1(meta=store.meta(), groups=selected, reasons=())
+
+    @app.get("/api/v1/time-machine/{session}", response_model=ErrorV1)
+    def time_machine(session: date):
+        snapshot = store.require()
+        bootstrap = snapshot.evaluation.bootstrap if snapshot.evaluation else None
+        if bootstrap and session < bootstrap.action_session:
+            raise ApiError(
+                422,
+                "UNKNOWN_BEFORE_BOOTSTRAP",
+                "Current-cohort calculations are not historical membership or backtest evidence before "
+                + str(bootstrap.action_session)
+                + ".",
+            )
+        raise ApiError(
+            404,
+            "HISTORICAL_SNAPSHOT_UNAVAILABLE",
+            "No historical snapshot is configured for this session.",
+        )
 
     return app

@@ -1,5 +1,8 @@
 # Current foundation V1
 
+Historical milestone receipt. The subsequent [current bootstrap](current-bootstrap-v1.md)
+resolves the representation blocker below and builds the first real snapshot.
+
 AP-CURRENT-FOUNDATION-001 completed the safe acquisition, correction, publication,
 and feature prerequisites. **The first real snapshot remains blocked by the
 historical population/replay contract.** No schedule or snapshot was published,

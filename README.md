@@ -1,20 +1,22 @@
 # market-dashboard
 
-The local Aperture Workstation now provides Brief, Tape, symbol detail, Sizer and
-Rules through React/TypeScript and FastAPI. Start with the
+The local Aperture Workstation provides Brief, Tape, symbol detail, Groups, Sizer
+and Rules through React/TypeScript and FastAPI. Start with the
 [local setup and snapshot contract](docs/workstation-slice-v1.md).
-Development defaults to visibly labeled synthetic fixtures. The
-[offline local materializer](docs/local-materializer-v1.md) now audits explicitly
-selected publications and builds only when all foundational gates pass. The actual
-local audit is blocked; no real snapshot was produced. The
-[offline foundation reconciliation](docs/foundation-reconciliation-v1.md) explains
-all eight findings, resolving one with verified evidence and retaining seven
-bounded next actions. The [foundation authority workflow](docs/foundation-authority-v1.md)
-established a pinned XNYS calendar and staged fractional-volume correction.
-The [normalized V2 snapshot](docs/workstation-snapshot-v2.md)
-retains complete audit evidence while fitting 2,000 synthetic records in 17.96 MiB.
-The [current-foundation milestone](docs/current-foundation-v1.md) records published
-current inputs and the remaining historical population/replay blocker.
+Development defaults to visibly labeled synthetic fixtures.
+
+The [current bootstrap](docs/current-bootstrap-v1.md) builds and validates the
+first real bounded LOCAL_SNAPSHOT from the [published current foundation](docs/current-foundation-v1.md).
+It uses market observations through September 4 and the recorded September 6
+New York evaluation for September 8 eligibility. Current-cohort ranks are labeled
+explicitly; prior membership remains UNKNOWN and Time Machine refuses historical
+use before bootstrap. The [normalized V2 format](docs/workstation-snapshot-v2.md)
+retains complete canonical evidence with bounded storage.
+
+The earlier [local materializer](docs/local-materializer-v1.md),
+[reconciliation](docs/foundation-reconciliation-v1.md) and
+[authority workflow](docs/foundation-authority-v1.md) document the preserved
+foundation history and its original blockers.
 
 Current implementation handoff: [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md).
 For new structure/setup work, read the canonical specifications linked there.

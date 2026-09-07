@@ -84,6 +84,118 @@
         "title": "ApertureRules",
         "type": "object"
       },
+      "BootstrapContextV1": {
+        "additionalProperties": false,
+        "properties": {
+          "action_session": {
+            "format": "date",
+            "title": "Action Session",
+            "type": "string"
+          },
+          "calculation_mode": {
+            "const": "CURRENT_STATE_BOOTSTRAP",
+            "default": "CURRENT_STATE_BOOTSTRAP",
+            "title": "Calculation Mode",
+            "type": "string"
+          },
+          "calculation_start": {
+            "format": "date",
+            "title": "Calculation Start",
+            "type": "string"
+          },
+          "covered_population": {
+            "exclusiveMinimum": 0.0,
+            "title": "Covered Population",
+            "type": "integer"
+          },
+          "evaluation_timestamp": {
+            "format": "date-time",
+            "title": "Evaluation Timestamp",
+            "type": "string"
+          },
+          "first_observations": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "format": "date",
+                  "type": "string"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "First Observations",
+            "type": "array"
+          },
+          "historical_membership_status": {
+            "const": "UNKNOWN_BEFORE_BOOTSTRAP",
+            "default": "UNKNOWN_BEFORE_BOOTSTRAP",
+            "title": "Historical Membership Status",
+            "type": "string"
+          },
+          "mapping_members": {
+            "minimum": 0.0,
+            "title": "Mapping Members",
+            "type": "integer"
+          },
+          "market_as_of_session": {
+            "format": "date",
+            "title": "Market As Of Session",
+            "type": "string"
+          },
+          "missing_observations": {
+            "minimum": 0.0,
+            "title": "Missing Observations",
+            "type": "integer"
+          },
+          "not_yet_observed": {
+            "minimum": 0.0,
+            "title": "Not Yet Observed",
+            "type": "integer"
+          },
+          "population_scope": {
+            "const": "bounded initial covered population",
+            "default": "bounded initial covered population",
+            "title": "Population Scope",
+            "type": "string"
+          },
+          "rank_basis": {
+            "const": "CURRENT_COHORT_AT_E",
+            "default": "CURRENT_COHORT_AT_E",
+            "title": "Rank Basis",
+            "type": "string"
+          },
+          "strict_trade_members": {
+            "minimum": 0.0,
+            "title": "Strict Trade Members",
+            "type": "integer"
+          },
+          "version": {
+            "const": "current-state-bootstrap-v1",
+            "default": "current-state-bootstrap-v1",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "market_as_of_session",
+          "evaluation_timestamp",
+          "action_session",
+          "calculation_start",
+          "first_observations",
+          "covered_population",
+          "strict_trade_members",
+          "mapping_members",
+          "not_yet_observed",
+          "missing_observations"
+        ],
+        "title": "BootstrapContextV1",
+        "type": "object"
+      },
       "BoundedBand": {
         "additionalProperties": false,
         "properties": {
@@ -195,6 +307,14 @@
             "title": "Act Candidates",
             "type": "array"
           },
+          "denominators": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/PopulationCountV1"
+            },
+            "title": "Denominators",
+            "type": "array"
+          },
           "funnel": {
             "$ref": "#/components/schemas/FunnelV1"
           },
@@ -273,6 +393,16 @@
       "DatedProvenanceV1": {
         "additionalProperties": false,
         "properties": {
+          "bootstrap": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BootstrapContextV1"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "effective_session": {
             "format": "date",
             "title": "Effective Session",
@@ -1016,6 +1146,16 @@
             "title": "Action Session",
             "type": "string"
           },
+          "bootstrap": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BootstrapContextV1"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "evaluation_timestamp": {
             "format": "date-time",
             "title": "Evaluation Timestamp",
@@ -1038,6 +1178,18 @@
             "minLength": 1,
             "title": "Population Scope",
             "type": "string"
+          },
+          "source_fingerprint": {
+            "anyOf": [
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Fingerprint"
           }
         },
         "required": [
@@ -2195,6 +2347,35 @@
         "title": "GroupType",
         "type": "string"
       },
+      "GroupsViewV1": {
+        "additionalProperties": false,
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/GroupEvidenceV1"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ViewMetaV1"
+          },
+          "reasons": {
+            "items": {
+              "$ref": "#/components/schemas/ReasonV1"
+            },
+            "title": "Reasons",
+            "type": "array"
+          }
+        },
+        "required": [
+          "meta",
+          "groups",
+          "reasons"
+        ],
+        "title": "GroupsViewV1",
+        "type": "object"
+      },
       "HealthV1": {
         "additionalProperties": false,
         "properties": {
@@ -2845,6 +3026,45 @@
           "prior_distances"
         ],
         "title": "MovingAverageV1",
+        "type": "object"
+      },
+      "PopulationCountV1": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "numerator": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numerator"
+          },
+          "population_count": {
+            "minimum": 0.0,
+            "title": "Population Count",
+            "type": "integer"
+          },
+          "valid_count": {
+            "minimum": 0.0,
+            "title": "Valid Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "numerator",
+          "valid_count",
+          "population_count"
+        ],
+        "title": "PopulationCountV1",
         "type": "object"
       },
       "PredicateV1": {
@@ -7473,6 +7693,133 @@
         "summary": "Brief"
       }
     },
+    "/api/v1/groups": {
+      "get": {
+        "operationId": "groups_api_v1_groups_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupsViewV1"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Groups"
+      }
+    },
+    "/api/v1/groups/{group_id}": {
+      "get": {
+        "operationId": "group_detail_api_v1_groups__group_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "title": "Group Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupsViewV1"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Group Detail"
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "health_api_v1_health_get",
@@ -7979,6 +8326,76 @@
           }
         },
         "summary": "Tape"
+      }
+    },
+    "/api/v1/time-machine/{session}": {
+      "get": {
+        "operationId": "time_machine_api_v1_time_machine__session__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "session",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "title": "Session",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Time Machine"
       }
     }
   }

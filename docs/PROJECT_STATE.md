@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-CURRENT-BOOTSTRAP-001 is ready on `codex/current-bootstrap-handoff`. The verified current foundation is published. Build the first real Workstation snapshot as an explicitly bounded CURRENT_STATE_BOOTSTRAP using T=2026-09-04, the recorded September 6 New York evaluation time, and A=2026-09-08. Publish membership only from September 8; preserve unknown prior membership and sparse per-symbol histories without imputation.
+Current milestone: AP-CURRENT-BOOTSTRAP-001 is complete. The first real LOCAL_SNAPSHOT is built and validated as CURRENT_STATE_BOOTSTRAP, with T=2026-09-04, the recorded September 6 New York evaluation time, and A=2026-09-08. The exact population is published only from September 8; historical membership remains UNKNOWN before bootstrap.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
@@ -977,3 +977,53 @@ The pre-existing Starlette TestClient httpx deprecation warning remains nonblock
 Fixture API/browser processes were confirmed shut down. Final file-set verification
 found exactly **seven new production artifacts**, no removed original files and
 no remaining WAL/pending publication files.
+
+
+## AP-CURRENT-BOOTSTRAP-001 completion — September 7 UTC / September 6 New York
+
+Built and independently validated the first real LOCAL_SNAPSHOT as
+CURRENT_STATE_BOOTSTRAP. T is September 4; the preserved E is September 7
+01:53:42.451047 UTC (September 6 in New York); A is September 8. This is a current
+cohort calculation with UNKNOWN_BEFORE_BOOTSTRAP historical membership, not
+historical point-in-time ranks or backtest evidence.
+
+The exact first-action schedule is complete, with 101 covered symbols, 75 research,
+49 strict trade and 25 mapping members. No membership was published before A.
+First publication, staged/published interruption recovery and identical no-op
+passed on real-candidate copies before publication. A full verified database backup
+and candidate copy remain retained. The production database did not change.
+
+The snapshot contains 75 records and 1,865,976 bytes (below 24 MiB/32 MiB limits).
+Logical fingerprint:
+`d10b6c0b62d403755aa7be08e8c378fb7b694c3c1254cbfcc2ff282b899b8012`.
+Byte SHA256:
+`6b2c93aad6ce62a8963eb30035c2ec533faea47d1d47212526efc4efaac2c898`.
+Canonical funnel: NONE 66, WATCH 9, TRADE 0, ACT 0. All 75 current Structure
+outputs are valid; insufficient-history outcomes are zero. All five sparse
+histories and 914 leading NOT_YET_OBSERVED slots are accounted for; internal
+MISSING_OBSERVATION slots are zero. Canonical current rank denominators are 75.
+
+Volatility remains UNKNOWN for the missing September 4 VIXCLS observation.
+Breadth/internals retain their existing minimum-count and absent-group UNKNOWN
+reasons; thresholds were not weakened for this bounded cohort. Groups explicitly
+reports absent published membership. These are valid component evidence outcomes,
+not whole-snapshot blockers. No provider acquisition, price imputation, crosswalk
+application, raw Deepvue publication or trading behavior was introduced.
+
+Observed verification: 87 focused Python tests, then the single full run of
+2,871 passing tests. Final sparse-count validation passed all seven bootstrap
+regressions; final API denominator projection passed 34 snapshot/API regressions.
+Frontend: 13 component tests, synchronized API types, TypeScript checking,
+production build and lint/format passed. Real desktop 1366px and mobile 390px
+browser smoke: two tests passed against the exact snapshot, including health,
+Brief, Tape/detail, Groups/detail refusal, Sizer, Rules and explicit pre-September-8
+Time Machine refusal. Temporary loopback services shut down after testing.
+OpenAPI/schema checks and whitespace checks passed.
+
+All 1,348 protected prework files retain their hashes, including completed
+foundation artifacts, prior staging/receipts/backups, environment and user settings.
+The 114 bound foundation/backup/schedule hashes were independently rechecked.
+Zero provider requests. The standalone snapshot, exact paths, receipts, source
+records and browser evidence remain private and uncommitted. See
+[current-bootstrap-v1.md](current-bootstrap-v1.md) for the versioned contract and
+registry compatibility boundary. No remaining milestone blocker.

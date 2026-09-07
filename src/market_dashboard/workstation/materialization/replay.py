@@ -52,14 +52,47 @@ def field_digests(snapshot):
 def replay(plan, loaded):
     started = time.perf_counter()
     source = loaded["manifest"].source
+    bootstrap = getattr(plan, "bootstrap", None)
+    if bootstrap:
+        from .bootstrap import BootstrapPlanV1
+
+        BootstrapPlanV1.model_validate(plan.model_dump())
+        if (
+            fingerprint(loaded["manifest"].model_dump(mode="json"))
+            != plan.manifest_fingerprint
+            or loaded["manifest"].bootstrap != bootstrap
+        ):
+            raise Refusal("BOOTSTRAP_MANIFEST_MISMATCH")
     calendar = loaded["calendar"].sessions
     sessions = tuple(d for d in calendar if d <= plan.as_of_session)
     completed_at = loaded["calendar"].closes[calendar.index(plan.as_of_session)]
     bars, spot = loaded["bars"], loaded["spot"]
+    if bootstrap:
+        from .sparse import verify_sparse_population
+
+        verify_sparse_population(bars, bootstrap, calendar)
     universes = tuple(s.universe for s in loaded["universe"].snapshots)
-    universe = select_snapshot(universes, plan.as_of_session)
+    universe = (
+        universes[0] if bootstrap else select_snapshot(universes, plan.as_of_session)
+    )
     current = next(s for s in loaded["universe"].snapshots if s.universe == universe)
+    if bootstrap and (
+        len(universes) != 1
+        or universe.provenance.bootstrap != bootstrap
+        or set(dict(bootstrap.first_observations)) != set(universe.symbols)
+    ):
+        raise Refusal("BOOTSTRAP_POPULATION_MISMATCH")
     memberships = {m.symbol: m.memberships for m in current.members}
+    if bootstrap and (
+        len(current.members),
+        sum(m.memberships.equity_trade.eligible for m in current.members),
+        sum(m.memberships.market_mapping.eligible for m in current.members),
+    ) != (
+        bootstrap.covered_population,
+        bootstrap.strict_trade_members,
+        bootstrap.mapping_members,
+    ):
+        raise Refusal("BOOTSTRAP_MEMBERSHIP_COUNTS_MISMATCH")
     group_schedules = tuple(
         loaded[n].snapshots for n in ("taxonomy", "themes") if n in loaded
     )
@@ -82,6 +115,10 @@ def replay(plan, loaded):
     contexts, final_structures = {}, {}
     for symbol in all_symbols:
         history = bars.loc[bars.ticker == symbol]
+        if bootstrap:
+            from .sparse import sparse_history
+
+            history, _ = sparse_history(bars, symbol, calendar, plan.as_of_session)
         structures = evaluate_daily_structure(
             history, source=structure_source, as_of=plan.as_of_session
         )
@@ -114,7 +151,7 @@ def replay(plan, loaded):
     indices = {d: i for i, d in enumerate(calendar)}
     group_history, regime, leadership = {}, None, None
     for session in sessions:
-        dated = select_snapshot(universes, session)
+        dated = universe if bootstrap else select_snapshot(universes, session)
         if dated is None:
             raise Refusal("REPLAY_UNIVERSE_MISSING")
         raw = tuple(
@@ -181,6 +218,10 @@ def replay(plan, loaded):
         for symbol in sorted(universe.symbols):
             structure = final_structures[symbol]
             history = bars.loc[bars.ticker == symbol]
+            if bootstrap:
+                from .sparse import sparse_history
+
+                history, _ = sparse_history(bars, symbol, calendar, plan.as_of_session)
             # Setup replay is bounded to a single symbol, never N copies of shared
             # Leadership/Regime populations. Reuse canonical Structure adaptation.
             setups = evaluate_setups(
@@ -259,10 +300,14 @@ def replay(plan, loaded):
             valid_until=plan.freshness_deadline,
             reasons=(
                 reason(
-                    "SOURCE_ATTESTED_FRESHNESS"
+                    "CURRENT_DECISION_CONTEXT"
+                    if bootstrap and fresh
+                    else "SOURCE_ATTESTED_FRESHNESS"
                     if fresh
                     else "HISTORICAL_OR_STALE_EVIDENCE",
-                    "Availability is bounded by explicit source attestations and the freshness deadline.",
+                    "Current-cohort scan uses observations through T and controls known at E; the context expires before action. Missing components remain UNKNOWN."
+                    if bootstrap
+                    else "Availability is bounded by explicit source attestations and the freshness deadline.",
                 ),
             ),
         ),
@@ -299,4 +344,19 @@ def replay(plan, loaded):
         "versions": snapshot.versions.model_dump(mode="json"),
         "rules_fingerprint": engine_rules.logical_fingerprint,
     }
+    if bootstrap:
+        diagnostics["calculation_mode"] = bootstrap.calculation_mode
+        diagnostics["sparse_outcomes"] = {
+            "not_yet_observed": bootstrap.not_yet_observed,
+            "missing_observations": bootstrap.missing_observations,
+            "insufficient_history": sum(
+                s.error == "insufficient_history" for s in final_structures.values()
+            ),
+            "valid_current_structure": sum(
+                s.error is None for s in final_structures.values()
+            ),
+            "unknown_current_structure": sum(
+                s.error is not None for s in final_structures.values()
+            ),
+        }
     return snapshot, diagnostics

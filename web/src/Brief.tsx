@@ -33,7 +33,7 @@ export function Brief({ onSelect }: { onSelect: (symbol: string) => void }) {
               <Chip value={d.regime_state} /> Market context
             </h2>
             <p>
-              {d.regime_reason.replaceAll("_", " ").toLowerCase()} · eligible
+              {d.regime_reason.replaceAll("_", " ").toLowerCase()} · evaluated
               for the action session shown
             </p>
           </div>
@@ -61,6 +61,24 @@ export function Brief({ onSelect }: { onSelect: (symbol: string) => void }) {
           ))}
         </div>
       </section>
+      {d.denominators && (
+        <section className="panel" aria-label="Current cohort denominators">
+          <h2>Current cohort evidence counts</h2>
+          {d.denominators.map((v) => (
+            <p key={v.name}>
+              {v.name}: {v.numerator ?? "UNKNOWN"} qualifying / {v.valid_count}{" "}
+              valid / {v.population_count} population
+            </p>
+          ))}
+          {d.sleeves
+            .filter((s) => s.reasons.length)
+            .map((s) => (
+              <p key={s.name}>
+                {s.name}: {s.reasons.join(", ")}
+              </p>
+            ))}
+        </section>
+      )}
       <section className="funnel" aria-label="Decision funnel">
         {(["NONE", "WATCH", "TRADE", "ACT"] as const).map((s, i) => (
           <div key={s}>
