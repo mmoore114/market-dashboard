@@ -157,6 +157,7 @@ class SnapshotStore:
         except SnapshotUnavailable as caught:
             error = caught
         return ViewMetaV1(
+            evaluation=s.evaluation if s else None,
             mode=self.mode,
             mode_label="SYNTHETIC FIXTURE"
             if self.mode == "FIXTURE"

@@ -262,6 +262,36 @@ def inspect(plan):
                 hard("calendar", "SESSION_NOT_COMPLETED")
     if manifest:
         by_role = {b.role: b for b in manifest.bindings}
+        if plan.evaluation:
+            if calendar:
+                completed_at_evaluation = [
+                    d
+                    for d, close in zip(calendar.sessions, calendar.closes)
+                    if close <= plan.evaluation.evaluation_timestamp
+                ]
+                if (
+                    not completed_at_evaluation
+                    or completed_at_evaluation[-1] != plan.as_of_session
+                ):
+                    hard("calendar", "MARKET_SESSION_NOT_LATEST_AT_EVALUATION")
+            if plan.evaluation.evaluation_timestamp > now or (
+                complete and plan.evaluation.evaluation_timestamp < complete
+            ):
+                hard("manifest", "EVALUATION_CLOCK_INVALID")
+            clock_bindings = {b.name: b for b in plan.evaluation.input_bindings}
+            if set(clock_bindings) != set(by_role):
+                hard("manifest", "INPUT_CLOCK_BINDING_SET_MISMATCH")
+            for role, binding in by_role.items():
+                clock = clock_bindings.get(role)
+                if clock and (
+                    clock.role != binding.clock_role
+                    or (
+                        not binding.artifact_hashes
+                        or clock.artifact_sha256 != binding.artifact_hashes[0]
+                    )
+                    or clock.available_at != binding.published_at
+                ):
+                    hard(role, "INPUT_CLOCK_BINDING_MISMATCH")
         observed = {r.role: r for r in receipts}
         calendar_artifact = next(a for a in plan.artifacts if a.role == "calendar")
         if calendar and (
@@ -298,12 +328,30 @@ def inspect(plan):
                 hard(r.role, "SOURCE_ATTESTATION_MISMATCH")
             if b.publication_state != "complete":
                 hard(r.role, "PUBLICATION_NOT_COMPLETE")
-            if not b.valid_from <= plan.as_of_session <= b.valid_through:
+            control = plan.evaluation is not None and b.clock_role == "decision_control"
+            validity_session = plan.action_session if control else plan.as_of_session
+            if not b.valid_from <= validity_session <= b.valid_through:
                 hard(r.role, "SOURCE_OUTSIDE_VALID_INTERVAL")
             # Foundations used in historical replay must already be known at T.
             # Optional event records have their own per-record completed-close gate.
-            if complete and b.observed_at > complete:
-                hard(r.role, "SOURCE_OBSERVED_AFTER_CLOSE")
+            availability_clock = (
+                plan.evaluation.evaluation_timestamp if plan.evaluation else complete
+            )
+            if (
+                availability_clock
+                and (
+                    max(b.observed_at, b.fetched_at, b.published_at)
+                    if plan.evaluation
+                    else b.observed_at
+                )
+                > availability_clock
+            ):
+                hard(
+                    r.role,
+                    "SOURCE_UNAVAILABLE_AT_EVALUATION"
+                    if plan.evaluation
+                    else "SOURCE_OBSERVED_AFTER_CLOSE",
+                )
             if b.published_at > now:
                 hard(r.role, "FUTURE_PUBLICATION")
             if (
@@ -333,7 +381,21 @@ def inspect(plan):
                 raise Refusal("MASTER_SCHEMA_INVALID")
             if master.snapshot_date.nunique() != 1:
                 raise Refusal("MASTER_SNAPSHOT_AMBIGUOUS")
-            if pd.to_datetime(master.snapshot_date).max().date() > plan.as_of_session:
+            master_binding = (
+                next(
+                    (b for b in manifest.bindings if b.role == "security_master"), None
+                )
+                if manifest
+                else None
+            )
+            identity_date = (
+                plan.evaluation.evaluation_timestamp.date()
+                if plan.evaluation
+                and master_binding
+                and master_binding.clock_role == "decision_control"
+                else plan.as_of_session
+            )
+            if pd.to_datetime(master.snapshot_date).max().date() > identity_date:
                 hard("security_master", "MASTER_SNAPSHOT_AFTER_AS_OF")
             boundary = CompatibilityBoundary(ReferenceTicker(s) for s in master.ticker)
             actual_collisions = tuple(

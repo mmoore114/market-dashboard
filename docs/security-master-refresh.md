@@ -168,3 +168,15 @@ an unresolved reader migration; v2 preserves uppercase exact precedence and
 retains collision evidence without allowing reverse casefold fallback. Legacy master ingestion no longer automatically
 publishes exposure classifications. Uppercase bar/feature/trading invariants are
 unchanged; their reference adapters use the explicit projection.
+
+
+## Current-foundation precision publication
+
+AP-CURRENT-FOUNDATION-001 completed the separately authorized September publication.
+The confirmed publisher preserves UTC nanoseconds in `last_updated_utc` using
+TIMESTAMP_NS. A transactional exact-DDL replacement retains July values, table
+constraints and index definitions; raw September Parquet bytes are unchanged.
+First publication, interruption/recovery, identical no-op, changed-date-content
+refusal and July preservation passed against the immutable real artifact before
+production publication. See [current foundation V1](current-foundation-v1.md)
+for exact counts, fingerprints, backups and the independent verification result.

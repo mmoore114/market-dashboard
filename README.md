@@ -10,9 +10,11 @@ local audit is blocked; no real snapshot was produced. The
 [offline foundation reconciliation](docs/foundation-reconciliation-v1.md) explains
 all eight findings, resolving one with verified evidence and retaining seven
 bounded next actions. The [foundation authority workflow](docs/foundation-authority-v1.md)
-now verifies a pinned XNYS calendar and staged fractional-volume correction;
-production remains unchanged. The [normalized V2 snapshot](docs/workstation-snapshot-v2.md)
+established a pinned XNYS calendar and staged fractional-volume correction.
+The [normalized V2 snapshot](docs/workstation-snapshot-v2.md)
 retains complete audit evidence while fitting 2,000 synthetic records in 17.96 MiB.
+The [current-foundation milestone](docs/current-foundation-v1.md) records published
+current inputs and the remaining historical population/replay blocker.
 
 Current implementation handoff: [docs/PROJECT_STATE.md](docs/PROJECT_STATE.md).
 For new structure/setup work, read the canonical specifications linked there.

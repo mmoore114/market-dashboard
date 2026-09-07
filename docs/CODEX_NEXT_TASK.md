@@ -2,7 +2,7 @@
 
 **Task ID:** AP-CURRENT-FOUNDATION-001
 
-**Status:** READY — approved end-to-end current-foundation milestone
+**Status:** BLOCKED — safe current-foundation prerequisites published; historical population/replay contract prevents a truthful first snapshot
 
 **Issued:** 2026-09-07
 
@@ -283,3 +283,37 @@ intentional production changes separately.
 Success is the first fully validated real local snapshot, or completion of every
 safe prerequisite with one irreducible external/time blocker. Do not stop merely
 because an intermediate planned phase completed.
+
+
+## Execution receipt
+
+The approved milestone was executed through all safe current-source and derived
+feature publications. See [PROJECT_STATE](PROJECT_STATE.md) and
+[current foundation V1](current-foundation-v1.md) for exact versions, counts,
+fingerprints, backups and verification.
+
+Completed: corrected-bar certification; exact September master precision fix and
+publication; pinned XNYS publication; bounded aggregate/FRED/reference retrieval
+and offline validation; recoverable current-bar and exposure publication; complete
+DOUBLE feature rebuild; new source provenance; compatible three-clock snapshot/
+API/UI metadata. No additional routine approval was requested.
+
+The candidate schedule is staged with 75 research and 49 trade members, effective
+September 8. Publishing it as September 4 research membership would backdate
+current controls and rewrite signal denominators. Existing replay also cannot
+represent five eligible stocks' different historical index origins. Schedule and
+snapshot publication therefore remain blocked under this handoff's explicit
+contract/honesty stop condition. No real snapshot or production API was started.
+
+Next: supply verifiable historical population evidence or review a versioned
+current-state bootstrap/replay contract covering unknown membership and per-symbol
+calendar alignment. The approved three-clock distinction is implemented; another
+calendar wait or simple timestamp relabeling cannot resolve this boundary.
+
+
+Observed verification: 18 new focused tests; 2,864 passing full-suite Python tests;
+12 frontend tests; two fixture browser tests. Final clock regressions, schema/API
+synchronization, typecheck, build, lint/format and whitespace checks passed. All
+completed publication states and retained backups independently verified. Only
+the intended database/100 existing bar files changed; 257 other protected hashes
+remain unchanged, with seven explicitly recorded new production artifacts.

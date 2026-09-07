@@ -19,7 +19,7 @@ from market_dashboard.aperture.leadership_contracts import (
 )
 from market_dashboard.aperture.regime_contracts import SpotVolatilityIdentityV1
 from market_dashboard.data.security_identity import COMPATIBILITY_VERSION
-from market_dashboard.workstation.models import VersionsV1
+from market_dashboard.workstation.models import EvaluationV1, VersionsV1
 
 Digest = str
 Role = Literal[
@@ -87,6 +87,9 @@ class MaterializationPlanV1(ContractModel):
     as_of_session: date
     action_session: date
     freshness_deadline: datetime
+    evaluation: EvaluationV1 | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
     versions: VersionsV1
     # Operational bounds, not research thresholds.
     max_source_bytes: int = Field(default=2 * 1024**3, gt=0, le=8 * 1024**3)
@@ -106,6 +109,11 @@ class MaterializationPlanV1(ContractModel):
         roles = [a.role for a in self.artifacts]
         if len(set(roles)) != len(roles) or not set(REQUIRED) <= set(roles):
             raise ValueError("One explicit artifact per required source is required")
+        if self.evaluation and (
+            self.evaluation.market_as_of_session,
+            self.evaluation.action_session,
+        ) != (self.as_of_session, self.action_session):
+            raise ValueError("Plan/evaluation clock mismatch")
         if self.action_session <= self.as_of_session:
             raise ValueError(
                 "Action follows as-of; exact calendar adjacency is audited"
@@ -147,6 +155,7 @@ class SourceBindingV1(ContractModel):
     first_date: date | None
     last_date: date | None
     publication_state: Literal["complete", "pending", "recovery_required"]
+    clock_role: Literal["market_observation", "decision_control"] = "market_observation"
     observed_at: datetime
     fetched_at: datetime
     published_at: datetime

@@ -4,7 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, it, expect, vi } from "vitest";
 import { App } from "./App";
 import fixture from "./__fixtures__/synthetic.json";
-import { number, money } from "./ui";
+import { Context, number, money } from "./ui";
+import type { Meta } from "./api";
 
 function setup(
   options: {
@@ -207,4 +208,24 @@ describe("workstation", () => {
     await user.keyboard("{Enter}");
     expect(await screen.findByLabelText("Account equity ($)")).toBeVisible();
   });
+});
+
+it("displays separate market, evaluation and action clocks with population scope", () => {
+  const meta = {
+    ...fixture.health.meta,
+    as_of_session: "2026-09-04",
+    action_session: "2026-09-08",
+    evaluation: {
+      market_as_of_session: "2026-09-04",
+      evaluation_timestamp: "2026-09-06T21:00:00-04:00",
+      action_session: "2026-09-08",
+      population_scope: "Initial covered population",
+      input_bindings: [],
+    },
+  } as Meta;
+  render(<Context meta={meta} />);
+  expect(screen.getByText("2026-09-04")).toBeInTheDocument();
+  expect(screen.getByText("2026-09-08")).toBeInTheDocument();
+  expect(screen.getByText("2026-09-06T21:00:00-04:00")).toBeInTheDocument();
+  expect(screen.getByText("Initial covered population")).toBeInTheDocument();
 });

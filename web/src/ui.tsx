@@ -103,11 +103,21 @@ export function Context({ meta }: { meta: Meta }) {
     <div className="context">
       <span>{meta.mode_label}</span>
       <span>
-        As of <b>{meta.as_of_session ?? "Unavailable"}</b>
+        Market as of <b>{meta.as_of_session ?? "Unavailable"}</b>
       </span>
       <span>
         Action session <b>{meta.action_session ?? "Unavailable"}</b>
       </span>
+      {meta.evaluation && (
+        <>
+          <span>
+            Evaluated <b>{meta.evaluation.evaluation_timestamp}</b>
+          </span>
+          <span>
+            Population <b>{meta.evaluation.population_scope}</b>
+          </span>
+        </>
+      )}
       <span>
         Freshness <b>{meta.freshness}</b>
       </span>

@@ -530,6 +530,34 @@ export interface components {
        */
       schema_version: "workstation-error-v1";
     };
+    /**
+     * EvaluationV1
+     * @description Current decision clocks; never a historical-membership attestation.
+     */
+    EvaluationV1: {
+      /**
+       * Action Session
+       * Format: date
+       */
+      action_session: string;
+      /**
+       * Evaluation Timestamp
+       * Format: date-time
+       */
+      evaluation_timestamp: string;
+      /**
+       * Input Bindings
+       * @default []
+       */
+      input_bindings: components["schemas"]["InputClockBindingV1"][];
+      /**
+       * Market As Of Session
+       * Format: date
+       */
+      market_as_of_session: string;
+      /** Population Scope */
+      population_scope: string;
+    };
     /** EventCoverageV1 */
     EventCoverageV1: {
       /**
@@ -997,6 +1025,27 @@ export interface components {
       /** Sma20 Change 5 */
       sma20_change_5: number | null;
       vote: components["schemas"]["Vote"];
+    };
+    /** InputClockBindingV1 */
+    InputClockBindingV1: {
+      /** Artifact Sha256 */
+      artifact_sha256: string;
+      /**
+       * Available At
+       * Format: date-time
+       */
+      available_at: string;
+      /** Effective Date */
+      effective_date?: string | null;
+      /** Name */
+      name: string;
+      /** Observation Date */
+      observation_date?: string | null;
+      /**
+       * Role
+       * @enum {string}
+       */
+      role: "market_observation" | "decision_control";
     };
     /** InternalsSleeveV1 */
     InternalsSleeveV1: {
@@ -2600,6 +2649,7 @@ export interface components {
       action_session: string | null;
       /** As Of Session */
       as_of_session: string | null;
+      evaluation?: components["schemas"]["EvaluationV1"] | null;
       /** Fingerprint */
       fingerprint: string | null;
       /**

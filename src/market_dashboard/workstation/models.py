@@ -79,10 +79,69 @@ class SymbolRecordV1(ContractModel):
     volume_reason: str | None
 
 
+class InputClockBindingV1(ContractModel):
+    name: str = Field(min_length=1)
+    role: Literal["market_observation", "decision_control"]
+    observation_date: date | None = None
+    effective_date: date | None = None
+    available_at: datetime
+    artifact_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class EvaluationV1(ContractModel):
+    """Current decision clocks; never a historical-membership attestation."""
+
+    market_as_of_session: date
+    evaluation_timestamp: datetime
+    action_session: date
+    population_scope: str = Field(min_length=1)
+    input_bindings: tuple[InputClockBindingV1, ...] = ()
+
+    @model_validator(mode="after")
+    def clocks(self):
+        if self.evaluation_timestamp.utcoffset() is None:
+            raise ValueError("Evaluation timestamp must be aware")
+        if (
+            not self.market_as_of_session
+            <= self.evaluation_timestamp.date()
+            <= self.action_session
+        ):
+            raise ValueError(
+                "Evaluation must follow the market session and precede action"
+            )
+        if len({b.name for b in self.input_bindings}) != len(self.input_bindings):
+            raise ValueError("Duplicate input clock binding")
+        for binding in self.input_bindings:
+            available = binding.available_at
+            if available.utcoffset() is None or available > self.evaluation_timestamp:
+                raise ValueError("Input unavailable at evaluation")
+            if binding.role == "market_observation" and (
+                binding.observation_date is None
+                or binding.observation_date > self.market_as_of_session
+            ):
+                raise ValueError("Market observation follows T or lacks a date")
+            if binding.role == "decision_control" and (
+                binding.effective_date is None
+                or binding.effective_date > self.action_session
+            ):
+                raise ValueError("Control evidence must be effective by action")
+        return self
+
+    def validate_snapshot(self, market, action, generated):
+        if (market, action) != (
+            self.market_as_of_session,
+            self.action_session,
+        ) or self.evaluation_timestamp > generated:
+            raise ValueError("Snapshot/evaluation clock mismatch")
+
+
 class WorkstationSnapshotV1(ContractModel):
     schema_version: Literal["workstation-snapshot-v1"] = "workstation-snapshot-v1"
     snapshot_id: str = Field(min_length=1)
     generated_at: datetime
+    evaluation: EvaluationV1 | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
     as_of_session: date
     action_session: date
     mode: Mode
@@ -100,6 +159,10 @@ class WorkstationSnapshotV1(ContractModel):
     @model_validator(mode="after")
     def consistency(self):
         validate_rules(self.rules)
+        if self.evaluation:
+            self.evaluation.validate_snapshot(
+                self.as_of_session, self.action_session, self.generated_at
+            )
         if self.generated_at.utcoffset() is None:
             raise ValueError("Generated timestamp must be aware")
         if not self.calendar or tuple(sorted(set(self.calendar))) != self.calendar:
@@ -185,6 +248,9 @@ def seal_snapshot(**values):
 
 
 class ViewMetaV1(ContractModel):
+    evaluation: EvaluationV1 | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
     schema_version: Literal["workstation-api-v1"] = "workstation-api-v1"
     mode: Mode
     mode_label: Literal["SYNTHETIC FIXTURE", "LOCAL SNAPSHOT"]

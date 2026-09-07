@@ -1,6 +1,6 @@
 # Aperture — authoritative project state
 
-Current milestone: AP-CURRENT-FOUNDATION-001 ready; execute the approved end-to-end current-data, aligned-publication, rebuild, and first-real-snapshot milestone. The production adjusted-volume correction is complete and verified. Current-state timing uses separate market-as-of, evaluation, and action clocks: for evaluation on 2026-09-06, use the 2026-09-04 close and next XNYS session 2026-09-08; the 2026-09-05 master may govern decision-time identity for that action session without being back-projected into September 4 signals.
+Current milestone: AP-CURRENT-FOUNDATION-001 has published the verified current master, bars, calendar, spot/reference evidence, exposure and derived features. Schedule and real snapshot publication are blocked by missing historical research membership and the existing replay/index contract. T=2026-09-04 and A=2026-09-08 are valid; this is not a calendar wait.
 Read `CODEX_NEXT_TASK.md` immediately after this file for the current assignment.
 
 ## Read first
@@ -889,3 +889,91 @@ correction with verified backup and an exclusive maintenance window. Calendar an
 provenance publication, feature rebuilding, identity/population prerequisites,
 QQQE/current history, spot identity/history and Aperture schedule publication
 remain separate later boundaries.
+
+
+## AP-CURRENT-FOUNDATION-001 — prerequisites published; snapshot blocked
+
+Started from exact handoff `25812e278cfac312c1ab2e3b0ed37d86b1afbb96`, with
+product baseline `f1250d733ec9f2192fd7c361b8c3cbbccccc226c`, on
+`codex/current-foundation-v1`. See the [current-foundation contract](current-foundation-v1.md).
+
+The corrected initial 63,279 rows and 11,607 fractional volumes were recertified
+against all original Parquet files, the full backup and the seven other tables.
+Fresh receipts were created; no old pre-correction evidence was resealed.
+
+The exact September 5 master is now published: **13,155 reference rows**, unchanged
+logical fingerprint `7d22fab5f8dbffea1c9254124e9c2731006648391519e55543f6058c77c7112b`
+and Parquet SHA256 `d3bd5b75665c646e109e22514839da6771b49070f4ed2998b5e879cdb16fc8fc`.
+TIMESTAMP_NS preserves provider nanoseconds exactly. A transactional shadow table
+retains constraints/index definitions and every July value. Real-artifact
+publication/recovery/no-op/revision-refusal simulations preceded publication.
+
+Observed network totals: Massive aggregates **101 attempts / 3,672 rows**;
+current ticker details **75 attempts / 75 records**; FRED VIXCLS **one attempt /
+698 observations**. All succeeded within their separate approved caps, with no
+retry, redirect or pagination. Final adjusted storage contains **66,951 rows and
+101 symbols**, through **September 4, 2026**, with **14,743 fractional volumes**,
+zero duplicate keys and exact full-field Parquet agreement. All original history
+is preserved. SPY, QQQ, IWM, RSP and QQQE each have **672/672** expected sessions.
+
+The pinned XNYS calendar is published with 682 sessions through September 21.
+The FRED session projection contains **671 observations through September 3**;
+seven missing values and 20 non-XNYS observations remain preserved in source
+staging. September 4 VIX stays UNKNOWN; no forward fill or proxy was introduced.
+Attribution and actual retrieval/availability times remain bound to the source.
+
+Exposure-policy-v3 is published for **12,751 compatible September identities**;
+the other **404 exact reference rows** remain preserved, with no implicit mapping.
+Fingerprint: `3a4a3844738754a0371dbe3cfc41c100109963682d886162b01ac100207e22c9`.
+Derived feature replacement passed full-row parity and rollback rehearsal:
+**66,951 daily / 101 latest rows**, both volume fields DOUBLE. All previous outputs
+remain in full verified backups. No research formula or immutable rule changed.
+
+Published provenance binds exact current files and all actual retrieval receipts;
+missing historical provider facts remain UNKNOWN. Its logical fingerprint is
+`772410aade01af1cae35dec27dcbb16ae182e1518018757db11c70f96a2748f8`.
+The final checkpointed production database SHA256 is
+`ae5890020e2701be93dc7b24916405c9106d1c8ff309dd475d9a38addf509a9a`.
+
+Compatible optional snapshot/API evaluation metadata now carries T, actual E, A,
+population scope, input roles, observation/effective dates, availability and hashes.
+The Workstation context displays the clocks and scope. Current audits permit
+reference/control evidence known at E and effective for A, and enforce the latest
+completed T at E. Legacy close-time gates and serialized snapshot fingerprints
+remain unchanged when evaluation metadata is absent.
+
+**Unresolved contract boundary:** the staged first-action population contains
+**75 research / 49 trade / 25 mapping** members among 100 reviewed symbols plus
+QQQE. Its first truthful known/effective session is September 8. Existing replay
+requires research membership already known for September 4 and all 672 replay
+sessions. Current master/market-cap data cannot be backdated into those ranks or
+breadth denominators. Five otherwise eligible stocks also have 914 absent prefix/
+internal calendar slots that the existing shared-calendar/per-symbol index
+contract cannot represent. They were not removed or assigned invented history.
+
+Schedule and real snapshot publication stopped at this boundary. No real snapshot
+path, funnel, real API startup or real browser smoke result exists. The next
+bounded decision is verifiable historical population evidence or a reviewed,
+versioned current-state bootstrap/replay contract that preserves UNKNOWN history
+and correct per-symbol calendar alignment without changing numerical rules.
+Waiting for September 8 alone cannot supply the missing historical evidence.
+
+Of **358 pre-work inventoried files**, only the intended production DuckDB and
+100 updated bar partitions changed; the other **257 files** remain byte-identical.
+September staging, July master bytes, previous receipts, credentials and user
+settings are preserved. New published artifacts are separately inventoried, all
+full backups retained, and all publication states independently verified complete.
+Raw inputs, plans, paths, backups and reports stay outside Git. No crosswalk,
+non-security disposition, raw Deepvue export, broker behavior or PR merge changed.
+
+
+Final verification: **18 new focused tests passed**, including the immutable
+real-artifact publication cases. The one complete Python run passed **2,864 tests**;
+the final latest-completed-session guard additionally passed both focused clock
+regressions. Frontend components **12 passed**; desktop/mobile fixture browsers
+**2 passed**. OpenAPI/snapshot schema synchronization, generated API types,
+TypeScript, production frontend build, lint/format and whitespace checks passed.
+The pre-existing Starlette TestClient httpx deprecation warning remains nonblocking.
+Fixture API/browser processes were confirmed shut down. Final file-set verification
+found exactly **seven new production artifacts**, no removed original files and
+no remaining WAL/pending publication files.

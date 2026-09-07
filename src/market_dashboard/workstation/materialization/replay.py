@@ -250,6 +250,7 @@ def replay(plan, loaded):
     snapshot = materialize_v2(
         snapshot_id="local-" + plan_fingerprint(plan),
         generated_at=datetime.now(UTC),
+        evaluation=plan.evaluation,
         as_of_session=plan.as_of_session,
         action_session=plan.action_session,
         mode="LOCAL_SNAPSHOT",

@@ -34,6 +34,7 @@ from market_dashboard.workstation.evidence_graph import (
     NodeRef,
 )
 from market_dashboard.workstation.models import (
+    EvaluationV1,
     FreshnessV1,
     FunnelV1,
     Mode,
@@ -89,6 +90,9 @@ class WorkstationSnapshotV2(ContractModel):
     schema_version: Literal["workstation-snapshot-v2"] = "workstation-snapshot-v2"
     snapshot_id: str = Field(min_length=1)
     generated_at: datetime
+    evaluation: EvaluationV1 | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
     as_of_session: date
     action_session: date
     mode: Mode
@@ -104,6 +108,10 @@ class WorkstationSnapshotV2(ContractModel):
 
     @model_validator(mode="after")
     def integrity(self):
+        if self.evaluation:
+            self.evaluation.validate_snapshot(
+                self.as_of_session, self.action_session, self.generated_at
+            )
         if self.generated_at.utcoffset() is None:
             raise ValueError("Generated timestamp must be aware")
         calendar = self.shared.calendar
