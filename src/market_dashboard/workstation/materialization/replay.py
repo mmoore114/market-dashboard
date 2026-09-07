@@ -51,6 +51,29 @@ def field_digests(snapshot):
 
 def replay(plan, loaded):
     started = time.perf_counter()
+    # Validate before dispatch: labels alone cannot select a different engine.
+    from market_dashboard.workstation.models import VersionsV1
+
+    VersionsV1.model_validate(plan.versions.model_dump())
+    structure_adapter, setup_adapter, setup_engine = (
+        evaluate_daily_structure,
+        build_setup_inputs,
+        evaluate_setups,
+    )
+    if plan.versions.structure == "structure-engine-v2":
+        from market_dashboard.aperture.setup_v2 import (
+            evaluate_setups as evaluate_setups_v2,
+        )
+        from market_dashboard.features.engine_features_v2 import (
+            build_setup_inputs_v2,
+            evaluate_daily_structure_v2,
+        )
+
+        structure_adapter, setup_adapter, setup_engine = (
+            evaluate_daily_structure_v2,
+            build_setup_inputs_v2,
+            evaluate_setups_v2,
+        )
     source = loaded["manifest"].source
     bootstrap = getattr(plan, "bootstrap", None)
     if bootstrap:
@@ -119,13 +142,13 @@ def replay(plan, loaded):
             from .sparse import sparse_history
 
             history, _ = sparse_history(bars, symbol, calendar, plan.as_of_session)
-        structures = evaluate_daily_structure(
+        structures = structure_adapter(
             history, source=structure_source, as_of=plan.as_of_session
         )
         if not structures:
             raise Refusal("RESEARCH_HISTORY_UNAVAILABLE")
-        setups = evaluate_setups(
-            build_setup_inputs(
+        setups = setup_engine(
+            setup_adapter(
                 history,
                 source=structure_source,
                 corporate_actions=corporate_actions,
@@ -224,8 +247,8 @@ def replay(plan, loaded):
                 history, _ = sparse_history(bars, symbol, calendar, plan.as_of_session)
             # Setup replay is bounded to a single symbol, never N copies of shared
             # Leadership/Regime populations. Reuse canonical Structure adaptation.
-            setups = evaluate_setups(
-                build_setup_inputs(
+            setups = setup_engine(
+                setup_adapter(
                     history,
                     source=structure_source,
                     corporate_actions=corporate_actions,

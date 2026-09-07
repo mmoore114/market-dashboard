@@ -53,8 +53,13 @@ class CompactRecordV2(ContractModel):
     output_ref: NodeRef
 
 
+from .legacy_registry import LEGACY_REGISTRY_FINGERPRINT, LEGACY_TYPE_CODES
+
+
 class SharedContextV2(ContractModel):
-    registry_fingerprint: Literal[REGISTRY_FINGERPRINT] = REGISTRY_FINGERPRINT
+    registry_fingerprint: Literal[REGISTRY_FINGERPRINT, LEGACY_REGISTRY_FINGERPRINT] = (
+        REGISTRY_FINGERPRINT
+    )
     source_ref: NodeRef
     universe_ref: NodeRef
     leadership_ref: NodeRef | None
@@ -108,6 +113,14 @@ class WorkstationSnapshotV2(ContractModel):
 
     @model_validator(mode="after")
     def integrity(self):
+        if self.shared.registry_fingerprint == LEGACY_REGISTRY_FINGERPRINT and (
+            self.shared.versions.structure != "structure-engine-v1"
+            or any(
+                n.value.model_type not in LEGACY_TYPE_CODES.values()
+                for n in self.evidence
+            )
+        ):
+            raise ValueError("Legacy registry cannot contain V2 engine evidence")
         if self.evaluation:
             self.evaluation.validate_snapshot(
                 self.as_of_session, self.action_session, self.generated_at

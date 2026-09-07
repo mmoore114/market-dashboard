@@ -700,9 +700,13 @@
                 "$ref": "#/components/schemas/SetupOutputV1"
               },
               {
+                "$ref": "#/components/schemas/SetupOutputV2"
+              },
+              {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Setups"
           },
           "sizing": {
             "$ref": "#/components/schemas/SizingProposalV1"
@@ -713,9 +717,13 @@
                 "$ref": "#/components/schemas/StructureEvidenceV1"
               },
               {
+                "$ref": "#/components/schemas/StructureEvidenceV2"
+              },
+              {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Structure"
           },
           "universe": {
             "$ref": "#/components/schemas/UniverseDecisionInputV1"
@@ -1067,6 +1075,38 @@
         "title": "Eligibility",
         "type": "string"
       },
+      "EngineComparisonV1": {
+        "additionalProperties": false,
+        "properties": {
+          "baseline_snapshot_fingerprint": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Baseline Snapshot Fingerprint",
+            "type": "string"
+          },
+          "kind": {
+            "const": "ENGINE_VERSION_COMPARISON",
+            "default": "ENGINE_VERSION_COMPARISON",
+            "title": "Kind",
+            "type": "string"
+          },
+          "note": {
+            "default": "Recomputed with V2 rules using original T/E/A clocks; not a new market refresh.",
+            "title": "Note",
+            "type": "string"
+          },
+          "source_spec_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Source Spec Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "baseline_snapshot_fingerprint",
+          "source_spec_sha256"
+        ],
+        "title": "EngineComparisonV1",
+        "type": "object"
+      },
       "ErrorFieldV1": {
         "additionalProperties": false,
         "properties": {
@@ -1150,6 +1190,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/BootstrapContextV1"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "comparison": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EngineComparisonV1"
               },
               {
                 "type": "null"
@@ -4601,6 +4651,353 @@
         "title": "SetupInputV1",
         "type": "object"
       },
+      "SetupInputV2": {
+        "additionalProperties": false,
+        "properties": {
+          "atr14": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Atr14"
+          },
+          "atr20": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Atr20"
+          },
+          "atr5": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Atr5"
+          },
+          "averages": {
+            "items": {
+              "$ref": "#/components/schemas/MovingAverageV1"
+            },
+            "title": "Averages",
+            "type": "array"
+          },
+          "bar_timestamp_utc": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bar Timestamp Utc"
+          },
+          "close": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Close"
+          },
+          "corporate_action_evidence": {
+            "minLength": 1,
+            "title": "Corporate Action Evidence",
+            "type": "string"
+          },
+          "corporate_action_qa": {
+            "$ref": "#/components/schemas/CorporateActionQA"
+          },
+          "feature_version": {
+            "const": "setup-features-v2",
+            "default": "setup-features-v2",
+            "title": "Feature Version",
+            "type": "string"
+          },
+          "high": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High"
+          },
+          "low": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Low"
+          },
+          "mean_volume20": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Volume20"
+          },
+          "mean_volume5": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Volume5"
+          },
+          "median_atr20": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median Atr20"
+          },
+          "median_volume20": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median Volume20"
+          },
+          "median_volume5": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median Volume5"
+          },
+          "open": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Open"
+          },
+          "previous_atr14": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Atr14"
+          },
+          "previous_close": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Close"
+          },
+          "prior_volume20": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prior Volume20"
+          },
+          "s20": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "S20"
+          },
+          "schema_version": {
+            "const": "setup-input-v2",
+            "default": "setup-input-v2",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_date": {
+            "format": "date",
+            "title": "Session Date",
+            "type": "string"
+          },
+          "session_index": {
+            "minimum": 0.0,
+            "title": "Session Index",
+            "type": "integer"
+          },
+          "source": {
+            "$ref": "#/components/schemas/StructureSourceV1"
+          },
+          "structure": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructureEvidenceV2"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "symbol": {
+            "title": "Symbol",
+            "type": "string"
+          },
+          "tr20": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tr20"
+          },
+          "tr5": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tr5"
+          },
+          "volume": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Volume"
+          },
+          "window20": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PriceWindowV1"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "window30": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PriceWindowV1"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "word_s20": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Word S20"
+          }
+        },
+        "required": [
+          "symbol",
+          "session_date",
+          "session_index",
+          "source",
+          "corporate_action_qa",
+          "corporate_action_evidence",
+          "open",
+          "high",
+          "low",
+          "close",
+          "previous_close",
+          "atr5",
+          "atr14",
+          "atr20",
+          "previous_atr14",
+          "volume",
+          "prior_volume20",
+          "mean_volume5",
+          "mean_volume20",
+          "s20",
+          "averages",
+          "window20",
+          "window30",
+          "tr5",
+          "tr20",
+          "median_atr20",
+          "word_s20",
+          "median_volume5",
+          "median_volume20"
+        ],
+        "title": "SetupInputV2",
+        "type": "object"
+      },
       "SetupInstanceV1": {
         "additionalProperties": false,
         "properties": {
@@ -4855,6 +5252,89 @@
           "rejected_ep"
         ],
         "title": "SetupOutputV1",
+        "type": "object"
+      },
+      "SetupOutputV2": {
+        "additionalProperties": false,
+        "properties": {
+          "archived_ids": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Archived Ids",
+            "type": "array"
+          },
+          "detections": {
+            "items": {
+              "$ref": "#/components/schemas/DetectionV1"
+            },
+            "title": "Detections",
+            "type": "array"
+          },
+          "engine_version": {
+            "const": "setup-engine-v2",
+            "default": "setup-engine-v2",
+            "title": "Engine Version",
+            "type": "string"
+          },
+          "errors": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "feature_version": {
+            "const": "setup-features-v2",
+            "default": "setup-features-v2",
+            "title": "Feature Version",
+            "type": "string"
+          },
+          "inputs": {
+            "$ref": "#/components/schemas/SetupInputV2"
+          },
+          "rejected_ep": {
+            "items": {
+              "$ref": "#/components/schemas/DetectionV1"
+            },
+            "title": "Rejected Ep",
+            "type": "array"
+          },
+          "rules_fingerprint": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Rules Fingerprint",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "setup-output-v2",
+            "default": "setup-output-v2",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "setups": {
+            "items": {
+              "$ref": "#/components/schemas/SetupEvidenceV1"
+            },
+            "title": "Setups",
+            "type": "array"
+          },
+          "threshold_version": {
+            "const": "setup-thresholds-v2",
+            "default": "setup-thresholds-v2",
+            "title": "Threshold Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rules_fingerprint",
+          "inputs",
+          "setups",
+          "detections",
+          "rejected_ep"
+        ],
+        "title": "SetupOutputV2",
         "type": "object"
       },
       "SetupStrengthContextV1": {
@@ -5850,7 +6330,14 @@
         "properties": {
           "evidence": {
             "items": {
-              "$ref": "#/components/schemas/StructureEvidenceV1"
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/StructureEvidenceV1"
+                },
+                {
+                  "$ref": "#/components/schemas/StructureEvidenceV2"
+                }
+              ]
             },
             "title": "Evidence",
             "type": "array"
@@ -5968,6 +6455,86 @@
           "SHOCK_DN"
         ],
         "title": "StructureConditionsV1",
+        "type": "object"
+      },
+      "StructureConditionsV2": {
+        "additionalProperties": false,
+        "properties": {
+          "damage_down": {
+            "title": "Damage Down",
+            "type": "boolean"
+          },
+          "damage_up": {
+            "title": "Damage Up",
+            "type": "boolean"
+          },
+          "decline": {
+            "title": "Decline",
+            "type": "boolean"
+          },
+          "deteriorating": {
+            "title": "Deteriorating",
+            "type": "boolean"
+          },
+          "emerging": {
+            "title": "Emerging",
+            "type": "boolean"
+          },
+          "hold_down": {
+            "title": "Hold Down",
+            "type": "boolean"
+          },
+          "hold_up": {
+            "title": "Hold Up",
+            "type": "boolean"
+          },
+          "predicates": {
+            "items": {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Predicates",
+            "type": "array"
+          },
+          "shock_down": {
+            "title": "Shock Down",
+            "type": "boolean"
+          },
+          "shock_up": {
+            "title": "Shock Up",
+            "type": "boolean"
+          },
+          "uptrend": {
+            "title": "Uptrend",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "emerging",
+          "uptrend",
+          "hold_up",
+          "damage_down",
+          "deteriorating",
+          "decline",
+          "hold_down",
+          "damage_up",
+          "shock_up",
+          "shock_down",
+          "predicates"
+        ],
+        "title": "StructureConditionsV2",
         "type": "object"
       },
       "StructureContextV1": {
@@ -6214,6 +6781,273 @@
           "conditions"
         ],
         "title": "StructureEvidenceV1",
+        "type": "object"
+      },
+      "StructureEvidenceV2": {
+        "additionalProperties": false,
+        "properties": {
+          "blocked_transition": {
+            "title": "Blocked Transition",
+            "type": "boolean"
+          },
+          "blocked_transition_count": {
+            "minimum": 0.0,
+            "title": "Blocked Transition Count",
+            "type": "integer"
+          },
+          "candidate": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructureState"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "candidate_streak": {
+            "minimum": 0.0,
+            "title": "Candidate Streak",
+            "type": "integer"
+          },
+          "conditions": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructureConditionsV2"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "context_only": {
+            "$ref": "#/components/schemas/StructureContextV1",
+            "default": {}
+          },
+          "engine_version": {
+            "const": "structure-engine-v2",
+            "default": "structure-engine-v2",
+            "title": "Engine Version",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "enum": [
+                  "insufficient_history",
+                  "missing_data",
+                  "nonpositive_input"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "failed_for_adjacent": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Failed For Adjacent",
+            "type": "array"
+          },
+          "feature_version": {
+            "const": "structure-features-v2",
+            "default": "structure-features-v2",
+            "title": "Feature Version",
+            "type": "string"
+          },
+          "inputs": {
+            "$ref": "#/components/schemas/StructureInputV2"
+          },
+          "last_transition_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Transition Date"
+          },
+          "last_transition_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Transition Reason"
+          },
+          "measures": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructureMeasuresV2"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "missing_inputs": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Inputs",
+            "type": "array"
+          },
+          "previous_state": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructureState"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "previous_state_duration": {
+            "minimum": 0.0,
+            "title": "Previous State Duration",
+            "type": "integer"
+          },
+          "qualification_counts": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Qualification Counts",
+            "type": "array"
+          },
+          "reason_codes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reason Codes",
+            "type": "array"
+          },
+          "retention_failure_count": {
+            "minimum": 0.0,
+            "title": "Retention Failure Count",
+            "type": "integer"
+          },
+          "rules_fingerprint": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Rules Fingerprint",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "structure-evidence-v2",
+            "default": "structure-evidence-v2",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "sessions_in_state": {
+            "minimum": 0.0,
+            "title": "Sessions In State",
+            "type": "integer"
+          },
+          "shock_override": {
+            "title": "Shock Override",
+            "type": "boolean"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructureState"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state_before": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructureState"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state_entered_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Entered Date"
+          },
+          "threshold_version": {
+            "const": "structure-thresholds-v2",
+            "default": "structure-thresholds-v2",
+            "title": "Threshold Version",
+            "type": "string"
+          },
+          "transition_count_20d": {
+            "minimum": 0.0,
+            "title": "Transition Count 20D",
+            "type": "integer"
+          },
+          "transition_count_60d": {
+            "minimum": 0.0,
+            "title": "Transition Count 60D",
+            "type": "integer"
+          },
+          "transition_today": {
+            "title": "Transition Today",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "rules_fingerprint",
+          "inputs",
+          "state",
+          "state_before",
+          "previous_state",
+          "state_entered_date",
+          "sessions_in_state",
+          "previous_state_duration",
+          "candidate",
+          "candidate_streak",
+          "transition_today",
+          "shock_override",
+          "blocked_transition",
+          "blocked_transition_count",
+          "reason_codes",
+          "error",
+          "measures",
+          "conditions",
+          "qualification_counts",
+          "retention_failure_count",
+          "transition_count_20d",
+          "transition_count_60d",
+          "last_transition_date",
+          "last_transition_reason"
+        ],
+        "title": "StructureEvidenceV2",
         "type": "object"
       },
       "StructureInputV1": {
@@ -6489,6 +7323,317 @@
         "title": "StructureInputV1",
         "type": "object"
       },
+      "StructureInputV2": {
+        "additionalProperties": false,
+        "properties": {
+          "above20_15": {
+            "anyOf": [
+              {
+                "maximum": 15.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Above20 15"
+          },
+          "above50_15": {
+            "anyOf": [
+              {
+                "maximum": 15.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Above50 15"
+          },
+          "atr14": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Atr14"
+          },
+          "bar_timestamp_utc": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bar Timestamp Utc"
+          },
+          "below20_15": {
+            "anyOf": [
+              {
+                "maximum": 15.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Below20 15"
+          },
+          "below50_15": {
+            "anyOf": [
+              {
+                "maximum": 15.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Below50 15"
+          },
+          "close": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Close"
+          },
+          "ema10": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ema10"
+          },
+          "feature_version": {
+            "const": "structure-features-v2",
+            "default": "structure-features-v2",
+            "title": "Feature Version",
+            "type": "string"
+          },
+          "hh20": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hh20"
+          },
+          "hh63": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hh63"
+          },
+          "ll20": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ll20"
+          },
+          "median_atr10": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median Atr10"
+          },
+          "median_atr20": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median Atr20"
+          },
+          "p20": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "P20"
+          },
+          "previous_atr14": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Atr14"
+          },
+          "previous_close": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Close"
+          },
+          "prior_sessions": {
+            "minimum": 0.0,
+            "title": "Prior Sessions",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "structure-input-v2",
+            "default": "structure-input-v2",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_date": {
+            "format": "date",
+            "title": "Session Date",
+            "type": "string"
+          },
+          "sma20": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sma20"
+          },
+          "sma200": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sma200"
+          },
+          "sma200_60_ago": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sma200 60 Ago"
+          },
+          "sma20_10_ago": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sma20 10 Ago"
+          },
+          "sma50": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sma50"
+          },
+          "sma50_20_ago": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sma50 20 Ago"
+          },
+          "source": {
+            "$ref": "#/components/schemas/StructureSourceV1"
+          },
+          "symbol": {
+            "title": "Symbol",
+            "type": "string"
+          }
+        },
+        "required": [
+          "symbol",
+          "session_date",
+          "source",
+          "prior_sessions",
+          "close",
+          "previous_close",
+          "ema10",
+          "sma20",
+          "sma50",
+          "atr14",
+          "previous_atr14",
+          "sma20_10_ago",
+          "sma50_20_ago",
+          "above20_15",
+          "above50_15",
+          "below20_15",
+          "below50_15",
+          "median_atr10",
+          "median_atr20",
+          "p20"
+        ],
+        "title": "StructureInputV2",
+        "type": "object"
+      },
       "StructureMeasuresV1": {
         "additionalProperties": false,
         "properties": {
@@ -6570,6 +7715,45 @@
           "dd63_atr"
         ],
         "title": "StructureMeasuresV1",
+        "type": "object"
+      },
+      "StructureMeasuresV2": {
+        "additionalProperties": false,
+        "properties": {
+          "dist20": {
+            "title": "Dist20",
+            "type": "number"
+          },
+          "dist50": {
+            "title": "Dist50",
+            "type": "number"
+          },
+          "p20": {
+            "title": "P20",
+            "type": "number"
+          },
+          "s20": {
+            "title": "S20",
+            "type": "number"
+          },
+          "s50": {
+            "title": "S50",
+            "type": "number"
+          },
+          "spread2050": {
+            "title": "Spread2050",
+            "type": "number"
+          }
+        },
+        "required": [
+          "dist20",
+          "dist50",
+          "spread2050",
+          "s20",
+          "s50",
+          "p20"
+        ],
+        "title": "StructureMeasuresV2",
         "type": "object"
       },
       "StructureSourceV1": {
@@ -7347,26 +8531,38 @@
             "type": "string"
           },
           "setup": {
-            "const": "setup-engine-v1",
             "default": "setup-engine-v1",
+            "enum": [
+              "setup-engine-v1",
+              "setup-engine-v2"
+            ],
             "title": "Setup",
             "type": "string"
           },
           "setup_fingerprint": {
-            "const": "823647ca53b5c4623fef7f00beb294a18b5a8e8166d398ef8290b534cdcbfc38",
             "default": "823647ca53b5c4623fef7f00beb294a18b5a8e8166d398ef8290b534cdcbfc38",
+            "enum": [
+              "823647ca53b5c4623fef7f00beb294a18b5a8e8166d398ef8290b534cdcbfc38",
+              "0f2acac1a4fa4546467db39098d33383212f0149f8bb9af1c660088e7f229aa2"
+            ],
             "title": "Setup Fingerprint",
             "type": "string"
           },
           "structure": {
-            "const": "structure-engine-v1",
             "default": "structure-engine-v1",
+            "enum": [
+              "structure-engine-v1",
+              "structure-engine-v2"
+            ],
             "title": "Structure",
             "type": "string"
           },
           "structure_fingerprint": {
-            "const": "b0faf4774c772c0f4d09120f8eafd311853c59d751fe5bc7649a9a1b380bcf0d",
             "default": "b0faf4774c772c0f4d09120f8eafd311853c59d751fe5bc7649a9a1b380bcf0d",
+            "enum": [
+              "b0faf4774c772c0f4d09120f8eafd311853c59d751fe5bc7649a9a1b380bcf0d",
+              "b9c2ae96d1cf00ef23168af4ca188f41101f3823dc5e827216ca77b02897d071"
+            ],
             "title": "Structure Fingerprint",
             "type": "string"
           },

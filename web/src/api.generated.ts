@@ -459,9 +459,17 @@ export interface components {
        * @constant
        */
       schema_version: "decision-risk-input-v1";
-      setups: components["schemas"]["SetupOutputV1"] | null;
+      /** Setups */
+      setups:
+        | components["schemas"]["SetupOutputV1"]
+        | components["schemas"]["SetupOutputV2"]
+        | null;
       sizing: components["schemas"]["SizingProposalV1"];
-      structure: components["schemas"]["StructureEvidenceV1"] | null;
+      /** Structure */
+      structure:
+        | components["schemas"]["StructureEvidenceV1"]
+        | components["schemas"]["StructureEvidenceV2"]
+        | null;
       universe: components["schemas"]["UniverseDecisionInputV1"];
     };
     /** DecisionRiskOutputV1 */
@@ -617,6 +625,24 @@ export interface components {
      * @enum {string}
      */
     Eligibility: "CLEAR" | "BLOCKED" | "UNKNOWN";
+    /** EngineComparisonV1 */
+    EngineComparisonV1: {
+      /** Baseline Snapshot Fingerprint */
+      baseline_snapshot_fingerprint: string;
+      /**
+       * Kind
+       * @default ENGINE_VERSION_COMPARISON
+       * @constant
+       */
+      kind: "ENGINE_VERSION_COMPARISON";
+      /**
+       * Note
+       * @default Recomputed with V2 rules using original T/E/A clocks; not a new market refresh.
+       */
+      note: string;
+      /** Source Spec Sha256 */
+      source_spec_sha256: string;
+    };
     /** ErrorFieldV1 */
     ErrorFieldV1: {
       /** Field */
@@ -663,6 +689,7 @@ export interface components {
        */
       action_session: string;
       bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
+      comparison?: components["schemas"]["EngineComparisonV1"] | null;
       /**
        * Evaluation Timestamp
        * Format: date-time
@@ -1823,6 +1850,81 @@ export interface components {
       window20: components["schemas"]["PriceWindowV1"] | null;
       window30: components["schemas"]["PriceWindowV1"] | null;
     };
+    /** SetupInputV2 */
+    SetupInputV2: {
+      /** Atr14 */
+      atr14: number | null;
+      /** Atr20 */
+      atr20: number | null;
+      /** Atr5 */
+      atr5: number | null;
+      /** Averages */
+      averages: components["schemas"]["MovingAverageV1"][];
+      /** Bar Timestamp Utc */
+      bar_timestamp_utc?: string | null;
+      /** Close */
+      close: number | null;
+      /** Corporate Action Evidence */
+      corporate_action_evidence: string;
+      corporate_action_qa: components["schemas"]["CorporateActionQA"];
+      /**
+       * Feature Version
+       * @default setup-features-v2
+       * @constant
+       */
+      feature_version: "setup-features-v2";
+      /** High */
+      high: number | null;
+      /** Low */
+      low: number | null;
+      /** Mean Volume20 */
+      mean_volume20: number | null;
+      /** Mean Volume5 */
+      mean_volume5: number | null;
+      /** Median Atr20 */
+      median_atr20: number | null;
+      /** Median Volume20 */
+      median_volume20: number | null;
+      /** Median Volume5 */
+      median_volume5: number | null;
+      /** Open */
+      open: number | null;
+      /** Previous Atr14 */
+      previous_atr14: number | null;
+      /** Previous Close */
+      previous_close: number | null;
+      /** Prior Volume20 */
+      prior_volume20: number[] | null;
+      /** S20 */
+      s20: number | null;
+      /**
+       * Schema Version
+       * @default setup-input-v2
+       * @constant
+       */
+      schema_version: "setup-input-v2";
+      /**
+       * Session Date
+       * Format: date
+       */
+      session_date: string;
+      /** Session Index */
+      session_index: number;
+      source: components["schemas"]["StructureSourceV1"];
+      structure?: components["schemas"]["StructureEvidenceV2"] | null;
+      /** Symbol */
+      symbol: string;
+      /** Tr20 */
+      tr20: number | null;
+      /** Tr5 */
+      tr5: number | null;
+      /** Volume */
+      volume: number | null;
+      window20: components["schemas"]["PriceWindowV1"] | null;
+      window30: components["schemas"]["PriceWindowV1"] | null;
+      /** Word S20 */
+      word_s20: number | null;
+    };
     /** SetupInstanceV1 */
     SetupInstanceV1: {
       birth_geometry: components["schemas"]["GeometryV1"];
@@ -1935,6 +2037,52 @@ export interface components {
        * @constant
        */
       threshold_version: "setup-thresholds-v1";
+    };
+    /** SetupOutputV2 */
+    SetupOutputV2: {
+      /**
+       * Archived Ids
+       * @default []
+       */
+      archived_ids: string[];
+      /** Detections */
+      detections: components["schemas"]["DetectionV1"][];
+      /**
+       * Engine Version
+       * @default setup-engine-v2
+       * @constant
+       */
+      engine_version: "setup-engine-v2";
+      /**
+       * Errors
+       * @default []
+       */
+      errors: string[];
+      /**
+       * Feature Version
+       * @default setup-features-v2
+       * @constant
+       */
+      feature_version: "setup-features-v2";
+      inputs: components["schemas"]["SetupInputV2"];
+      /** Rejected Ep */
+      rejected_ep: components["schemas"]["DetectionV1"][];
+      /** Rules Fingerprint */
+      rules_fingerprint: string;
+      /**
+       * Schema Version
+       * @default setup-output-v2
+       * @constant
+       */
+      schema_version: "setup-output-v2";
+      /** Setups */
+      setups: components["schemas"]["SetupEvidenceV1"][];
+      /**
+       * Threshold Version
+       * @default setup-thresholds-v2
+       * @constant
+       */
+      threshold_version: "setup-thresholds-v2";
     };
     /** SetupStrengthContextV1 */
     SetupStrengthContextV1: {
@@ -2280,7 +2428,10 @@ export interface components {
     /** StructureBreadthContextV1 */
     StructureBreadthContextV1: {
       /** Evidence */
-      evidence: components["schemas"]["StructureEvidenceV1"][];
+      evidence: (
+        | components["schemas"]["StructureEvidenceV1"]
+        | components["schemas"]["StructureEvidenceV2"]
+      )[];
       /**
        * Session Date
        * Format: date
@@ -2325,6 +2476,31 @@ export interface components {
       SMA50_FLATISH: boolean;
       /** Sma50 Rising */
       SMA50_RISING: boolean;
+    };
+    /** StructureConditionsV2 */
+    StructureConditionsV2: {
+      /** Damage Down */
+      damage_down: boolean;
+      /** Damage Up */
+      damage_up: boolean;
+      /** Decline */
+      decline: boolean;
+      /** Deteriorating */
+      deteriorating: boolean;
+      /** Emerging */
+      emerging: boolean;
+      /** Hold Down */
+      hold_down: boolean;
+      /** Hold Up */
+      hold_up: boolean;
+      /** Predicates */
+      predicates: [string, boolean, number][];
+      /** Shock Down */
+      shock_down: boolean;
+      /** Shock Up */
+      shock_up: boolean;
+      /** Uptrend */
+      uptrend: boolean;
     };
     /** StructureContextV1 */
     StructureContextV1: {
@@ -2404,6 +2580,87 @@ export interface components {
       /** Transition Today */
       transition_today: boolean;
     };
+    /** StructureEvidenceV2 */
+    StructureEvidenceV2: {
+      /** Blocked Transition */
+      blocked_transition: boolean;
+      /** Blocked Transition Count */
+      blocked_transition_count: number;
+      candidate: components["schemas"]["StructureState"] | null;
+      /** Candidate Streak */
+      candidate_streak: number;
+      conditions: components["schemas"]["StructureConditionsV2"] | null;
+      /** @default {} */
+      context_only: components["schemas"]["StructureContextV1"];
+      /**
+       * Engine Version
+       * @default structure-engine-v2
+       * @constant
+       */
+      engine_version: "structure-engine-v2";
+      /** Error */
+      error:
+        ("insufficient_history" | "missing_data" | "nonpositive_input") | null;
+      /**
+       * Failed For Adjacent
+       * @default []
+       */
+      failed_for_adjacent: string[];
+      /**
+       * Feature Version
+       * @default structure-features-v2
+       * @constant
+       */
+      feature_version: "structure-features-v2";
+      inputs: components["schemas"]["StructureInputV2"];
+      /** Last Transition Date */
+      last_transition_date: string | null;
+      /** Last Transition Reason */
+      last_transition_reason: string | null;
+      measures: components["schemas"]["StructureMeasuresV2"] | null;
+      /**
+       * Missing Inputs
+       * @default []
+       */
+      missing_inputs: string[];
+      previous_state: components["schemas"]["StructureState"] | null;
+      /** Previous State Duration */
+      previous_state_duration: number;
+      /** Qualification Counts */
+      qualification_counts: [string, number][];
+      /** Reason Codes */
+      reason_codes: string[];
+      /** Retention Failure Count */
+      retention_failure_count: number;
+      /** Rules Fingerprint */
+      rules_fingerprint: string;
+      /**
+       * Schema Version
+       * @default structure-evidence-v2
+       * @constant
+       */
+      schema_version: "structure-evidence-v2";
+      /** Sessions In State */
+      sessions_in_state: number;
+      /** Shock Override */
+      shock_override: boolean;
+      state: components["schemas"]["StructureState"] | null;
+      state_before: components["schemas"]["StructureState"] | null;
+      /** State Entered Date */
+      state_entered_date: string | null;
+      /**
+       * Threshold Version
+       * @default structure-thresholds-v2
+       * @constant
+       */
+      threshold_version: "structure-thresholds-v2";
+      /** Transition Count 20D */
+      transition_count_20d: number;
+      /** Transition Count 60D */
+      transition_count_60d: number;
+      /** Transition Today */
+      transition_today: boolean;
+    };
     /** StructureInputV1 */
     StructureInputV1: {
       /** Above20 15 */
@@ -2467,6 +2724,75 @@ export interface components {
       /** Symbol */
       symbol: string;
     };
+    /** StructureInputV2 */
+    StructureInputV2: {
+      /** Above20 15 */
+      above20_15: number | null;
+      /** Above50 15 */
+      above50_15: number | null;
+      /** Atr14 */
+      atr14: number | null;
+      /** Bar Timestamp Utc */
+      bar_timestamp_utc?: string | null;
+      /** Below20 15 */
+      below20_15: number | null;
+      /** Below50 15 */
+      below50_15: number | null;
+      /** Close */
+      close: number | null;
+      /** Ema10 */
+      ema10: number | null;
+      /**
+       * Feature Version
+       * @default structure-features-v2
+       * @constant
+       */
+      feature_version: "structure-features-v2";
+      /** Hh20 */
+      hh20?: number | null;
+      /** Hh63 */
+      hh63?: number | null;
+      /** Ll20 */
+      ll20?: number | null;
+      /** Median Atr10 */
+      median_atr10: number | null;
+      /** Median Atr20 */
+      median_atr20: number | null;
+      /** P20 */
+      p20: number | null;
+      /** Previous Atr14 */
+      previous_atr14: number | null;
+      /** Previous Close */
+      previous_close: number | null;
+      /** Prior Sessions */
+      prior_sessions: number;
+      /**
+       * Schema Version
+       * @default structure-input-v2
+       * @constant
+       */
+      schema_version: "structure-input-v2";
+      /**
+       * Session Date
+       * Format: date
+       */
+      session_date: string;
+      /** Sma20 */
+      sma20: number | null;
+      /** Sma200 */
+      sma200?: number | null;
+      /** Sma200 60 Ago */
+      sma200_60_ago?: number | null;
+      /** Sma20 10 Ago */
+      sma20_10_ago: number | null;
+      /** Sma50 */
+      sma50: number | null;
+      /** Sma50 20 Ago */
+      sma50_20_ago: number | null;
+      source: components["schemas"]["StructureSourceV1"];
+      /** Symbol */
+      symbol: string;
+    };
     /** StructureMeasuresV1 */
     StructureMeasuresV1: {
       /** Dd63 Atr */
@@ -2493,6 +2819,21 @@ export interface components {
       stack_dn: boolean;
       /** Stack Up */
       stack_up: boolean;
+    };
+    /** StructureMeasuresV2 */
+    StructureMeasuresV2: {
+      /** Dist20 */
+      dist20: number;
+      /** Dist50 */
+      dist50: number;
+      /** P20 */
+      p20: number;
+      /** S20 */
+      s20: number;
+      /** S50 */
+      s50: number;
+      /** Spread2050 */
+      spread2050: number;
     };
     /**
      * StructureSourceV1
@@ -2759,27 +3100,31 @@ export interface components {
       /**
        * Setup
        * @default setup-engine-v1
-       * @constant
+       * @enum {string}
        */
-      setup: "setup-engine-v1";
+      setup: "setup-engine-v1" | "setup-engine-v2";
       /**
        * Setup Fingerprint
        * @default 823647ca53b5c4623fef7f00beb294a18b5a8e8166d398ef8290b534cdcbfc38
-       * @constant
+       * @enum {string}
        */
-      setup_fingerprint: "823647ca53b5c4623fef7f00beb294a18b5a8e8166d398ef8290b534cdcbfc38";
+      setup_fingerprint:
+        | "823647ca53b5c4623fef7f00beb294a18b5a8e8166d398ef8290b534cdcbfc38"
+        | "0f2acac1a4fa4546467db39098d33383212f0149f8bb9af1c660088e7f229aa2";
       /**
        * Structure
        * @default structure-engine-v1
-       * @constant
+       * @enum {string}
        */
-      structure: "structure-engine-v1";
+      structure: "structure-engine-v1" | "structure-engine-v2";
       /**
        * Structure Fingerprint
        * @default b0faf4774c772c0f4d09120f8eafd311853c59d751fe5bc7649a9a1b380bcf0d
-       * @constant
+       * @enum {string}
        */
-      structure_fingerprint: "b0faf4774c772c0f4d09120f8eafd311853c59d751fe5bc7649a9a1b380bcf0d";
+      structure_fingerprint:
+        | "b0faf4774c772c0f4d09120f8eafd311853c59d751fe5bc7649a9a1b380bcf0d"
+        | "b9c2ae96d1cf00ef23168af4ca188f41101f3823dc5e827216ca77b02897d071";
       /**
        * Universe
        * @default aperture-universe-v1

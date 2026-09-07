@@ -60,27 +60,46 @@ can be relaunched from the retained local snapshot.
 
 ## Engine alignment status
 
-The runtime V1 engines remain reproducible and unchanged. They do not yet reflect
-all settled target decisions in `APERTURE_CURRENT_AUTHORITY.md`.
+`AP-ENGINE-ALIGNMENT-001` is implemented and verified on the V2 branch. Runtime V1
+remains reproducible and is still the default materializer selection. V2 is an
+explicit coherent `structure-engine-v2` / `setup-engine-v2` pair; no production
+source data or existing snapshot was relabeled.
 
-Most important target divergence:
+- Structure V2 uses the verified final Word SMA20/SMA50 model, median-ATR slopes,
+  ten-session persistence, confirmation/retention hysteresis, and transitional-only
+  D50 shock overrides. EMA10/SMA200 are context only.
+- Setup V2 uses Word closing-dispersion contraction, robust 20-session range,
+  mature-trend-only pullbacks, and 40/60-session pre-trigger limits.
+- Prior-session geometry, stable version-scoped birth identities, failure-first
+  ordering, terminal non-reactivation, corporate-action quarantine, and corrected
+  replay are retained.
+- Materialization, normalized evidence, decision/regime context, symbol detail,
+  and Rules explicitly carry the selected engine identities.
 
-- runtime Structure V1 uses EMA10/SMA20/SMA50 stack predicates;
-- the settled target Structure model uses the final Word specification's
-  SMA20/SMA50 ATR-normalized design, with EMA10 and SMA200 as context only;
-- runtime shock rules can enter mature states immediately, while the target uses
-  transitional shock states;
-- target setup lifetimes allow RANGE up to 60 sessions and CONTRACTION initially
-  up to 40 sessions while geometry remains valid.
+A separate `ENGINE_VERSION_COMPARISON` snapshot was built from the verified retained
+inputs. It has 75 valid current Structure records and funnel 63 NONE / 12 WATCH /
+0 TRADE / 0 ACT, versus the preserved V1 funnel 66 / 9 / 0 / 0. Structure changes:
+28 of 75; active setup sets change for 63 symbols. The eight-symbol, 126-session
+sample has 362 differing states out of 1,008 observations and 69 V2 transitions
+versus 56 V1 transitions. This is not a claim of reduced churn or predictive lift.
 
-Accepted Git V1 safety behavior—including frozen T-1 references, stable identity,
-event ordering, no-look-ahead, corporate-action quarantine, missing-data evidence,
-failure precedence, terminal non-reactivation, and corrected replay—remains part of
-the target design.
+Comparison snapshot bytes: 2,146,854. Logical fingerprint:
+`e7e2b78be213dbf51919012bbc4ddbf34ee4e58ce495be8d50c45246aa386a73`.
+The original evidence/evaluation/action clocks are unchanged. The comparison
+retains expiry at 2026-09-08 00:00 UTC and must be refused as stale afterward.
 
-No engine code or existing snapshot was changed by the documentation-authority
-cleanup. A later explicitly authorized milestone must implement new versions and
-rebuild the snapshot.
+Verification: 2,910 Python tests passed, four optional real-artifact tests skipped;
+13 frontend component tests and two desktop/mobile comparison browser tests
+passed. TypeScript, production build, scoped lint/format, schema/type sync and
+whitespace checks passed. Both services stopped, and all 1,383 protected baseline
+files—including settings, source data, original snapshots and backups—remained
+byte-identical. No provider requests or production publications occurred.
+
+See [the implementation contract](engine-alignment-v2.md) for material source
+ambiguities and selected interpretations, and
+[the completion receipt](engine-alignment-v2-receipt.md) for final evidence and
+limitations. Book, Journal, routine refresh, full-universe coverage, group
+membership, earnings completeness and broader calibration remain outside scope.
 
 ## Repository and data safety
 
@@ -101,6 +120,6 @@ Historical task receipts and implementation documents remain available under
 
 ## Next work
 
-No engine change is authorized merely by this status file. See
-`docs/CODEX_NEXT_TASK.md` for the current assignment state and the proposed bounded
-next milestone.
+Engine alignment is complete; no additional engine changes, refresh, production
+switch, or merge is authorized merely by this status file. See
+`docs/CODEX_NEXT_TASK.md` for the completed assignment and delivery boundary.

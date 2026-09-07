@@ -1,0 +1,2018 @@
+{
+  "source_filename": "Aperture_Structure_and_Setup_Engine_Final_Spec-1.docx",
+  "source_sha256": "3e8de86756299a91a592eb9a78431896e783e7d8500d6c1254d93f28f6567965",
+  "source_bytes": 218014,
+  "extraction": "All main-document body paragraphs and table cells in XML order; text, tabs and line breaks preserved. Presentation formatting and automatic list markers are not transcribed.",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "Aperture: Final Structure State & Setup Classification Specification"
+    },
+    {
+      "type": "paragraph",
+      "text": "Consolidated project decisions from the independent design challenges"
+    },
+    {
+      "type": "paragraph",
+      "text": "Purpose. This document is the final project-ready specification for the two foundational descriptive engines in Aperture: the Structure State Engine and the Setup Classification Engine. It consolidates the final architectural decisions, formulas, thresholds, lifecycle rules, evidence requirements, interfaces, testing approach, calibration philosophy, and deliberate exclusions."
+    },
+    {
+      "type": "paragraph",
+      "text": "Core architectural rule. Measurements describe observable market facts. Structure classifies directional condition. Setup classifies a specific price/volatility configuration or event. Lifecycle records where a setup is in its development. Leadership, regime, extension, earnings risk, actionability, position sizing, and portfolio policy remain independent downstream layers."
+    },
+    {
+      "type": "paragraph",
+      "text": "Final Aperture pipeline:"
+    },
+    {
+      "type": "paragraph",
+      "text": "Market Regime -> Groups -> Leadership -> Structure -> Setup -> Actionability -> Risk -> Portfolio Context"
+    },
+    {
+      "type": "paragraph",
+      "text": "Non-negotiable separation of concerns"
+    },
+    {
+      "type": "paragraph",
+      "text": "Structure must not encode setup type, relative strength, group strength, extension, earnings, regime, or actionability."
+    },
+    {
+      "type": "paragraph",
+      "text": "Setup must not decide whether a setup should be traded."
+    },
+    {
+      "type": "paragraph",
+      "text": "Extension is not a structure state."
+    },
+    {
+      "type": "paragraph",
+      "text": "Reclaim is not a V1 setup family; it is a deterministic evidence/event flag."
+    },
+    {
+      "type": "paragraph",
+      "text": "Multiple setup families may coexist on one stock."
+    },
+    {
+      "type": "paragraph",
+      "text": "No arbitrary confidence percentage is produced by either engine."
+    },
+    {
+      "type": "paragraph",
+      "text": "Every historical classification must be reconstructable from stored numeric evidence and versioned rules."
+    },
+    {
+      "type": "paragraph",
+      "text": "\n"
+    },
+    {
+      "type": "paragraph",
+      "text": "Part I - Structure State Engine"
+    },
+    {
+      "type": "paragraph",
+      "text": "1. Final state taxonomy"
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          "Internal enum",
+          "UI label",
+          "Conceptual meaning"
+        ],
+        [
+          "NEUTRAL",
+          "Neutral",
+          "No sufficiently established directional structure."
+        ],
+        [
+          "TRANSITION_UP",
+          "Emerging",
+          "Structure is rotating positively but is not yet a mature uptrend."
+        ],
+        [
+          "TREND_UP",
+          "Uptrend",
+          "Established constructive intermediate swing structure."
+        ],
+        [
+          "TRANSITION_DOWN",
+          "Deteriorating",
+          "Material structural damage is developing, but decline is not yet mature."
+        ],
+        [
+          "TREND_DOWN",
+          "Decline",
+          "Established negative intermediate swing structure."
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "Why these five states"
+    },
+    {
+      "type": "paragraph",
+      "text": "NEUTRAL replaces BASE because 'base' is a setup concept. A sideways stock may be neutral without being a constructive base."
+    },
+    {
+      "type": "paragraph",
+      "text": "EMERGING and DETERIORATING are retained because inflection points matter materially to swing traders."
+    },
+    {
+      "type": "paragraph",
+      "text": "UPTREND and DECLINE are established directional states."
+    },
+    {
+      "type": "paragraph",
+      "text": "The internal vocabulary is directionally symmetric, which supports future short-side use without doubling the state count."
+    },
+    {
+      "type": "paragraph",
+      "text": "2. Moving averages and roles"
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          "Average",
+          "Used in classifier?",
+          "Role"
+        ],
+        [
+          "EMA10",
+          "No",
+          "Setup/location/trade-management context; too reactive for structural state authority."
+        ],
+        [
+          "SMA20",
+          "Yes",
+          "Fast structural trend, roughly one trading month."
+        ],
+        [
+          "SMA50",
+          "Yes",
+          "Intermediate structural anchor, roughly ten trading weeks."
+        ],
+        [
+          "SMA200",
+          "No",
+          "Long-term context only; must not delay short-horizon structural transitions."
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "Key decision:"
+    },
+    {
+      "type": "paragraph",
+      "text": "The classifier is driven by the 20-day/50-day complex, not a 10/20/50/200 stack. EMA10 and SMA200 should be calculated and stored, but they do not vote on the state. This sharply reduces redundant signals and avoids state churn during normal short-term pullbacks."
+    },
+    {
+      "type": "paragraph",
+      "text": "3. Exact mathematical inputs"
+    },
+    {
+      "type": "paragraph",
+      "text": "Adjusted daily OHLC data."
+    },
+    {
+      "type": "paragraph",
+      "text": "Wilder ATR14."
+    },
+    {
+      "type": "paragraph",
+      "text": "SMA20 and SMA50."
+    },
+    {
+      "type": "paragraph",
+      "text": "ATR-normalized close distance from SMA20 and SMA50."
+    },
+    {
+      "type": "paragraph",
+      "text": "ATR-normalized SMA20/SMA50 separation."
+    },
+    {
+      "type": "paragraph",
+      "text": "ATR-normalized SMA20 and SMA50 slope."
+    },
+    {
+      "type": "paragraph",
+      "text": "Ten-session persistence of closes above SMA20."
+    },
+    {
+      "type": "paragraph",
+      "text": "Previous state and persistence counters."
+    },
+    {
+      "type": "paragraph",
+      "text": "4. Core formulas"
+    },
+    {
+      "type": "paragraph",
+      "text": "ATR14 = Wilder ATR(14)"
+    },
+    {
+      "type": "paragraph",
+      "text": "D20 = (Close - SMA20) / ATR14"
+    },
+    {
+      "type": "paragraph",
+      "text": "D50 = (Close - SMA50) / ATR14"
+    },
+    {
+      "type": "paragraph",
+      "text": "Spread2050 = (SMA20 - SMA50) / ATR14"
+    },
+    {
+      "type": "paragraph",
+      "text": "Slope20 = (SMA20[t] - SMA20[t-10]) / median(ATR14[t-9:t])"
+    },
+    {
+      "type": "paragraph",
+      "text": "Slope50 = (SMA50[t] - SMA50[t-20]) / median(ATR14[t-19:t])"
+    },
+    {
+      "type": "paragraph",
+      "text": "P20 = count(Close > SMA20 over t-9:t) / 10"
+    },
+    {
+      "type": "paragraph",
+      "text": "Why ATR normalization? A fixed dollar or percentage threshold behaves very differently in a 2% ADR stock versus an 8% ADR stock. ATR units create a more comparable structural language across volatility profiles. Median ATR is used in slope denominators to reduce distortion from a single volatility shock."
+    },
+    {
+      "type": "paragraph",
+      "text": "5. State qualification rules"
+    },
+    {
+      "type": "paragraph",
+      "text": "EMERGING entry"
+    },
+    {
+      "type": "paragraph",
+      "text": "E1 D50 >= +0.25"
+    },
+    {
+      "type": "paragraph",
+      "text": "E2 Slope20 >= +0.15"
+    },
+    {
+      "type": "paragraph",
+      "text": "E3 Spread2050 >= -0.25"
+    },
+    {
+      "type": "paragraph",
+      "text": "E4 Slope50 >= -0.10"
+    },
+    {
+      "type": "paragraph",
+      "text": "E5 P20 >= 0.60"
+    },
+    {
+      "type": "paragraph",
+      "text": "Require E1 AND E2 AND at least 4 of 5 conditions for 2 consecutive sessions."
+    },
+    {
+      "type": "paragraph",
+      "text": "UPTREND entry"
+    },
+    {
+      "type": "paragraph",
+      "text": "U1 D50 >= -0.25"
+    },
+    {
+      "type": "paragraph",
+      "text": "U2 Spread2050 >= +0.25"
+    },
+    {
+      "type": "paragraph",
+      "text": "U3 Slope20 >= +0.25"
+    },
+    {
+      "type": "paragraph",
+      "text": "U4 Slope50 >= +0.15"
+    },
+    {
+      "type": "paragraph",
+      "text": "U5 P20 >= 0.60"
+    },
+    {
+      "type": "paragraph",
+      "text": "Require U1 AND U4 AND at least 4 of 5 conditions for 3 consecutive sessions."
+    },
+    {
+      "type": "paragraph",
+      "text": "UPTREND retention"
+    },
+    {
+      "type": "paragraph",
+      "text": "H1 D50 >= -0.50"
+    },
+    {
+      "type": "paragraph",
+      "text": "H2 Spread2050 >= 0.00"
+    },
+    {
+      "type": "paragraph",
+      "text": "H3 Slope50 >= +0.05"
+    },
+    {
+      "type": "paragraph",
+      "text": "H4 P20 >= 0.40"
+    },
+    {
+      "type": "paragraph",
+      "text": "Require H1 AND H3 AND at least 3 of 4 conditions."
+    },
+    {
+      "type": "paragraph",
+      "text": "DETERIORATING from UPTREND"
+    },
+    {
+      "type": "paragraph",
+      "text": "D1 D20 <= -0.50"
+    },
+    {
+      "type": "paragraph",
+      "text": "D2 P20 <= 0.40"
+    },
+    {
+      "type": "paragraph",
+      "text": "D3 Slope20 <= +0.05"
+    },
+    {
+      "type": "paragraph",
+      "text": "D4 Spread2050 <= +0.20"
+    },
+    {
+      "type": "paragraph",
+      "text": "D5 D50 <= +0.50"
+    },
+    {
+      "type": "paragraph",
+      "text": "Require D1 AND D2 AND at least 4 of 5 conditions for 2 consecutive sessions."
+    },
+    {
+      "type": "paragraph",
+      "text": "DECLINE entry"
+    },
+    {
+      "type": "paragraph",
+      "text": "L1 D50 <= +0.25"
+    },
+    {
+      "type": "paragraph",
+      "text": "L2 Spread2050 <= -0.25"
+    },
+    {
+      "type": "paragraph",
+      "text": "L3 Slope20 <= -0.25"
+    },
+    {
+      "type": "paragraph",
+      "text": "L4 Slope50 <= -0.15"
+    },
+    {
+      "type": "paragraph",
+      "text": "L5 P20 <= 0.40"
+    },
+    {
+      "type": "paragraph",
+      "text": "Require L1 AND L4 AND at least 4 of 5 conditions for 3 consecutive sessions."
+    },
+    {
+      "type": "paragraph",
+      "text": "Short-side symmetry. The downside model should be implemented as the sign-inverted mirror of the upside rules wherever possible. This keeps the architecture consistent and avoids maintaining separate discretionary long and short models."
+    },
+    {
+      "type": "paragraph",
+      "text": "6. State transitions and hysteresis"
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          "Current state",
+          "Allowed next states"
+        ],
+        [
+          "NEUTRAL",
+          "NEUTRAL, EMERGING, DETERIORATING"
+        ],
+        [
+          "EMERGING",
+          "EMERGING, UPTREND, NEUTRAL, DETERIORATING"
+        ],
+        [
+          "UPTREND",
+          "UPTREND, DETERIORATING, NEUTRAL"
+        ],
+        [
+          "DETERIORATING",
+          "DETERIORATING, DECLINE, NEUTRAL, UPTREND"
+        ],
+        [
+          "DECLINE",
+          "DECLINE, EMERGING, NEUTRAL"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "Do not normally allow UPTREND -> DECLINE or DECLINE -> UPTREND directly."
+    },
+    {
+      "type": "paragraph",
+      "text": "Use stricter thresholds to enter a mature trend and looser thresholds to retain it."
+    },
+    {
+      "type": "paragraph",
+      "text": "Require two sessions for transitional states and three sessions for mature directional states."
+    },
+    {
+      "type": "paragraph",
+      "text": "If UPTREND retention fails for five consecutive sessions but explicit bearish damage does not fire, transition to NEUTRAL."
+    },
+    {
+      "type": "paragraph",
+      "text": "Mirror the same logic on the downside."
+    },
+    {
+      "type": "paragraph",
+      "text": "7. Extraordinary gaps / shock override"
+    },
+    {
+      "type": "paragraph",
+      "text": "Positive shock override:"
+    },
+    {
+      "type": "paragraph",
+      "text": "D50 >= +2.0 AND Close > SMA20 AND Slope20 > -0.10"
+    },
+    {
+      "type": "paragraph",
+      "text": "=> NEUTRAL or DECLINE may move immediately to EMERGING."
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "Negative shock override:"
+    },
+    {
+      "type": "paragraph",
+      "text": "D50 <= -2.0 AND Close < SMA20 AND Slope20 < +0.10"
+    },
+    {
+      "type": "paragraph",
+      "text": "=> positive/neutral states may move immediately to DETERIORATING."
+    },
+    {
+      "type": "paragraph",
+      "text": "Important: A violent one-day event can accelerate entry into a transitional state, but it cannot establish a mature trend by itself."
+    },
+    {
+      "type": "paragraph",
+      "text": "8. Extension is separate"
+    },
+    {
+      "type": "paragraph",
+      "text": "Final decision: EXTENDED is not a structure state. A stock can remain structurally UPTREND while its extension layer says NORMAL, ELEVATED, or EXTREME. This preserves orthogonality between trend condition and trade location."
+    },
+    {
+      "type": "paragraph",
+      "text": "Example:"
+    },
+    {
+      "type": "paragraph",
+      "text": "Structure = UPTREND"
+    },
+    {
+      "type": "paragraph",
+      "text": "Extension = EXTREME"
+    },
+    {
+      "type": "paragraph",
+      "text": "9. Constructive pullbacks and bases"
+    },
+    {
+      "type": "paragraph",
+      "text": "A normal pullback to EMA10/SMA20/SMA50 should remain UPTREND while the Setup Engine detects TREND_PULLBACK."
+    },
+    {
+      "type": "paragraph",
+      "text": "A six-week consolidation above a rising SMA50 may remain UPTREND while the Setup Engine detects RANGE and/or CONTRACTION."
+    },
+    {
+      "type": "paragraph",
+      "text": "A directionless months-long sideways stock is NEUTRAL, even if the Setup Engine separately identifies a RANGE."
+    },
+    {
+      "type": "paragraph",
+      "text": "Structure never decides whether a range is a 'good base.'"
+    },
+    {
+      "type": "paragraph",
+      "text": "10. Structure evidence and state history"
+    },
+    {
+      "type": "paragraph",
+      "text": "Store at minimum:"
+    },
+    {
+      "type": "paragraph",
+      "text": "symbol, session, current_state, previous_state, state_entered_date, sessions_in_state,"
+    },
+    {
+      "type": "paragraph",
+      "text": "close, sma20, sma50, atr14, d20_atr, d50_atr, spread20_50_atr,"
+    },
+    {
+      "type": "paragraph",
+      "text": "slope20_10_atr, slope50_20_atr, p20,"
+    },
+    {
+      "type": "paragraph",
+      "text": "all state predicate booleans, conditions_passed, threshold margins,"
+    },
+    {
+      "type": "paragraph",
+      "text": "qualification-day counters, retention status, shock_override, transition_reason,"
+    },
+    {
+      "type": "paragraph",
+      "text": "engine_version, feature_version, threshold_version, data/adjustment revision."
+    },
+    {
+      "type": "paragraph",
+      "text": "Store previous-state duration and last transition date/reason."
+    },
+    {
+      "type": "paragraph",
+      "text": "Track transition_count_20d and transition_count_60d as diagnostics, not classification features."
+    },
+    {
+      "type": "paragraph",
+      "text": "Expose passed and failed conditions rather than an arbitrary confidence percentage."
+    },
+    {
+      "type": "paragraph",
+      "text": "11. Deliberately excluded from Structure V1"
+    },
+    {
+      "type": "paragraph",
+      "text": "RSI, MACD, ADX/DMI, Bollinger Bands."
+    },
+    {
+      "type": "paragraph",
+      "text": "Volume and relative strength."
+    },
+    {
+      "type": "paragraph",
+      "text": "Group strength and market regime."
+    },
+    {
+      "type": "paragraph",
+      "text": "Earnings or event risk."
+    },
+    {
+      "type": "paragraph",
+      "text": "52-week-high requirements."
+    },
+    {
+      "type": "paragraph",
+      "text": "Higher-high/higher-low pivot algorithms."
+    },
+    {
+      "type": "paragraph",
+      "text": "Linear-regression slope."
+    },
+    {
+      "type": "paragraph",
+      "text": "EMA10 and SMA200 as voting inputs."
+    },
+    {
+      "type": "paragraph",
+      "text": "Extension and compression."
+    },
+    {
+      "type": "paragraph",
+      "text": "Machine learning or LLM chart judgment."
+    },
+    {
+      "type": "paragraph",
+      "text": "\n"
+    },
+    {
+      "type": "paragraph",
+      "text": "Part II - Setup Classification Engine"
+    },
+    {
+      "type": "paragraph",
+      "text": "12. Final V1 setup taxonomy"
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          "Setup type",
+          "What it represents",
+          "What it does not decide"
+        ],
+        [
+          "EP",
+          "Unusually large directional information gap with strong participation and close.",
+          "Catalyst identity, quality, leadership, actionability."
+        ],
+        [
+          "CONTRACTION",
+          "Progressive compression in closing dispersion and realized range.",
+          "Textbook VCP artistry or pivot-leg interpretation."
+        ],
+        [
+          "TREND_PULLBACK",
+          "Return toward a trend reference after prior excursion while external structure remains intact.",
+          "Whether the pullback should be bought."
+        ],
+        [
+          "RANGE",
+          "Sustained bounded and relatively horizontal trading area with objective upper/lower boundaries.",
+          "Cup/handle, double bottom, saucer, base count."
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "Reclaim decision. RECLAIM is not a fifth V1 setup. It is a deterministic event/evidence flag that can annotate Pullback, Emerging, Range, or EP."
+    },
+    {
+      "type": "paragraph",
+      "text": "13. Multiple simultaneous setups"
+    },
+    {
+      "type": "paragraph",
+      "text": "Use active_setups[] rather than primary_setup/secondary_setup."
+    },
+    {
+      "type": "paragraph",
+      "text": "Do not rank setup families. Priority belongs downstream in policy/actionability."
+    },
+    {
+      "type": "paragraph",
+      "text": "A stock may simultaneously be RANGE + CONTRACTION, or EP + RANGE_BREAKOUT."
+    },
+    {
+      "type": "paragraph",
+      "text": "Prevent duplicate instances with one active instance per setup_type + direction + reference."
+    },
+    {
+      "type": "paragraph",
+      "text": "14. Universal setup lifecycle"
+    },
+    {
+      "type": "paragraph",
+      "text": "FORMING -> NEAR_TRIGGER -> TRIGGERED -> RESOLVED"
+    },
+    {
+      "type": "paragraph",
+      "text": "Any active state -> FAILED"
+    },
+    {
+      "type": "paragraph",
+      "text": "Any pre-trigger state -> STALE"
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          "Lifecycle",
+          "Definition"
+        ],
+        [
+          "FORMING",
+          "Setup conditions exist but price is not yet sufficiently close to its trigger/reference."
+        ],
+        [
+          "NEAR_TRIGGER",
+          "Setup remains valid and price is within the configured ATR distance of the trigger."
+        ],
+        [
+          "TRIGGERED",
+          "The objective trigger boundary or contact condition has occurred; this does not mean BUY."
+        ],
+        [
+          "RESOLVED",
+          "Post-trigger observation window ended without satisfying failure; this does not mean profitable."
+        ],
+        [
+          "FAILED",
+          "Explicit setup invalidation occurred."
+        ],
+        [
+          "STALE",
+          "Pre-trigger setup aged out or geometry drifted enough to become a new setup."
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "Critical lifecycle rule. Lifecycle is monotonic. Once a setup is TRIGGERED it never goes backward to NEAR_TRIGGER. If the setup later reforms, create a new immutable setup_id."
+    },
+    {
+      "type": "paragraph",
+      "text": "15. Common setup object"
+    },
+    {
+      "type": "paragraph",
+      "text": "SetupInstance {"
+    },
+    {
+      "type": "paragraph",
+      "text": "  setup_id, symbol, session, setup_type, direction, lifecycle,"
+    },
+    {
+      "type": "paragraph",
+      "text": "  first_detected_date, lifecycle_entered_date, age_sessions,"
+    },
+    {
+      "type": "paragraph",
+      "text": "  reference_type, reference_level, distance_to_reference_atr,"
+    },
+    {
+      "type": "paragraph",
+      "text": "  trigger_level, invalidation_level,"
+    },
+    {
+      "type": "paragraph",
+      "text": "  measurements{}, rules{}, supporting_evidence{}, contradictions[],"
+    },
+    {
+      "type": "paragraph",
+      "text": "  structure_state_ref, transition_reason,"
+    },
+    {
+      "type": "paragraph",
+      "text": "  feature_version, setup_engine_version, threshold_version, data_version"
+    },
+    {
+      "type": "paragraph",
+      "text": "}"
+    },
+    {
+      "type": "paragraph",
+      "text": "16. EP / Episodic Information Gap"
+    },
+    {
+      "type": "paragraph",
+      "text": "Measurements"
+    },
+    {
+      "type": "paragraph",
+      "text": "GapPct = (Open[t] - Close[t-1]) / Close[t-1]"
+    },
+    {
+      "type": "paragraph",
+      "text": "GapATR = (Open[t] - Close[t-1]) / ATR14[t-1]"
+    },
+    {
+      "type": "paragraph",
+      "text": "ShockATR = (Close[t] - Close[t-1]) / ATR14[t-1]"
+    },
+    {
+      "type": "paragraph",
+      "text": "MedianVol20_prior = median(Volume[t-20:t-1])"
+    },
+    {
+      "type": "paragraph",
+      "text": "RVOL20 = Volume[t] / MedianVol20_prior"
+    },
+    {
+      "type": "paragraph",
+      "text": "CLV = (Close - Low) / (High - Low)"
+    },
+    {
+      "type": "paragraph",
+      "text": "If High == Low, define CLV = 0.5."
+    },
+    {
+      "type": "paragraph",
+      "text": "Long EP initial thresholds"
+    },
+    {
+      "type": "paragraph",
+      "text": "GapPct >= +4%"
+    },
+    {
+      "type": "paragraph",
+      "text": "GapATR >= +1.0"
+    },
+    {
+      "type": "paragraph",
+      "text": "ShockATR >= +1.5"
+    },
+    {
+      "type": "paragraph",
+      "text": "RVOL20 >= 1.5"
+    },
+    {
+      "type": "paragraph",
+      "text": "CLV >= 0.65"
+    },
+    {
+      "type": "paragraph",
+      "text": "All five conditions required."
+    },
+    {
+      "type": "paragraph",
+      "text": "Do not require Close > Open."
+    },
+    {
+      "type": "paragraph",
+      "text": "Do not require a new recent high."
+    },
+    {
+      "type": "paragraph",
+      "text": "Use both GapPct and GapATR so the move is large in absolute and stock-specific volatility terms."
+    },
+    {
+      "type": "paragraph",
+      "text": "EP context may be stored as TRANSITION or CONTINUATION based on Structure, but not as separate setup types."
+    },
+    {
+      "type": "paragraph",
+      "text": "Bearish EP symmetry"
+    },
+    {
+      "type": "paragraph",
+      "text": "GapPct <= -4%"
+    },
+    {
+      "type": "paragraph",
+      "text": "GapATR <= -1.0"
+    },
+    {
+      "type": "paragraph",
+      "text": "ShockATR <= -1.5"
+    },
+    {
+      "type": "paragraph",
+      "text": "RVOL20 >= 1.5"
+    },
+    {
+      "type": "paragraph",
+      "text": "CLV <= 0.35"
+    },
+    {
+      "type": "paragraph",
+      "text": "setup_type = EP, direction = SHORT"
+    },
+    {
+      "type": "paragraph",
+      "text": "EP lifecycle"
+    },
+    {
+      "type": "paragraph",
+      "text": "EP begins directly at TRIGGERED on the event session."
+    },
+    {
+      "type": "paragraph",
+      "text": "Store event high, event low, event midpoint, event close, and prior-close gap reference."
+    },
+    {
+      "type": "paragraph",
+      "text": "Long EP FAILED if Close < event low within the next 5 sessions."
+    },
+    {
+      "type": "paragraph",
+      "text": "Short EP mirrors the rule."
+    },
+    {
+      "type": "paragraph",
+      "text": "If no failure after 5 complete sessions, mark RESOLVED."
+    },
+    {
+      "type": "paragraph",
+      "text": "17. CONTRACTION"
+    },
+    {
+      "type": "paragraph",
+      "text": "Core formulas"
+    },
+    {
+      "type": "paragraph",
+      "text": "CRn = (max(Close over n sessions) - min(Close over n sessions)) / Close[t]"
+    },
+    {
+      "type": "paragraph",
+      "text": "Compute CR20, CR10, CR5"
+    },
+    {
+      "type": "paragraph",
+      "text": "R10_20 = CR10 / CR20"
+    },
+    {
+      "type": "paragraph",
+      "text": "R5_10 = CR5 / CR10"
+    },
+    {
+      "type": "paragraph",
+      "text": "TR5 = mean(TrueRange[t-4:t])"
+    },
+    {
+      "type": "paragraph",
+      "text": "TR20 = mean(TrueRange[t-19:t])"
+    },
+    {
+      "type": "paragraph",
+      "text": "TRCompression = TR5 / TR20"
+    },
+    {
+      "type": "paragraph",
+      "text": "Core definition"
+    },
+    {
+      "type": "paragraph",
+      "text": "C1 CR10 / CR20 <= 0.75"
+    },
+    {
+      "type": "paragraph",
+      "text": "C2 CR5 / CR10 <= 0.75"
+    },
+    {
+      "type": "paragraph",
+      "text": "C3 TR5 / TR20 <= 0.80"
+    },
+    {
+      "type": "paragraph",
+      "text": "C4 CR20 > 0"
+    },
+    {
+      "type": "paragraph",
+      "text": "Require all core conditions."
+    },
+    {
+      "type": "paragraph",
+      "text": "Volume dry-up"
+    },
+    {
+      "type": "paragraph",
+      "text": "VolumeDryRatio = MedianVolume5 / MedianVolume20"
+    },
+    {
+      "type": "paragraph",
+      "text": "Supporting evidence only: volume_dryup = VolumeDryRatio <= 0.80. It does not veto contraction."
+    },
+    {
+      "type": "paragraph",
+      "text": "Objective contraction reference"
+    },
+    {
+      "type": "paragraph",
+      "text": "Upper10 = second-highest High over last 10 sessions"
+    },
+    {
+      "type": "paragraph",
+      "text": "Lower10 = second-lowest Low over last 10 sessions"
+    },
+    {
+      "type": "paragraph",
+      "text": "Breakout trigger must use yesterday's frozen Upper10/Lower10, never today's dynamically updated boundary."
+    },
+    {
+      "type": "paragraph",
+      "text": "Lifecycle"
+    },
+    {
+      "type": "paragraph",
+      "text": "FORMING: core contraction passes and DistancePivotATR > 0.50"
+    },
+    {
+      "type": "paragraph",
+      "text": "NEAR_TRIGGER LONG: 0 < (Upper10 - Close)/ATR14 <= 0.50"
+    },
+    {
+      "type": "paragraph",
+      "text": "TRIGGERED LONG: Close[t] > Upper10[t-1] + 0.10 * ATR14[t-1]"
+    },
+    {
+      "type": "paragraph",
+      "text": "FAILED pre-trigger: TR5/TR20 > 1.10 OR Close < Lower10 - 0.25 ATR"
+    },
+    {
+      "type": "paragraph",
+      "text": "FAILED post-trigger within 5 sessions: Close < TriggerLevel - 0.50 * ATR_at_trigger"
+    },
+    {
+      "type": "paragraph",
+      "text": "RESOLVED: 5 sessions after trigger without failure"
+    },
+    {
+      "type": "paragraph",
+      "text": "STALE: active > 15 sessions without triggering"
+    },
+    {
+      "type": "paragraph",
+      "text": "VCP decision. Do not detect sequential VCP legs in V1. That would require a hidden pivot/swing algorithm and would reintroduce subjective chart artistry."
+    },
+    {
+      "type": "paragraph",
+      "text": "18. TREND_PULLBACK"
+    },
+    {
+      "type": "paragraph",
+      "text": "One family, three possible references: EMA10, SMA20, SMA50."
+    },
+    {
+      "type": "paragraph",
+      "text": "Structural compatibility"
+    },
+    {
+      "type": "paragraph",
+      "text": "Long pullback requires structure == UPTREND"
+    },
+    {
+      "type": "paragraph",
+      "text": "Short pullback requires structure == DECLINE"
+    },
+    {
+      "type": "paragraph",
+      "text": "Do not duplicate structure slopes or MA-order rules inside the setup engine."
+    },
+    {
+      "type": "paragraph",
+      "text": "Distance and approach formulas"
+    },
+    {
+      "type": "paragraph",
+      "text": "DistanceMA_ATR = (Close - MA) / ATR14"
+    },
+    {
+      "type": "paragraph",
+      "text": "Long approach condition: max(DistanceMA_ATR over prior 5 sessions) >= +1.0"
+    },
+    {
+      "type": "paragraph",
+      "text": "Short approach condition: min(DistanceMA_ATR over prior 5 sessions) <= -1.0"
+    },
+    {
+      "type": "paragraph",
+      "text": "Long pullback lifecycle bands"
+    },
+    {
+      "type": "paragraph",
+      "text": "FORMING: +0.75 < DistanceMA_ATR <= +1.50"
+    },
+    {
+      "type": "paragraph",
+      "text": "NEAR_TRIGGER: +0.25 < DistanceMA_ATR <= +0.75"
+    },
+    {
+      "type": "paragraph",
+      "text": "TRIGGERED: -0.50 <= DistanceMA_ATR <= +0.25"
+    },
+    {
+      "type": "paragraph",
+      "text": "If multiple MAs qualify, choose the nearest MA as reference_ma and store all qualifying candidate_references."
+    },
+    {
+      "type": "paragraph",
+      "text": "Pullback quality metrics such as volume contraction, TR contraction, down-day count, CLV, distance from recent high, and reclaim flags are supporting evidence only."
+    },
+    {
+      "type": "paragraph",
+      "text": "A normal undercut can still be a valid pullback; that is why the trigger zone extends to -0.50 ATR."
+    },
+    {
+      "type": "paragraph",
+      "text": "Failure / resolution / staleness"
+    },
+    {
+      "type": "paragraph",
+      "text": "FAILED if DistanceMA_ATR < -0.75 for 2 consecutive sessions"
+    },
+    {
+      "type": "paragraph",
+      "text": "OR immediately if structure becomes DETERIORATING or DECLINE."
+    },
+    {
+      "type": "paragraph",
+      "text": "RESOLVED after trigger if DistanceMA_ATR >= +1.0 before failure."
+    },
+    {
+      "type": "paragraph",
+      "text": "STALE if pre-trigger instance lasts >10 sessions without entering trigger zone"
+    },
+    {
+      "type": "paragraph",
+      "text": "OR price moves back above +1.50 ATR before ever triggering."
+    },
+    {
+      "type": "paragraph",
+      "text": "19. RANGE / BASE"
+    },
+    {
+      "type": "paragraph",
+      "text": "Canonical V1 window: 20 sessions. Do not scan multiple overlapping 15/20/30/40/60-day range families."
+    },
+    {
+      "type": "paragraph",
+      "text": "Robust boundaries"
+    },
+    {
+      "type": "paragraph",
+      "text": "Upper20 = second-highest High over last 20 sessions"
+    },
+    {
+      "type": "paragraph",
+      "text": "Lower20 = second-lowest Low over last 20 sessions"
+    },
+    {
+      "type": "paragraph",
+      "text": "Range geometry"
+    },
+    {
+      "type": "paragraph",
+      "text": "RangeDepthPct = (Upper20 - Lower20) / ((Upper20 + Lower20)/2)"
+    },
+    {
+      "type": "paragraph",
+      "text": "RangeDepthATR = (Upper20 - Lower20) / median(ATR14 over last 20 sessions)"
+    },
+    {
+      "type": "paragraph",
+      "text": "Efficiency20 = abs(Close[t] - Close[t-19]) / (Upper20 - Lower20)"
+    },
+    {
+      "type": "paragraph",
+      "text": "SMA20Drift = abs(SMA20[t] - SMA20[t-10]) / median(ATR14[t-9:t])"
+    },
+    {
+      "type": "paragraph",
+      "text": "RANGE definition"
+    },
+    {
+      "type": "paragraph",
+      "text": "RangeDepthATR <= 6.0"
+    },
+    {
+      "type": "paragraph",
+      "text": "RangeDepthPct <= 25%"
+    },
+    {
+      "type": "paragraph",
+      "text": "Efficiency20 <= 0.50"
+    },
+    {
+      "type": "paragraph",
+      "text": "SMA20Drift <= 0.50"
+    },
+    {
+      "type": "paragraph",
+      "text": "Require all conditions."
+    },
+    {
+      "type": "paragraph",
+      "text": "Lifecycle"
+    },
+    {
+      "type": "paragraph",
+      "text": "FORMING: range qualifies and price is >0.50 ATR from both boundaries"
+    },
+    {
+      "type": "paragraph",
+      "text": "NEAR_TRIGGER LONG: 0 < (Upper20 - Close)/ATR14 <= 0.50"
+    },
+    {
+      "type": "paragraph",
+      "text": "NEAR_TRIGGER SHORT: 0 < (Close - Lower20)/ATR14 <= 0.50"
+    },
+    {
+      "type": "paragraph",
+      "text": "TRIGGERED LONG: Close[t] > Upper20[t-1] + 0.10 * ATR14[t-1]"
+    },
+    {
+      "type": "paragraph",
+      "text": "TRIGGERED SHORT: Close[t] < Lower20[t-1] - 0.10 * ATR14[t-1]"
+    },
+    {
+      "type": "paragraph",
+      "text": "FAILED LONG within 3 sessions: Close < TriggerUpper - 0.25 * ATR_at_trigger"
+    },
+    {
+      "type": "paragraph",
+      "text": "FAILED SHORT: symmetric"
+    },
+    {
+      "type": "paragraph",
+      "text": "RESOLVED: 5 sessions after trigger without failure"
+    },
+    {
+      "type": "paragraph",
+      "text": "STALE: pre-trigger age >60 sessions OR boundaries shift by >1 ATR from setup inception"
+    },
+    {
+      "type": "paragraph",
+      "text": "Do not require breakout volume; record it as evidence."
+    },
+    {
+      "type": "paragraph",
+      "text": "Use closing confirmation rather than intraday high/low alone."
+    },
+    {
+      "type": "paragraph",
+      "text": "Second-highest/second-lowest boundaries reduce one-wick distortion while remaining fully deterministic."
+    },
+    {
+      "type": "paragraph",
+      "text": "20. Reclaim event flags"
+    },
+    {
+      "type": "paragraph",
+      "text": "Example SMA20 reclaim flag:"
+    },
+    {
+      "type": "paragraph",
+      "text": "Close[t-1] < SMA20[t-1] AND Close[t] > SMA20[t]"
+    },
+    {
+      "type": "paragraph",
+      "text": "Optional strengthening evidence: Low[t] < SMA20[t] AND CLV[t] > 0.60"
+    },
+    {
+      "type": "paragraph",
+      "text": "Use as context/evidence, not as setup_type. The same pattern applies to EMA10 and SMA50."
+    },
+    {
+      "type": "paragraph",
+      "text": "21. Setup compatibility matrix"
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          "Setup",
+          "NEUTRAL",
+          "EMERGING",
+          "UPTREND",
+          "DETERIORATING",
+          "DECLINE"
+        ],
+        [
+          "EP Long",
+          "Yes",
+          "Yes",
+          "Yes",
+          "Yes",
+          "Yes"
+        ],
+        [
+          "EP Short",
+          "Yes",
+          "Yes",
+          "Yes",
+          "Yes",
+          "Yes"
+        ],
+        [
+          "CONTRACTION",
+          "Yes",
+          "Yes",
+          "Yes",
+          "Yes",
+          "Yes"
+        ],
+        [
+          "TREND_PULLBACK Long",
+          "No",
+          "No",
+          "Required",
+          "No",
+          "No"
+        ],
+        [
+          "TREND_PULLBACK Short",
+          "No",
+          "No",
+          "No",
+          "No",
+          "Required"
+        ],
+        [
+          "RANGE",
+          "Yes",
+          "Yes",
+          "Yes",
+          "Yes",
+          "Yes"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "22. Relationship with other Aperture layers"
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          "Layer",
+          "Setup engine behavior"
+        ],
+        [
+          "Leadership / RS",
+          "Ignore entirely. Low-RS stocks can objectively form setups."
+        ],
+        [
+          "Group strength",
+          "Ignore entirely."
+        ],
+        [
+          "Extension",
+          "Record setup even when extension is EXTREME."
+        ],
+        [
+          "Market regime",
+          "Record setup even in RED regime."
+        ],
+        [
+          "Earnings proximity",
+          "Ignore for ordinary setups; policy handles lockout."
+        ],
+        [
+          "Actionability",
+          "Never decided by Setup Engine."
+        ],
+        [
+          "Position sizing / risk",
+          "Completely downstream."
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "23. No setup confidence score"
+    },
+    {
+      "type": "paragraph",
+      "text": "Do not emit 'VCP confidence 82%' or similar."
+    },
+    {
+      "type": "paragraph",
+      "text": "Expose passed rules, failed rules, numerical threshold margins, lifecycle, age, and contradictions."
+    },
+    {
+      "type": "paragraph",
+      "text": "A probability should only exist later if it is explicitly calibrated to a defined future event; it should not be disguised as setup classification."
+    },
+    {
+      "type": "paragraph",
+      "text": "24. Setup evidence schema"
+    },
+    {
+      "type": "paragraph",
+      "text": "Store at minimum:"
+    },
+    {
+      "type": "paragraph",
+      "text": "setup_id, symbol, session, setup_type, direction, lifecycle,"
+    },
+    {
+      "type": "paragraph",
+      "text": "first_detected_date, lifecycle_entered_date, age_sessions,"
+    },
+    {
+      "type": "paragraph",
+      "text": "reference_type, reference_level, distance_to_reference_atr,"
+    },
+    {
+      "type": "paragraph",
+      "text": "trigger_level, invalidation_level,"
+    },
+    {
+      "type": "paragraph",
+      "text": "exact setup-specific measurements, passed/failed core rules, supporting evidence, contradictions,"
+    },
+    {
+      "type": "paragraph",
+      "text": "structure_state_ref, transition from/to/reason,"
+    },
+    {
+      "type": "paragraph",
+      "text": "data timestamp/source/revision, feature_version, setup_engine_version, threshold_version."
+    },
+    {
+      "type": "paragraph",
+      "text": "25. Setup transition history"
+    },
+    {
+      "type": "paragraph",
+      "text": "Separate transition table:"
+    },
+    {
+      "type": "paragraph",
+      "text": "setup_id"
+    },
+    {
+      "type": "paragraph",
+      "text": "symbol"
+    },
+    {
+      "type": "paragraph",
+      "text": "transition_date"
+    },
+    {
+      "type": "paragraph",
+      "text": "from_lifecycle"
+    },
+    {
+      "type": "paragraph",
+      "text": "to_lifecycle"
+    },
+    {
+      "type": "paragraph",
+      "text": "reason"
+    },
+    {
+      "type": "paragraph",
+      "text": "reference_level"
+    },
+    {
+      "type": "paragraph",
+      "text": "engine_version"
+    },
+    {
+      "type": "paragraph",
+      "text": "\n"
+    },
+    {
+      "type": "paragraph",
+      "text": "Part III - Integrated Aperture Design"
+    },
+    {
+      "type": "paragraph",
+      "text": "26. Final descriptive grammar"
+    },
+    {
+      "type": "paragraph",
+      "text": "The key outcome of the design work is not just the formulas; it is the separation of descriptive dimensions. Aperture should be able to describe one stock with several independent facts without forcing them into one composite label."
+    },
+    {
+      "type": "paragraph",
+      "text": "Example 1:"
+    },
+    {
+      "type": "paragraph",
+      "text": "Structure     UPTREND"
+    },
+    {
+      "type": "paragraph",
+      "text": "Setup         TREND_PULLBACK / TRIGGERED"
+    },
+    {
+      "type": "paragraph",
+      "text": "Reference     SMA20"
+    },
+    {
+      "type": "paragraph",
+      "text": "Extension     NORMAL"
+    },
+    {
+      "type": "paragraph",
+      "text": "RS            94"
+    },
+    {
+      "type": "paragraph",
+      "text": "Group         LEADING"
+    },
+    {
+      "type": "paragraph",
+      "text": "Regime        GREEN"
+    },
+    {
+      "type": "paragraph",
+      "text": "Earnings      +18 sessions"
+    },
+    {
+      "type": "paragraph",
+      "text": "Action        ACT"
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "Example 2:"
+    },
+    {
+      "type": "paragraph",
+      "text": "Structure     EMERGING"
+    },
+    {
+      "type": "paragraph",
+      "text": "Setup         EP / TRIGGERED"
+    },
+    {
+      "type": "paragraph",
+      "text": "EP Context    TRANSITION"
+    },
+    {
+      "type": "paragraph",
+      "text": "Extension     EXTREME"
+    },
+    {
+      "type": "paragraph",
+      "text": "RS            91"
+    },
+    {
+      "type": "paragraph",
+      "text": "Regime        YELLOW"
+    },
+    {
+      "type": "paragraph",
+      "text": "Action        WATCH"
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "Example 3:"
+    },
+    {
+      "type": "paragraph",
+      "text": "Structure     UPTREND"
+    },
+    {
+      "type": "paragraph",
+      "text": "Setups        RANGE / NEAR_TRIGGER; CONTRACTION / NEAR_TRIGGER"
+    },
+    {
+      "type": "paragraph",
+      "text": "Extension     NORMAL"
+    },
+    {
+      "type": "paragraph",
+      "text": "Action        determined downstream"
+    },
+    {
+      "type": "paragraph",
+      "text": "27. Hard definitions vs configurable parameters"
+    },
+    {
+      "type": "paragraph",
+      "text": "Hard definitions: feature equations, state/setup semantics, lifecycle semantics, use of frozen prior-session trigger references, separation of layers, monotonic setup lifecycle, versioned historical evidence."
+    },
+    {
+      "type": "paragraph",
+      "text": "Configurable V1 parameters: ATR buffers, persistence-day counts, EP thresholds, contraction ratios, pullback zones, range depth limits, breakout buffers, failure windows, and staleness windows. These must live in explicit versioned parameter files rather than being scattered through code."
+    },
+    {
+      "type": "paragraph",
+      "text": "28. Historical reproducibility requirements"
+    },
+    {
+      "type": "paragraph",
+      "text": "Persist daily state/setup snapshots rather than reconstructing only from current code."
+    },
+    {
+      "type": "paragraph",
+      "text": "Store raw-data timestamp/source and adjustment/corporate-action revision where available."
+    },
+    {
+      "type": "paragraph",
+      "text": "Version feature formulas, state engine, setup engine, and threshold sets independently."
+    },
+    {
+      "type": "paragraph",
+      "text": "Store previous state and persistence counters because Structure is path-dependent."
+    },
+    {
+      "type": "paragraph",
+      "text": "Store frozen reference levels used for setup triggers so later rolling-window changes do not alter history."
+    },
+    {
+      "type": "paragraph",
+      "text": "Keep policy/action versions outside Structure/Setup evidence."
+    },
+    {
+      "type": "paragraph",
+      "text": "29. Testing strategy"
+    },
+    {
+      "type": "paragraph",
+      "text": "Structure synthetic fixtures"
+    },
+    {
+      "type": "paragraph",
+      "text": "Flat base -> NEUTRAL."
+    },
+    {
+      "type": "paragraph",
+      "text": "Gradual emergence -> NEUTRAL -> EMERGING -> UPTREND."
+    },
+    {
+      "type": "paragraph",
+      "text": "Clean sustained advance -> UPTREND retained."
+    },
+    {
+      "type": "paragraph",
+      "text": "Normal pullback / brief SMA20 undercut -> remain UPTREND."
+    },
+    {
+      "type": "paragraph",
+      "text": "Extended advance -> remain UPTREND; extension changes externally."
+    },
+    {
+      "type": "paragraph",
+      "text": "Slow flattening -> UPTREND -> NEUTRAL."
+    },
+    {
+      "type": "paragraph",
+      "text": "Genuine rollover -> UPTREND -> DETERIORATING -> DECLINE."
+    },
+    {
+      "type": "paragraph",
+      "text": "False breakdown and reclaim -> state retained or rapid recovery according to hysteresis."
+    },
+    {
+      "type": "paragraph",
+      "text": "Large positive gap -> immediate EMERGING, not immediate UPTREND."
+    },
+    {
+      "type": "paragraph",
+      "text": "Crash gap -> immediate DETERIORATING, not immediate DECLINE."
+    },
+    {
+      "type": "paragraph",
+      "text": "Noisy SMA20/SMA50 oscillation -> minimal state flipping."
+    },
+    {
+      "type": "paragraph",
+      "text": "Setup synthetic fixtures"
+    },
+    {
+      "type": "paragraph",
+      "text": "EP: ordinary gap; valid long EP; huge gap with weak close; huge gap without volume; valid bearish EP; fail below event low; survive to RESOLVED."
+    },
+    {
+      "type": "paragraph",
+      "text": "CONTRACTION: progressive 20->10->5 compression; range compression with TR expansion; one-day tightness; re-expansion failure; near-trigger; breakout; resolved breakout."
+    },
+    {
+      "type": "paragraph",
+      "text": "TREND_PULLBACK: EMA10/SMA20/SMA50 approaches; stock living under MA; trigger-zone touch; structure deterioration; rebound to RESOLVED."
+    },
+    {
+      "type": "paragraph",
+      "text": "RANGE: clean horizontal range; directional trend rejected by efficiency; anomalous wick handled by trimmed extrema; near trigger; breakout; failed breakout; breakdown."
+    },
+    {
+      "type": "paragraph",
+      "text": "Boundary tests"
+    },
+    {
+      "type": "paragraph",
+      "text": "Every major threshold must be tested at threshold-epsilon, threshold, and threshold+epsilon. Also test missing bars, newly listed stocks, zero volume, High=Low, bad OHLC relationships, duplicate sessions, splits, trading halts, null ATR, and corporate-action revisions."
+    },
+    {
+      "type": "paragraph",
+      "text": "30. Calibration philosophy"
+    },
+    {
+      "type": "paragraph",
+      "text": "Start with the explicit V1 priors in this document; do not optimize immediately."
+    },
+    {
+      "type": "paragraph",
+      "text": "Inspect broad point-in-time distributions of every core measurement across years, sectors, and volatility regimes."
+    },
+    {
+      "type": "paragraph",
+      "text": "Randomly inspect positives, near misses, and negatives; do not calibrate only on famous winners."
+    },
+    {
+      "type": "paragraph",
+      "text": "Include failed setups and failed leaders to avoid hindsight bias."
+    },
+    {
+      "type": "paragraph",
+      "text": "Measure state duration, setup frequency, stale rate, failure rate, overlap, transition churn, and one-day reversals."
+    },
+    {
+      "type": "paragraph",
+      "text": "Use walk-forward validation across bull, bear, crisis, quiet, and speculative regimes."
+    },
+    {
+      "type": "paragraph",
+      "text": "Prefer round, explainable thresholds over numerically optimized values."
+    },
+    {
+      "type": "paragraph",
+      "text": "Use future returns only after semantics stabilize and only as diagnostics, not as the definition of the setup or state."
+    },
+    {
+      "type": "paragraph",
+      "text": "31. Deliberately excluded from Setup V1"
+    },
+    {
+      "type": "paragraph",
+      "text": "Cup-and-handle, double bottom, saucer, ascending triangle, wedge, head-and-shoulders."
+    },
+    {
+      "type": "paragraph",
+      "text": "Flags/pennants as independent families; these are usually contractions inside trends."
+    },
+    {
+      "type": "paragraph",
+      "text": "Textbook sequential VCP leg recognition."
+    },
+    {
+      "type": "paragraph",
+      "text": "Pocket pivots."
+    },
+    {
+      "type": "paragraph",
+      "text": "Reclaim as its own setup family."
+    },
+    {
+      "type": "paragraph",
+      "text": "Inside day / NR7 as foundational setup types."
+    },
+    {
+      "type": "paragraph",
+      "text": "Bollinger squeeze and RSI/MACD-based setup definitions."
+    },
+    {
+      "type": "paragraph",
+      "text": "Fibonacci retracements."
+    },
+    {
+      "type": "paragraph",
+      "text": "Candlestick-pattern families."
+    },
+    {
+      "type": "paragraph",
+      "text": "RS, group strength, regime, earnings lockout, extension veto."
+    },
+    {
+      "type": "paragraph",
+      "text": "LLM or visual chart interpretation."
+    },
+    {
+      "type": "paragraph",
+      "text": "32. Final V1 parameters at a glance"
+    },
+    {
+      "type": "table",
+      "rows": [
+        [
+          "Component",
+          "Parameter",
+          "Initial V1"
+        ],
+        [
+          "Structure",
+          "Emerging persistence",
+          "2 sessions"
+        ],
+        [
+          "Structure",
+          "Uptrend/Decline persistence",
+          "3 sessions"
+        ],
+        [
+          "Structure",
+          "Lost retention to Neutral",
+          "5 sessions"
+        ],
+        [
+          "Structure",
+          "Shock transition",
+          "2 ATR from SMA50 plus directional conditions"
+        ],
+        [
+          "EP",
+          "GapPct",
+          ">= 4% absolute directional threshold"
+        ],
+        [
+          "EP",
+          "GapATR",
+          ">= 1.0 absolute directional threshold"
+        ],
+        [
+          "EP",
+          "ShockATR",
+          ">= 1.5 absolute directional threshold"
+        ],
+        [
+          "EP",
+          "RVOL",
+          ">= 1.5 vs prior 20-session median volume"
+        ],
+        [
+          "EP",
+          "CLV",
+          ">= .65 long / <= .35 short"
+        ],
+        [
+          "CONTRACTION",
+          "CR10/CR20",
+          "<= .75"
+        ],
+        [
+          "CONTRACTION",
+          "CR5/CR10",
+          "<= .75"
+        ],
+        [
+          "CONTRACTION",
+          "TR5/TR20",
+          "<= .80"
+        ],
+        [
+          "CONTRACTION",
+          "Near trigger",
+          "<= .50 ATR"
+        ],
+        [
+          "CONTRACTION",
+          "Breakout buffer",
+          ".10 ATR"
+        ],
+        [
+          "CONTRACTION",
+          "Stale",
+          "15 sessions"
+        ],
+        [
+          "PULLBACK",
+          "Prior excursion",
+          ">= 1.0 ATR from reference"
+        ],
+        [
+          "PULLBACK",
+          "Forming",
+          "+.75 to +1.50 ATR"
+        ],
+        [
+          "PULLBACK",
+          "Near trigger",
+          "+.25 to +.75 ATR"
+        ],
+        [
+          "PULLBACK",
+          "Triggered zone",
+          "-.50 to +.25 ATR"
+        ],
+        [
+          "PULLBACK",
+          "Distance failure",
+          "< -.75 ATR for 2 sessions"
+        ],
+        [
+          "PULLBACK",
+          "Stale",
+          "10 sessions"
+        ],
+        [
+          "RANGE",
+          "Window",
+          "20 sessions"
+        ],
+        [
+          "RANGE",
+          "Depth ATR cap",
+          "<= 6.0 ATR"
+        ],
+        [
+          "RANGE",
+          "Depth % cap",
+          "<= 25%"
+        ],
+        [
+          "RANGE",
+          "Efficiency",
+          "<= .50"
+        ],
+        [
+          "RANGE",
+          "SMA20 drift",
+          "<= .50 ATR / 10 sessions"
+        ],
+        [
+          "RANGE",
+          "Near boundary",
+          "<= .50 ATR"
+        ],
+        [
+          "RANGE",
+          "Breakout buffer",
+          ".10 ATR"
+        ],
+        [
+          "RANGE",
+          "Max pre-trigger age",
+          "60 sessions"
+        ]
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "33. Strongest final recommendation"
+    },
+    {
+      "type": "paragraph",
+      "text": "Ship this as V1 without adding more indicators, states, or chart-pattern families. The strength of the design is that each engine makes a narrow, auditable claim. The Structure Engine answers whether price is neutral, transitioning, or in an established trend. The Setup Engine answers whether one of four measurable configurations or events exists and where it is in its lifecycle. Everything that answers 'should I care?' or 'should I trade it?' remains downstream."
+    },
+    {
+      "type": "paragraph",
+      "text": "Recommended V1 Structure:"
+    },
+    {
+      "type": "paragraph",
+      "text": "NEUTRAL / EMERGING / UPTREND / DETERIORATING / DECLINE"
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "Recommended V1 Setups:"
+    },
+    {
+      "type": "paragraph",
+      "text": "EP / CONTRACTION / TREND_PULLBACK / RANGE"
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "Recommended lifecycle:"
+    },
+    {
+      "type": "paragraph",
+      "text": "FORMING / NEAR_TRIGGER / TRIGGERED / RESOLVED / FAILED / STALE"
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "paragraph",
+      "text": "Recommended philosophy:"
+    },
+    {
+      "type": "paragraph",
+      "text": "Simple measurable market behavior > mathematical imitation of subjective chart artistry."
+    },
+    {
+      "type": "paragraph",
+      "text": "Implementation handoff note"
+    },
+    {
+      "type": "paragraph",
+      "text": "Before coding, convert every configurable parameter above into versioned configuration constants and convert every state/setup predicate into pure deterministic functions with unit tests. Persist evidence and lifecycle/state transitions as first-class data, not just UI labels. That will allow Aperture to audit historical decisions and safely evolve thresholds later without rewriting history."
+    }
+  ]
+}

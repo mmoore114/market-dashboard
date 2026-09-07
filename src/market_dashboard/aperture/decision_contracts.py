@@ -5,13 +5,30 @@ from typing import Literal
 
 from pydantic import Field, field_validator, model_validator
 
-from market_dashboard.aperture.contracts import ContractModel, ExtensionState, UniverseMemberships
-from market_dashboard.aperture.rules import ApertureRules, ExtensionRules
-from market_dashboard.aperture.setup_contracts import Direction, Family, Status, SetupOutputV1
-from market_dashboard.aperture.structure_contracts import StructureEvidenceV1
-from market_dashboard.aperture.leadership_contracts import StrengthSourceV1, ResearchUniverseV1, LeadershipOutputV1, GroupEvidenceV1
-from market_dashboard.aperture.regime_contracts import RegimeOutputV1, State as RegimeState
+from market_dashboard.aperture.contracts import (
+    ContractModel,
+    ExtensionState,
+    UniverseMemberships,
+)
 from market_dashboard.aperture.decision_policy import RULES_FINGERPRINT
+from market_dashboard.aperture.leadership_contracts import (
+    GroupEvidenceV1,
+    LeadershipOutputV1,
+    ResearchUniverseV1,
+    StrengthSourceV1,
+)
+from market_dashboard.aperture.regime_contracts import RegimeOutputV1
+from market_dashboard.aperture.regime_contracts import State as RegimeState
+from market_dashboard.aperture.rules import ApertureRules, ExtensionRules
+from market_dashboard.aperture.setup_contracts import (
+    Direction,
+    Family,
+    SetupOutputV1,
+    Status,
+)
+from market_dashboard.aperture.setup_v2_contracts import SetupOutputV2
+from market_dashboard.aperture.structure_contracts import StructureEvidenceV1
+from market_dashboard.aperture.structure_v2 import StructureEvidenceV2
 from market_dashboard.data.security_identity import MarketDataSymbol
 
 
@@ -292,8 +309,8 @@ class DecisionInputV1(ContractModel):
     action_session: date
     completed_at: datetime
     universe: UniverseDecisionInputV1
-    structure: StructureEvidenceV1 | None
-    setups: SetupOutputV1 | None
+    structure: StructureEvidenceV1 | StructureEvidenceV2 | None
+    setups: SetupOutputV1 | SetupOutputV2 | None
     leadership: LeadershipOutputV1 | None
     regime: RegimeOutputV1 | None
     events: tuple[EventInputV1, ...] = ()
