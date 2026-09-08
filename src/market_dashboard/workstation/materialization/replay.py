@@ -55,6 +55,23 @@ def replay(plan, loaded, *, optimize_current=True, checkpoint_root=None):
     from market_dashboard.workstation.models import VersionsV1
 
     VersionsV1.model_validate(plan.versions.model_dump())
+    regime_engine, decision_engine, input_model = (
+        evaluate_regime,
+        evaluate_decision,
+        DecisionInputV1,
+    )
+    if plan.versions.decision_risk == "decision-risk-v2":
+        from market_dashboard.aperture.industry import (
+            evaluate_industry_decision,
+            evaluate_industry_regime,
+        )
+        from market_dashboard.aperture.industry_contracts import DecisionInputV2
+
+        regime_engine, decision_engine, input_model = (
+            evaluate_industry_regime,
+            evaluate_industry_decision,
+            DecisionInputV2,
+        )
     structure_adapter, setup_adapter, setup_engine = (
         evaluate_daily_structure,
         build_setup_inputs,
@@ -325,7 +342,7 @@ def replay(plan, loaded, *, optimize_current=True, checkpoint_root=None):
             if session == plan.as_of_session
             else None,
         )
-        regime = evaluate_regime(inp, calendar=calendar, previous=regime)
+        regime = regime_engine(inp, calendar=calendar, previous=regime)
     del contexts, closes, group_history, prepared_regime, inp, raw, strength, groups
     engine_rules = loaded["rules"]
     proposals = (
@@ -360,7 +377,7 @@ def replay(plan, loaded, *, optimize_current=True, checkpoint_root=None):
             setups = final_setups.pop(symbol)
             directions = sorted({"LONG"} | {d for s, d in proposals if s == symbol})
             for direction in directions:
-                inputs = DecisionInputV1(
+                inputs = input_model(
                     features=features_from_structure(
                         structure, source=source, calendar=calendar
                     ),
@@ -395,7 +412,7 @@ def replay(plan, loaded, *, optimize_current=True, checkpoint_root=None):
                     ),
                     rules=engine_rules,
                 )
-                output = evaluate_decision(
+                output = decision_engine(
                     inputs, calendar=calendar, validation_cache=validation_cache
                 )
                 validation_cache.objects = dict(shared_validation)

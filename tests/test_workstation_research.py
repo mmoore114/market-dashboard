@@ -226,3 +226,126 @@ def test_research_api_bounds_filters_members_and_search(snapshot):
     assert len(members["members"]) <= 2 and members["total"] == g["total_members"]
     assert client.get("/api/v2/research/symbols?limit=51").status_code == 422
     assert len(client.get("/api/v2/research/symbols?q=SIM&limit=2").json()) == 2
+
+
+def test_current_setup_is_stable_evaluated_and_direction_scoped():
+    from datetime import date
+    from types import SimpleNamespace as N
+
+    session = date(2026, 9, 4)
+
+    def candidate(identity, status="TRIGGERED", **changes):
+        fields = dict(  # noqa: C408 — readable mutable test fields
+            setup_id=identity,
+            family="RANGE",
+            direction="LONG",
+            status=status,
+            evaluated=True,
+            replay_required=False,
+            trigger=10,
+            invalidation=9,
+            local_errors=(),
+            unrelated_errors=(),
+            qualification="test",
+        )
+        return research.SetupReviewV1(**(fields | changes))
+
+    good = candidate("b")
+    tied = candidate("a")
+    active = [
+        good,
+        candidate("0", evaluated=False),
+        candidate("1", replay_required=True),
+        candidate("2", local_errors=("missing_data",)),
+        candidate("3", direction="SHORT"),
+        candidate("4", "FAILED"),
+        candidate("5", "STALE"),
+        candidate("6", "RESOLVED"),
+        candidate("7", "NEAR_TRIGGER"),
+        candidate("8", "FORMING"),
+        tied,
+    ]
+    engine = N(
+        inputs=N(session_date=session),
+        setups=[
+            N(instance=N(setup_id=s.setup_id), session_date=session) for s in active
+        ],
+        detections=[],
+        errors=(),
+    )
+    for items in (active, list(reversed(active))):
+        result = research.select_current_setup(engine, "LONG", session, items)
+        assert result.setup == tied
+        assert result.schema_version == "current-setup-display-v1"
+    engine.setups[-1].session_date = date(2026, 9, 3)
+    assert research.select_current_setup(engine, "LONG", session, active).setup == good
+    assert (
+        research.select_current_setup(engine, "LONG", date(2026, 9, 5), active).state
+        == "UNAVAILABLE"
+    )
+
+
+def test_current_setup_distinguishes_absence_from_unavailability():
+    from datetime import date
+    from types import SimpleNamespace as N
+
+    session = date(2026, 9, 4)
+    engine = N(
+        inputs=N(session_date=session),
+        setups=[],
+        errors=(),
+        detections=[
+            N(family=f, direction="LONG", error=None)
+            for f in ("EP", "CONTRACTION", "TREND_PULLBACK", "RANGE")
+        ],
+    )
+    assert research.select_current_setup(engine, "LONG", session, []).state == "NONE"
+    engine.detections[0].error = "corporate_action_quarantine"
+    assert (
+        research.select_current_setup(engine, "LONG", session, []).state
+        == "UNAVAILABLE"
+    )
+    assert (
+        research.select_current_setup(None, "LONG", session, []).state == "UNAVAILABLE"
+    )
+    engine.detections[0].error = None
+    engine.errors = ("unattributed_failure",)
+    assert (
+        research.select_current_setup(engine, "LONG", session, []).state
+        == "UNAVAILABLE"
+    )
+    engine.errors = ()
+    engine.detections.pop()
+    assert (
+        research.select_current_setup(engine, "LONG", session, []).state
+        == "UNAVAILABLE"
+    )
+
+
+def test_display_projection_does_not_rewrite_snapshot_policy_or_decisions(snapshot):
+    before = snapshot.logical_fingerprint
+    decisions = tuple(r.output.decision for r in snapshot.records)
+    for record in snapshot.records:
+        row = research.research_row(record)
+        assert row.current_setup == research.review(record.output).current_setup
+    assert snapshot.logical_fingerprint == before
+    assert tuple(r.output.decision for r in snapshot.records) == decisions
+
+
+def test_tape_filters_any_exact_membership_and_selected_direction(snapshot):
+    store = SnapshotStore(fixture=snapshot)
+    theme = next(g for g in snapshot.groups if g.group_type == "THEME")
+    expected = {m.market_data_symbol for m in theme.members}
+    result = research.tape_view(
+        snapshot, store.meta(), group=theme.group_id, direction="LONG", page_size=100
+    )
+    assert result.rows
+    assert all(r.symbol in expected and r.direction == "LONG" for r in result.rows)
+    assert research.tape_view(snapshot, store.meta(), direction="SHORT").total == 0
+
+
+def test_current_setup_filter_matches_displayed_family(snapshot):
+    store = SnapshotStore(fixture=snapshot)
+    for family in ("EP", "RANGE", "CONTRACTION", "TREND_PULLBACK"):
+        result = research.tape_view(snapshot, store.meta(), setup=family)
+        assert all(r.current_setup.setup.family == family for r in result.rows)

@@ -14,6 +14,10 @@ from market_dashboard.aperture.decision_contracts import (
 )
 from market_dashboard.aperture.decision_policy import validate_rules
 from market_dashboard.aperture.decision_risk import regime_gate
+from market_dashboard.aperture.industry_contracts import (
+    DecisionRiskOutputV2,
+    RegimeOutputV2,
+)
 from market_dashboard.aperture.leadership import fingerprint
 from market_dashboard.aperture.leadership_contracts import (
     GroupEvidenceV1,
@@ -59,6 +63,8 @@ class CompactRecordV2(ContractModel):
 from .legacy_registry import (
     ACTIVATION_REGISTRY_FINGERPRINT,
     ACTIVATION_TYPE_CODES,
+    COVERAGE_REGISTRY_FINGERPRINT,
+    COVERAGE_TYPE_CODES,
     CURRENT_GROUP_REGISTRY_FINGERPRINT,
     CURRENT_GROUP_TYPE_CODES,
     LEGACY_REGISTRY_FINGERPRINT,
@@ -71,6 +77,7 @@ from .legacy_registry import (
 class SharedContextV2(ContractModel):
     registry_fingerprint: Literal[
         REGISTRY_FINGERPRINT,
+        COVERAGE_REGISTRY_FINGERPRINT,
         MEMBERSHIP_REGISTRY_FINGERPRINT,
         ACTIVATION_REGISTRY_FINGERPRINT,
         CURRENT_GROUP_REGISTRY_FINGERPRINT,
@@ -131,7 +138,9 @@ class WorkstationSnapshotV2(ContractModel):
     @model_validator(mode="after")
     def integrity(self):
         retained_types = (
-            MEMBERSHIP_TYPE_CODES
+            COVERAGE_TYPE_CODES
+            if self.shared.registry_fingerprint == COVERAGE_REGISTRY_FINGERPRINT
+            else MEMBERSHIP_TYPE_CODES
             if self.shared.registry_fingerprint == MEMBERSHIP_REGISTRY_FINGERPRINT
             else CURRENT_GROUP_TYPE_CODES
             if self.shared.registry_fingerprint == CURRENT_GROUP_REGISTRY_FINGERPRINT
@@ -173,7 +182,12 @@ class WorkstationSnapshotV2(ContractModel):
             if c.leadership_ref
             else None
         )
-        regime = reader.get(c.regime_ref, RegimeOutputV1)
+        regime = reader.get(
+            c.regime_ref,
+            RegimeOutputV2
+            if c.versions.regime == "market-regime-v2"
+            else RegimeOutputV1,
+        )
         rules = reader.get(c.rules_ref, ApertureRules)
         groups = tuple(reader.get(ref, GroupEvidenceV1) for ref in c.group_refs)
         member_groups = {}
@@ -323,7 +337,17 @@ class WorkstationSnapshotV2(ContractModel):
             MarketDataSymbol(record.symbol)
             if record.context_ref != self.context_id:
                 raise ValueError("Record shared context mismatch")
-            out = reader.get(record.output_ref, DecisionRiskOutputV1)
+            out = reader.get(
+                record.output_ref,
+                DecisionRiskOutputV2
+                if c.versions.decision_risk == "decision-risk-v2"
+                else DecisionRiskOutputV1,
+            )
+            if (out.engine_version, out.rules_fingerprint) != (
+                c.versions.decision_risk,
+                c.versions.decision_fingerprint,
+            ):
+                raise ValueError("Decision policy version/fingerprint mismatch")
             i, f = out.inputs, out.inputs.features
             symbol_context = (
                 f,
@@ -432,13 +456,25 @@ class WorkstationSnapshotV2(ContractModel):
                     or context != i.structure.state
                 ):
                     raise ValueError("Strength Structure context mismatch")
-            for group in (out.group.sub_industry, *out.group.themes):
+            for group in (
+                getattr(out.group, "industry", None),
+                out.group.sub_industry,
+                *out.group.themes,
+            ):
                 if group is not None and group not in groups:
                     raise ValueError("Group gate reference mismatch")
             memberships = member_groups.get(f.symbol, ())
             sub_industries = tuple(
                 g for g in memberships if g.group_type == "SUB_INDUSTRY"
             )
+            if isinstance(out, DecisionRiskOutputV2):
+                industries = [g for g in memberships if g.group_type == "INDUSTRY"]
+                if out.group.industry != (
+                    industries[0] if len(industries) == 1 else None
+                ):
+                    raise ValueError(
+                        "Industry gate contradicts exact symbol membership"
+                    )
             expected_sub = sub_industries[0] if len(sub_industries) == 1 else None
             if out.group.sub_industry != expected_sub or out.group.themes != tuple(
                 g for g in memberships if g.group_type == "THEME"
@@ -483,7 +519,9 @@ class WorkstationSnapshotV2(ContractModel):
             ):
                 raise ValueError("Regime gate reference mismatch")
             if expected_regime_gate is None:
-                expected_regime_gate = regime_gate(i)
+                expected_regime_gate = regime_gate(
+                    i, rules_fingerprint=c.versions.regime_fingerprint
+                )
             if out.regime != expected_regime_gate:
                 raise ValueError("Regime gate contradicts referenced shared evidence")
             counts[out.decision.state] += 1

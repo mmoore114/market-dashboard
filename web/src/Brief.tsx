@@ -14,7 +14,7 @@ export function Brief({
 }) {
   const query = useQuery({
     queryKey: ["brief"],
-    queryFn: () => get<Schemas["BriefV1"]>("/brief"),
+    queryFn: () => get<Schemas["BriefV1"]>("/research/brief", undefined, "v2"),
   });
   const health = useQuery({
     queryKey: ["research-health"],
@@ -135,13 +135,13 @@ export function Brief({
       </section>
       <div className="group-grid">
         {[
-          ["Leading sub-industries", d.leading_groups],
+          ["Leading industries", d.leading_groups],
           ["Lower rotation than composite", d.weakening_groups],
         ].map(([title, groups]) => (
           <section className="panel" key={title as string}>
             <h2>{title as string}</h2>
             <p className="muted">
-              Within sub-industries · rotation spread is cross-sectional, not
+              Within industries · rotation spread is cross-sectional, not
               historical movement
             </p>
             <ul className="group-list">

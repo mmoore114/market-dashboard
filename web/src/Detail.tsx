@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { get, type Schemas } from "./api";
 import { Chip, ErrorPanel, StatePanel, money, number, Reasons } from "./ui";
-import { categoryNames, groupName, label, type Direction } from "./research";
+import { categoryNames, label, type Direction } from "./research";
 const tabs = [
   "Overview",
   "Setups",
@@ -23,6 +23,7 @@ export function Detail({
   const dialog = useRef<HTMLDialogElement>(null);
   const [tab, setTab] = useState<(typeof tabs)[number]>("Overview");
   const [copied, setCopied] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
   const [direction, setDirection] = useState<Direction>(initialDirection);
   const query = useQuery({
     queryKey: ["symbol", symbol],
@@ -107,7 +108,10 @@ export function Detail({
                   Evidence direction
                   <select
                     value={direction}
-                    onChange={(e) => setDirection(e.target.value as Direction)}
+                    onChange={(e) => {
+                      setDirection(e.target.value as Direction);
+                      setHistoryPage(1);
+                    }}
                   >
                     {query.data.records.map((r) => (
                       <option key={r.output.decision.direction}>
@@ -121,7 +125,12 @@ export function Detail({
             </div>
             <div className="detail-summary">
               <div>
-                <small>Stored decision</small>
+                <small>
+                  Stored decision ·{" "}
+                  {review.policy_version === "decision-risk-v2"
+                    ? "industry V2"
+                    : "sub-industry V1"}
+                </small>
                 <Chip value={o.decision.state} />
               </div>
               <div>
@@ -161,6 +170,16 @@ export function Detail({
                 <>
                   <div className="overview-context">
                     <p>
+                      <b>Current setup: </b>
+                      {review.current_setup.setup
+                        ? label(review.current_setup.setup.family) +
+                          " · " +
+                          label(review.current_setup.setup.status)
+                        : review.current_setup.state === "NONE"
+                          ? "No current setup"
+                          : "Evaluation unavailable"}
+                    </p>
+                    <p>
                       <b>{review.strength_summary}</b>
                     </p>
                     <p>
@@ -169,21 +188,19 @@ export function Detail({
                         ? "Eligible"
                         : "Not eligible"}{" "}
                       ·{" "}
-                      {o.group.sub_industry
-                        ? groupName(o.group.sub_industry.group_id)
-                        : "Sub-industry unassigned"}
+                      {review.industry
+                        ? `${review.industry.name} · rank ${review.industry.rank ?? "unavailable"} / ${review.industry.eligible_count}`
+                        : "Industry unavailable"}
                     </p>
-                    <p>
-                      <b>Active setup: </b>
-                      {review.active_setups.length
-                        ? review.active_setups
-                            .map(
-                              (s) => label(s.family) + " · " + label(s.status),
-                            )
-                            .join("; ")
-                        : "None in this direction"}
-                      .
-                    </p>
+                    {review.blockers.length ? (
+                      <button onClick={() => setTab("Decision evidence")}>
+                        Next: review primary blocker →
+                      </button>
+                    ) : (
+                      <button onClick={() => void copy()}>
+                        Next: copy symbol for Deepvue review →
+                      </button>
+                    )}
                   </div>
                   <h3>Primary blockers</h3>
                   <ul className="blocker-list">
@@ -218,6 +235,11 @@ export function Detail({
               )}
               {tab === "Setups" && (
                 <>
+                  <p>
+                    One evaluated setup is selected for display. Decision
+                    eligibility considers every instance independently; the
+                    displayed setup does not override stored vetoes.
+                  </p>
                   <h3>Active setups · {o.decision.direction}</h3>
                   {review.active_setups.length === 0 && (
                     <p>No active setup in this direction.</p>
@@ -271,23 +293,68 @@ export function Detail({
                       Terminal history ({review.historical_count}) & opposite
                       direction ({review.opposite_direction_count})
                     </summary>
-                    {o.decision.setups
+                    <p>
+                      Available retained instances, newest status change first.
+                      Terminal instances are retained for 20 trading sessions
+                      (roughly one month); active instances may have older
+                      births. This is available lifecycle evidence, not a
+                      complete 60-day daily archive. Full local evidence remains
+                      in Data details.
+                    </p>
+                    {(o.inputs.setups?.setups ?? [])
                       .filter(
                         (s) =>
-                          !s.active || s.direction !== o.decision.direction,
+                          !["FORMING", "NEAR_TRIGGER", "TRIGGERED"].includes(
+                            s.instance.status,
+                          ) || s.instance.direction !== o.decision.direction,
                       )
+                      .sort(
+                        (a, b) =>
+                          b.instance.status_changed_at.localeCompare(
+                            a.instance.status_changed_at,
+                          ) ||
+                          a.instance.setup_id.localeCompare(
+                            b.instance.setup_id,
+                          ),
+                      )
+                      .slice((historyPage - 1) * 20, historyPage * 20)
                       .map((s) => (
-                        <p key={s.setup_id}>
-                          {label(s.family)} · {s.direction} ·{" "}
-                          <Chip value={s.status} />
+                        <p key={s.instance.setup_id}>
+                          {label(s.instance.family)} · {s.instance.direction} ·{" "}
+                          <Chip value={s.instance.status} /> · born{" "}
+                          {s.instance.detected_at} · changed{" "}
+                          {s.instance.status_changed_at}
                         </p>
                       ))}
+                    <button
+                      disabled={historyPage === 1}
+                      onClick={() => setHistoryPage(historyPage - 1)}
+                    >
+                      Previous history
+                    </button>
+                    <span> Page {historyPage} </span>
+                    <button
+                      disabled={
+                        historyPage * 20 >=
+                        review.historical_count +
+                          review.opposite_direction_count
+                      }
+                      onClick={() => setHistoryPage(historyPage + 1)}
+                    >
+                      Next history
+                    </button>
                   </details>
                 </>
               )}
               {tab === "Decision evidence" && (
                 <>
                   <h3>Decision evidence</h3>
+                  <p>
+                    Stored policy: {review.policy_version}.{" "}
+                    {review.policy_version === "decision-risk-v1"
+                      ? "This historical policy used sub-industry as a gate; displaying industry leadership does not recalculate this decision."
+                      : "Industry leadership is the primary group gate. Sub-industry and themes are context."}
+                  </p>
                   <p>
                     These explanations describe the retained {o.decision.state}{" "}
                     decision. Optional alternatives and unentered proposals are
@@ -310,6 +377,22 @@ export function Detail({
                       </li>
                     ))}
                   </ul>
+                  <details>
+                    <summary>
+                      Industry, broader groups, sub-industry paths & themes
+                    </summary>
+                    {review.memberships.map((g) => (
+                      <p key={g.level + g.group_id}>
+                        <b>
+                          {label(g.level)} · {g.name}
+                        </b>{" "}
+                        · rank {g.rank ?? "unavailable"} / {g.eligible_count} ·
+                        coverage {g.valid_members} / {g.total_members}
+                        <br />
+                        {g.parent}
+                      </p>
+                    ))}
+                  </details>
                   <details>
                     <summary>Strength alternatives</summary>
                     <p>{review.strength_summary}</p>

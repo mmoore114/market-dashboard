@@ -22,11 +22,13 @@ def document():
             ("health", "health"),
             ("brief", "brief"),
             ("tape", "tape"),
-            ("detail", "symbols/SIM110"),
+            ("brief", "research/brief"),
+        ("detail", "symbols/SIM110"),
             ("rules", "rules"),
         )
     }
     for name, path in (
+        ("brief", "research/brief"),
         ("detail", "symbols/SIM110"),
         ("research_health", "research/health"),
         ("research_tape", "research/tape"),

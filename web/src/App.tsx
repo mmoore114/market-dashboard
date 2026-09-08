@@ -72,7 +72,7 @@ export function App() {
     setFilters({ ...initialFilters, action });
     navigate("tape");
   };
-  const openGroup = (id: string, kind = "SUB_INDUSTRY") => {
+  const openGroup = (id: string, kind = "INDUSTRY") => {
     setGroup({ id, kind });
     navigate("groups");
   };
@@ -169,6 +169,10 @@ export function App() {
                   onSelect={(symbol, direction = "LONG") =>
                     setSelected({ symbol, direction })
                   }
+                  onTape={(id) => {
+                    setFilters({ ...initialFilters, group: id });
+                    navigate("tape");
+                  }}
                   initialGroup={group}
                   enabled={route === "groups"}
                 />

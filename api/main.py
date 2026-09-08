@@ -21,7 +21,7 @@ from market_dashboard.workstation.detail_v2 import (
     SymbolDetailV2,
     symbol_view,
 )
-from market_dashboard.workstation.fixtures import build_fixture
+from market_dashboard.workstation.fixtures import build_fixture, build_industry_fixture
 from market_dashboard.workstation.models import (
     BriefV1,
     ErrorFieldV1,
@@ -54,7 +54,12 @@ def create_app(store=None):
             )
             scenario = os.environ.get("APERTURE_FIXTURE_SCENARIO", "GREEN")
             if scenario in ("GREEN", "YELLOW", "RED"):
-                fixture = build_fixture(rules, scenario)
+                builder = (
+                    build_industry_fixture
+                    if os.environ.get("APERTURE_FIXTURE_POLICY") == "INDUSTRY"
+                    else build_fixture
+                )
+                fixture = builder(rules, scenario)
         store = SnapshotStore(
             mode, path=os.environ.get("APERTURE_SNAPSHOT_PATH"), fixture=fixture
         )
@@ -325,6 +330,7 @@ def create_app(store=None):
     def research_tape(
         page: int = Query(1, ge=1),
         page_size: int = Query(25, ge=1, le=100),
+        direction: Literal["LONG", "SHORT"] | None = None,
         action: Literal["NONE", "WATCH", "TRADE", "ACT"] | None = None,
         structure: Literal["NEUTRAL", "EMERGING", "UPTREND", "DETERIORATING", "DECLINE"]
         | None = None,
@@ -343,6 +349,7 @@ def create_app(store=None):
             store.meta(),
             page=page,
             page_size=page_size,
+            direction=direction,
             action=action,
             structure=structure,
             setup=setup,
@@ -354,11 +361,15 @@ def create_app(store=None):
             descending=descending,
         )
 
+    @app.get("/api/v2/research/brief", response_model=BriefV1)
+    def research_brief():
+        return projections.brief(store.require(), store.meta(), group_kind="INDUSTRY")
+
     @app.get("/api/v2/research/groups", response_model=research.ResearchGroupsV1)
     def research_groups(
         kind: Literal[
             "SECTOR", "GROUP", "INDUSTRY", "SUB_INDUSTRY", "THEME"
-        ] = "SUB_INDUSTRY",
+        ] = "INDUSTRY",
         include_unranked: bool = False,
         sort: Literal[
             "leadership_rank",

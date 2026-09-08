@@ -12,14 +12,16 @@ import {
 import { StockRows } from "./Tape";
 export function Groups({
   onSelect = () => {},
+  onTape,
   initialGroup = null,
   enabled = true,
 }: {
   onSelect?: (symbol: string, direction?: Direction) => void;
+  onTape?: (id: string) => void;
   initialGroup?: { id: string; kind: string } | null;
   enabled?: boolean;
 }) {
-  const [kind, setKind] = useState("SUB_INDUSTRY");
+  const [kind, setKind] = useState("INDUSTRY");
   const [q, setQ] = useState("");
   const [all, setAll] = useState(false);
   const [page, setPage] = useState(1);
@@ -83,7 +85,9 @@ export function Groups({
   return (
     <>
       <PageTitle eyebrow="GROUP LEADERSHIP" title="Groups">
-        <span className="muted">Ranks compare eligible peers at one level</span>
+        <span className="muted">
+          Industry leadership · ranks compare eligible peers at one level
+        </span>
       </PageTitle>
       <div className="level-tabs" aria-label="Group levels">
         {levels.map((k, i) => (
@@ -258,6 +262,11 @@ export function Groups({
                 ← Back to ranked groups
               </button>
               <h2>{groupName(selected)}</h2>
+              {onTape && (
+                <button onClick={() => onTape(selected)}>
+                  Open members on Tape →
+                </button>
+              )}
               <small className="muted">
                 {members.data?.total ?? "…"} published members · bounded pages
               </small>

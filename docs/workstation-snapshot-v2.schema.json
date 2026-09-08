@@ -485,6 +485,7 @@
                 "0": "#/$defs/NormalizedApertureRules",
                 "1": "#/$defs/NormalizedBootstrapContextV1",
                 "10": "#/$defs/NormalizedDetectionV1",
+                "100": "#/$defs/NormalizedSleevesV2",
                 "11": "#/$defs/NormalizedEarningsEvidenceV1",
                 "12": "#/$defs/NormalizedEventCoverageV1",
                 "13": "#/$defs/NormalizedEventEvidenceV1",
@@ -574,7 +575,14 @@
                 "9": "#/$defs/NormalizedDecisionRiskOutputV1",
                 "90": "#/$defs/NormalizedCurrentGroupProvenanceV2",
                 "91": "#/$defs/NormalizedCurrentGroupProvenanceV3",
-                "92": "#/$defs/NormalizedCoverageContextV1"
+                "92": "#/$defs/NormalizedCoverageContextV1",
+                "93": "#/$defs/NormalizedDecisionEvidenceV2",
+                "94": "#/$defs/NormalizedDecisionInputV2",
+                "95": "#/$defs/NormalizedDecisionRiskOutputV2",
+                "96": "#/$defs/NormalizedGroupGateV2",
+                "97": "#/$defs/NormalizedInternalsSleeveV2",
+                "98": "#/$defs/NormalizedRegimeOutputV2",
+                "99": "#/$defs/NormalizedSetupActionEvidenceV2"
               },
               "propertyName": "model_type"
             },
@@ -607,6 +615,9 @@
                 "$ref": "#/$defs/NormalizedDecisionEvidenceV1"
               },
               {
+                "$ref": "#/$defs/NormalizedDecisionEvidenceV2"
+              },
+              {
                 "$ref": "#/$defs/NormalizedDecisionFeaturesV1"
               },
               {
@@ -616,7 +627,13 @@
                 "$ref": "#/$defs/NormalizedDecisionInputV1"
               },
               {
+                "$ref": "#/$defs/NormalizedDecisionInputV2"
+              },
+              {
                 "$ref": "#/$defs/NormalizedDecisionRiskOutputV1"
+              },
+              {
+                "$ref": "#/$defs/NormalizedDecisionRiskOutputV2"
               },
               {
                 "$ref": "#/$defs/NormalizedDetectionV1"
@@ -655,6 +672,9 @@
                 "$ref": "#/$defs/NormalizedGroupGateV1"
               },
               {
+                "$ref": "#/$defs/NormalizedGroupGateV2"
+              },
+              {
                 "$ref": "#/$defs/NormalizedGroupMemberV1"
               },
               {
@@ -668,6 +688,9 @@
               },
               {
                 "$ref": "#/$defs/NormalizedInternalsSleeveV1"
+              },
+              {
+                "$ref": "#/$defs/NormalizedInternalsSleeveV2"
               },
               {
                 "$ref": "#/$defs/NormalizedLeadershipOutputV1"
@@ -718,6 +741,9 @@
                 "$ref": "#/$defs/NormalizedRegimeOutputV1"
               },
               {
+                "$ref": "#/$defs/NormalizedRegimeOutputV2"
+              },
+              {
                 "$ref": "#/$defs/NormalizedResearchUniverseRules"
               },
               {
@@ -737,6 +763,9 @@
               },
               {
                 "$ref": "#/$defs/NormalizedSetupActionEvidenceV1"
+              },
+              {
+                "$ref": "#/$defs/NormalizedSetupActionEvidenceV2"
               },
               {
                 "$ref": "#/$defs/NormalizedSetupEvidenceV1"
@@ -776,6 +805,9 @@
               },
               {
                 "$ref": "#/$defs/NormalizedSleevesV1"
+              },
+              {
+                "$ref": "#/$defs/NormalizedSleevesV2"
               },
               {
                 "$ref": "#/$defs/NormalizedSpotVolatilityIdentityV1"
@@ -1758,6 +1790,84 @@
         "title": "NormalizedDecisionEvidenceV1",
         "type": "object"
       },
+      "NormalizedDecisionEvidenceV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 11,
+            "minItems": 11,
+            "prefixItems": [
+              {
+                "type": "string"
+              },
+              {
+                "const": "decision-risk-formulas-v2",
+                "type": "string"
+              },
+              {
+                "const": "decision-risk-thresholds-v2",
+                "type": "string"
+              },
+              {
+                "const": "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab",
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/Direction"
+              },
+              {
+                "$ref": "#/$defs/DecisionState"
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 93,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedDecisionEvidenceV2",
+        "type": "object"
+      },
       "NormalizedDecisionFeaturesV1": {
         "additionalProperties": false,
         "properties": {
@@ -1988,6 +2098,123 @@
         "title": "NormalizedDecisionInputV1",
         "type": "object"
       },
+      "NormalizedDecisionInputV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 14,
+            "minItems": 14,
+            "prefixItems": [
+              {
+                "const": "decision-risk-input-v2",
+                "type": "string"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "$ref": "#/$defs/Direction"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 94,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedDecisionInputV2",
+        "type": "object"
+      },
       "NormalizedDecisionRiskOutputV1": {
         "additionalProperties": false,
         "properties": {
@@ -2082,6 +2309,102 @@
           "fields"
         ],
         "title": "NormalizedDecisionRiskOutputV1",
+        "type": "object"
+      },
+      "NormalizedDecisionRiskOutputV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 19,
+            "minItems": 19,
+            "prefixItems": [
+              {
+                "const": "decision-risk-formulas-v2",
+                "type": "string"
+              },
+              {
+                "const": "decision-risk-thresholds-v2",
+                "type": "string"
+              },
+              {
+                "const": "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab",
+                "type": "string"
+              },
+              {
+                "const": "decision-risk-output-v2",
+                "type": "string"
+              },
+              {
+                "const": "decision-risk-v2",
+                "type": "string"
+              },
+              {
+                "const": "decision-risk-features-v1",
+                "type": "string"
+              },
+              {
+                "const": "experimental_uncalibrated",
+                "type": "string"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 95,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedDecisionRiskOutputV2",
         "type": "object"
       },
       "NormalizedDetectionV1": {
@@ -3191,6 +3514,116 @@
         "title": "NormalizedGroupGateV1",
         "type": "object"
       },
+      "NormalizedGroupGateV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 11,
+            "minItems": 11,
+            "prefixItems": [
+              {
+                "const": "decision-risk-formulas-v2",
+                "type": "string"
+              },
+              {
+                "const": "decision-risk-thresholds-v2",
+                "type": "string"
+              },
+              {
+                "const": "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab",
+                "type": "string"
+              },
+              {
+                "enum": [
+                  "NOT_LAGGING",
+                  "LAGGING",
+                  "UNKNOWN"
+                ],
+                "type": "string"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 96,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedGroupGateV2",
+        "type": "object"
+      },
       "NormalizedGroupMemberV1": {
         "additionalProperties": false,
         "properties": {
@@ -3522,6 +3955,93 @@
           "fields"
         ],
         "title": "NormalizedInternalsSleeveV1",
+        "type": "object"
+      },
+      "NormalizedInternalsSleeveV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 11,
+            "minItems": 11,
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/State"
+              },
+              {
+                "anyOf": [
+                  {
+                    "enum": [
+                      -1,
+                      0,
+                      1
+                    ],
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 97,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedInternalsSleeveV2",
         "type": "object"
       },
       "NormalizedLeadershipOutputV1": {
@@ -4588,6 +5108,167 @@
         "title": "NormalizedRegimeOutputV1",
         "type": "object"
       },
+      "NormalizedRegimeOutputV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 25,
+            "minItems": 25,
+            "prefixItems": [
+              {
+                "const": "market-regime-output-v2",
+                "type": "string"
+              },
+              {
+                "const": "market-regime-v2",
+                "type": "string"
+              },
+              {
+                "const": "market-regime-features-v1",
+                "type": "string"
+              },
+              {
+                "const": "market-regime-thresholds-v2",
+                "type": "string"
+              },
+              {
+                "const": "experimental_uncalibrated",
+                "type": "string"
+              },
+              {
+                "const": "f439214090776469fc36e03d8227440e3a6ff979830c39bbc136292af2c26dbd",
+                "type": "string"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "$ref": "#/$defs/State"
+              },
+              {
+                "$ref": "#/$defs/State"
+              },
+              {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "GREEN",
+                      "YELLOW",
+                      "RED"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "GREEN",
+                      "YELLOW",
+                      "RED"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "maximum": 5,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "maximum": 5,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "maximum": 5,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "maximum": 5,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "anyOf": [
+                  {
+                    "format": "date",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 98,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedRegimeOutputV2",
+        "type": "object"
+      },
       "NormalizedResearchUniverseRules": {
         "additionalProperties": false,
         "properties": {
@@ -4964,6 +5645,86 @@
           "fields"
         ],
         "title": "NormalizedSetupActionEvidenceV1",
+        "type": "object"
+      },
+      "NormalizedSetupActionEvidenceV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 14,
+            "minItems": 14,
+            "prefixItems": [
+              {
+                "const": "decision-risk-formulas-v2",
+                "type": "string"
+              },
+              {
+                "const": "decision-risk-thresholds-v2",
+                "type": "string"
+              },
+              {
+                "const": "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab",
+                "type": "string"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "$ref": "#/$defs/Family"
+              },
+              {
+                "$ref": "#/$defs/Direction"
+              },
+              {
+                "$ref": "#/$defs/Status"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 99,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedSetupActionEvidenceV2",
         "type": "object"
       },
       "NormalizedSetupEvidenceV1": {
@@ -6375,6 +7136,50 @@
           "fields"
         ],
         "title": "NormalizedSleevesV1",
+        "type": "object"
+      },
+      "NormalizedSleevesV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 5,
+            "minItems": 5,
+            "prefixItems": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 100,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedSleevesV2",
         "type": "object"
       },
       "NormalizedSpotVolatilityIdentityV1": {
@@ -8788,8 +9593,9 @@
             "type": "integer"
           },
           "registry_fingerprint": {
-            "default": "2f38c1bc3ae5b3b1350d0e97932fa961334af5c2a53335be6a1051f86a19faae",
+            "default": "608ed44770ed092b61f14b568f84986e4f7ccc8885f03e370229cac43edb150a",
             "enum": [
+              "608ed44770ed092b61f14b568f84986e4f7ccc8885f03e370229cac43edb150a",
               "2f38c1bc3ae5b3b1350d0e97932fa961334af5c2a53335be6a1051f86a19faae",
               "852d8761d6a5a24ec4484b62043e2ebc4570fffdbae63de3b3c6fd1fce99b607",
               "53d77137cff3f89e1cff2a3ecba2a51bf0855bb0b9f170aeb62b76eeb493fa49",
@@ -8869,14 +9675,20 @@
         "additionalProperties": false,
         "properties": {
           "decision_fingerprint": {
-            "const": "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8",
-            "default": "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8",
+            "default": "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab",
+            "enum": [
+              "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8",
+              "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab"
+            ],
             "title": "Decision Fingerprint",
             "type": "string"
           },
           "decision_risk": {
-            "const": "decision-risk-v1",
-            "default": "decision-risk-v1",
+            "default": "decision-risk-v2",
+            "enum": [
+              "decision-risk-v1",
+              "decision-risk-v2"
+            ],
             "title": "Decision Risk",
             "type": "string"
           },
@@ -8905,14 +9717,20 @@
             "type": "string"
           },
           "regime": {
-            "const": "market-regime-v1",
-            "default": "market-regime-v1",
+            "default": "market-regime-v2",
+            "enum": [
+              "market-regime-v1",
+              "market-regime-v2"
+            ],
             "title": "Regime",
             "type": "string"
           },
           "regime_fingerprint": {
-            "const": "3e13d0e057fbc80d806e8eab8fb3b9060b1c3f5de60bf45f8fb33ae15abec01a",
-            "default": "3e13d0e057fbc80d806e8eab8fb3b9060b1c3f5de60bf45f8fb33ae15abec01a",
+            "default": "f439214090776469fc36e03d8227440e3a6ff979830c39bbc136292af2c26dbd",
+            "enum": [
+              "3e13d0e057fbc80d806e8eab8fb3b9060b1c3f5de60bf45f8fb33ae15abec01a",
+              "f439214090776469fc36e03d8227440e3a6ff979830c39bbc136292af2c26dbd"
+            ],
             "title": "Regime Fingerprint",
             "type": "string"
           },
@@ -9239,6 +10057,22 @@
         "reasons"
       ]
     },
+    "DecisionEvidenceV2": {
+      "code": 93,
+      "fields": [
+        "symbol",
+        "formula_version",
+        "threshold_version",
+        "rules_fingerprint",
+        "direction",
+        "state",
+        "gates",
+        "setups",
+        "qualifying_setup_ids",
+        "act_setup_ids",
+        "reasons"
+      ]
+    },
     "DecisionFeaturesV1": {
       "code": 6,
       "fields": [
@@ -9280,8 +10114,51 @@
         "rules"
       ]
     },
+    "DecisionInputV2": {
+      "code": 94,
+      "fields": [
+        "schema_version",
+        "features",
+        "direction",
+        "action_session",
+        "completed_at",
+        "universe",
+        "structure",
+        "setups",
+        "leadership",
+        "regime",
+        "events",
+        "event_coverage",
+        "sizing",
+        "rules"
+      ]
+    },
     "DecisionRiskOutputV1": {
       "code": 9,
+      "fields": [
+        "formula_version",
+        "threshold_version",
+        "rules_fingerprint",
+        "schema_version",
+        "engine_version",
+        "feature_version",
+        "research_status",
+        "inputs",
+        "calendar_id",
+        "calendar_fingerprint",
+        "action_calendar_fingerprint",
+        "aperture_rules_fingerprint",
+        "extension",
+        "earnings",
+        "strength",
+        "group",
+        "regime",
+        "sizing",
+        "decision"
+      ]
+    },
+    "DecisionRiskOutputV2": {
+      "code": 95,
       "fields": [
         "formula_version",
         "threshold_version",
@@ -9498,6 +10375,22 @@
         "reasons"
       ]
     },
+    "GroupGateV2": {
+      "code": 96,
+      "fields": [
+        "formula_version",
+        "threshold_version",
+        "rules_fingerprint",
+        "status",
+        "sub_industry",
+        "rank_limit",
+        "group_rotation_rank",
+        "rotation_rank_advantage",
+        "themes",
+        "reasons",
+        "industry"
+      ]
+    },
     "GroupMemberV1": {
       "code": 22,
       "fields": [
@@ -9554,6 +10447,22 @@
         "improving_groups",
         "eligible_sub_industries",
         "excluded_sub_industries"
+      ]
+    },
+    "InternalsSleeveV2": {
+      "code": 97,
+      "fields": [
+        "state",
+        "score",
+        "reasons",
+        "predicates",
+        "strong_leadership",
+        "strong_rotation",
+        "positive_rotation",
+        "leading_groups",
+        "improving_groups",
+        "eligible_industries",
+        "excluded_industries"
       ]
     },
     "LeadershipOutputV1": {
@@ -9740,6 +10649,36 @@
         "timing_reason"
       ]
     },
+    "RegimeOutputV2": {
+      "code": 98,
+      "fields": [
+        "schema_version",
+        "engine_version",
+        "feature_version",
+        "threshold_version",
+        "research_status",
+        "rules_fingerprint",
+        "inputs",
+        "sleeves",
+        "candidate",
+        "status",
+        "state",
+        "previous_state",
+        "entered_date",
+        "sessions_in_state",
+        "candidate_streak",
+        "memory",
+        "transition_reason",
+        "risk_off_override",
+        "override_reasons",
+        "green_sleeves",
+        "yellow_sleeves",
+        "red_sleeves",
+        "unknown_sleeves",
+        "eligible_from_session",
+        "timing_reason"
+      ]
+    },
     "ResearchUniverseRules": {
       "code": 43,
       "fields": [
@@ -9803,6 +10742,25 @@
     },
     "SetupActionEvidenceV1": {
       "code": 49,
+      "fields": [
+        "formula_version",
+        "threshold_version",
+        "rules_fingerprint",
+        "setup_id",
+        "family",
+        "direction",
+        "status",
+        "active",
+        "evaluated",
+        "replay_required",
+        "setup_eligible",
+        "act_eligible",
+        "invalidation_level",
+        "reasons"
+      ]
+    },
+    "SetupActionEvidenceV2": {
+      "code": 99,
       "fields": [
         "formula_version",
         "threshold_version",
@@ -10043,6 +11001,16 @@
     },
     "SleevesV1": {
       "code": 60,
+      "fields": [
+        "index",
+        "breadth",
+        "internals",
+        "volatility",
+        "style"
+      ]
+    },
+    "SleevesV2": {
+      "code": 100,
       "fields": [
         "index",
         "breadth",
@@ -10454,5 +11422,5 @@
       ]
     }
   },
-  "registry_fingerprint": "2f38c1bc3ae5b3b1350d0e97932fa961334af5c2a53335be6a1051f86a19faae"
+  "registry_fingerprint": "608ed44770ed092b61f14b568f84986e4f7ccc8885f03e370229cac43edb150a"
 }

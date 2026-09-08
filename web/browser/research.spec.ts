@@ -55,7 +55,7 @@ for (const width of [1366, 390])
     await expect(
       dialog.getByRole("heading", { name: "Primary blockers" }),
     ).toBeVisible();
-    await expect(dialog.getByText(/Active setup:/)).toBeVisible();
+    await expect(dialog.getByText(/Current setup:/)).toBeVisible();
     if (width === 1366) {
       const b = await dialog
         .getByRole("heading", { name: "Primary blockers" })
@@ -90,7 +90,7 @@ for (const width of [1366, 390])
     const nav = page.getByRole("navigation", { name: "Primary navigation" });
     await nav.getByRole("link", { name: "Groups", exact: true }).click();
     await expect(
-      page.getByRole("button", { name: "Sub-industries", exact: true }),
+      page.getByRole("button", { name: "Industries", exact: true }),
     ).toHaveAttribute("aria-pressed", "true");
     const groups = page.getByRole("table", {
       name: "Ranked groups",
@@ -120,7 +120,7 @@ for (const width of [1366, 390])
     await page.getByLabel("Include unranked groups").check();
     const unranked = await (
       await request.get(
-        "/api/v2/research/groups?kind=SUB_INDUSTRY&include_unranked=true&page_size=100&page=2",
+        "/api/v2/research/groups?kind=INDUSTRY&include_unranked=true&page_size=100&page=1",
       )
     ).json();
     expect(

@@ -6,6 +6,28 @@ Current product authority: `docs/APERTURE_CURRENT_AUTHORITY.md`
 
 Working prototype baseline: `401e1b0afd6ad2a4678af4f1040014b5c9b568e9`
 
+## Industry alignment — validated for draft review
+
+`AP-PRODUCT-ALIGNMENT-001` continues from shutdown commit `000a356` on
+`codex/product-alignment-001`, stacked on draft PR #19. PRs #18 and #19 were
+verified open, draft and unmerged before changes. The owner selected INDUSTRY,
+with all 75 full parent paths retained. New Decision/Regime V2 policies and compact
+industry-first research views are implemented; the current setup cell is a
+separately versioned display projection. See [the contract](product-alignment-001.md).
+
+A memory-capped read-only check decoded the retained expanded snapshot with its
+original `4d8ca015…6798c6` fingerprint and unchanged September 8 13:30 UTC expiry.
+It is now expired. Five historical sample decisions remain WATCH under the new
+policy because other controls remain unavailable. ABNB's subindustry rank was
+47/59 (passing cutoff 48), while its industry has only 77/130 valid members
+(59.23%), below the unchanged 60% coverage requirement; the new industry gate is
+UNKNOWN. This is a changed gate, not a new actionable candidate.
+
+Production remains pinned to `7de9858`; scheduling stays stopped. No acquisition,
+setup replay, production snapshot build, merge or deployment is part of this pass.
+The retained global EP veto remains pending an explicit scope decision. The
+completed shutdown record below remains historical evidence.
+
 ## Session closed — 2026-09-08 07:39 UTC
 
 The owner requested safe shutdown. Refresh timer was **enabled and active**;
