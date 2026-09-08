@@ -224,3 +224,9 @@ file, all input history bytes, source, calendar, corporate actions and engine
 versions must match. Any price-engine change refuses compatibility. Original shards
 are read in place and never relabeled or overwritten. Construction plan and manifest
 are persisted atomically before replay/assembly, including failed attempts.
+
+Consumed per-symbol Setup outputs and validation identity caches are released
+before assembling the normalized table. The builder drops its canonical identity
+cache before table conversion, so normalization and typed validation do not retain
+an unnecessary second complete set of source objects. The receipt reports both
+the combined construction/readback peak and an independent API cold-load peak.

@@ -55,16 +55,75 @@ Git. The original 1,383 protected baseline artifacts remain byte-identical.
 
 ## Recovery and validation
 
-A VSCode crash interrupted the second full build after 2,700 of 2,743 engine
-replays, before any snapshot publication. Verified acquisition survived and the
-existing scheduler remained enabled on the known-good checkout. A separate
-recovery build reuses those inputs and reruns deterministic engine replay.
+Linux kernel and user-session logs confirm a global OOM killed the Python build
+(3,376,712 KiB anonymous RSS); its VS Code scope subsequently failed with OOM.
+Linux remained running. The original progress log and operator recovery receipt
+were not durable replay checkpoints. Verified acquisition survived; the original
+engine computation could not be resumed. No acquisition was repeated.
 
-Recovery checks: 96 focused Python tests passed (82.22 seconds), including
-selection, coverage, acquisition resumption, required daily inclusion, missing
-bars, runtime guards, current-cohort parity and failed-publication preservation.
-Fourteen frontend component tests passed. No repeated full-suite run.
+Recovery established immutable, hash-bound per-symbol Structure/Setup checkpoints
+before the one necessary full replay. All 2,743 shards subsequently passed a
+separate typed audit against exact input-history bytes, source, calendar, corporate
+actions and engine identities. Later construction attempts restored all shards
+with engine execution explicitly forbidden. A narrowly checked compatibility
+receipt admits only the downstream decision-validation change; original shards
+remain unchanged.
 
-See [the coverage contract](universe-expansion-v1.md) for commands, archive bounds
-and scheduler deployment requirements. Final real-snapshot scale measurements,
-desktop/mobile results and scheduler switch remain pending in this receipt.
+The concrete allocation problems were full object-dtype Parquet readback copies,
+quadratic expansion of shared Leadership/Regime/bootstrap inputs during decision
+validation, retained consumed Setup graphs and identity caches, and whole-snapshot
+JSON representations. Fixed-size readback, memoized model validation, early
+release of consumed objects, disk-backed normalization and row-streamed archive
+I/O preserve formulas, full evidence, fingerprints and all integrity checks.
+The symbol API also required explicit V2 reference-based shared evidence:
+AAPL's old expanded response would repeat at least 326,938,170 bootstrap bytes;
+its complete local V2 response is 211,414 bytes, with all shared nodes accessible
+by fingerprint-bound graph references. Retained snapshots keep V1 compatibility.
+
+The measured successful attempt restored all 2,743 cached outputs, assembled all
+288,756 normalized evidence nodes, serialized and independently read/validated
+the archive. Earlier throttled attempts were stopped deliberately with no new
+OOM, and their inputs/logs were retained. Spill files used disk rather than tmpfs;
+no swap or ChromeOS settings changed.
+
+| Measurement | Peak RSS (KiB) |
+| --- | ---: |
+| Construction and initial full graph validation | 1,491,356 |
+| Complete construction, archive write and typed readback | 1,536,856 |
+| Independent cold API validation/load | 1,112,372 |
+| API endpoint probe | 1,138,396 |
+| Standalone API during real browser checks | 1,136,264 |
+
+The independent cold load took 56.84 seconds. Desktop (1366 px) and mobile
+(390 px) real-snapshot tests both passed in 23.8 seconds, covering Groups, Brief,
+Tape, AAPL detail, Sizer and Rules, without browser errors or page overflow.
+The API service recorded no memory-high, maximum or OOM events. The full recovery
+service used a 1,400 MiB soft / 1,600 MiB hard cgroup budget and a two-hour timeout,
+outside the editor scope, with durable logs and both refresh workspace locks.
+
+The successful artifact has 2,743 records: 2,489 NONE, 254 WATCH, zero TRADE/ACT.
+Canonical bytes: 79,532,474. Archive transport including envelope: 26,042,957 bytes.
+Logical fingerprint:
+`4d8ca015e9deadc1ca7f26b53596134072720ae9714c2be89e778df8ca6798c6`.
+Market observations remain September 4; actual evaluation was September 8 at
+05:23:37.910472 UTC; action expiry remains September 8 at 13:30 UTC.
+VIX completed-session input remains unpublished/UNKNOWN; no value or deadline was
+invented. The recovered artifact is current within that original action window.
+
+Focused verification includes 312 decision-engine/adapter/recovery tests, 21
+current-group/recovery tests, and a final 82-test materialization/archive/API run.
+Fourteen frontend component tests, production build, type/schema checks and two
+fixture browser tests also passed. No repeated full-suite run. New captures and
+machine-specific receipts remain private and separate from retained originals.
+
+See [the coverage contract](universe-expansion-v1.md) for recovery compatibility,
+archive bounds and scheduler deployment requirements. The PR remains unmerged.
+
+Activation and pinned scheduler deployment completed at 05:37:16 UTC. The runtime
+is detached commit `7de9858f055e7e79d26c6ac8a42896956497b43c`, with the tested frontend
+and an isolated interpreter import path. The previous main runtime, snapshots and
+three configuration/unit backups remain preserved and hash-verified. The timer is
+enabled and active, dispatching every 15 minutes; the next supporting-input retry
+is 06:23:37.910472 UTC. All 1,383 protected baseline paths were checked again after
+recovery and remain byte-identical. There is no remaining recovery blocker; the
+unpublished VIX input and existing incomplete/unresolved coverage remain explicit.

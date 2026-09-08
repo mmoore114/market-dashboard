@@ -1,11 +1,14 @@
 # Codex Next Task
 
-Status: ACTIVE — AP-UNIVERSE-EXPANSION-001
+Status: IMPLEMENTED / REVIEW PENDING — AP-UNIVERSE-EXPANSION-001
 
 Reviewed PR #17 was merged with history preserved at
 `3a1499e2d22a7321c55dc4e03b4dba382d590aad`. Expansion is staged on
-`codex/universe-expansion-v1` in an isolated worktree; the enabled scheduler
-continues using the tested main checkout.
+`codex/universe-expansion-v1` in an isolated worktree. Recovery completed and the
+enabled scheduler now uses the verified detached release at `7de9858`; the main
+checkout, previous snapshots and configuration backups remain preserved. Draft
+PR #18 is open and unmerged. See the [completion receipt](universe-expansion-v1-receipt.md)
+for the measured build/API/browser result and the remaining UNKNOWN VIX input.
 
 The owner authorizes expansion from the verified Deepvue capture union, required
 existing-provider acquisition, recoverable publication, and a separately verified

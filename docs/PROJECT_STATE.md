@@ -22,6 +22,12 @@ members. Full hierarchy capture rows cover all research/trade members; themes co
 1,101 research and 442 trade names. All four parent conflicts remain. These are
 current-cohort calculations, not historical membership or backtested rotation.
 
+The recovered full-population snapshot passed complete validation and real desktop/
+mobile browser checks. The supervised build/readback peaked at 1.47 GiB RSS; the
+independent API endpoint probe peaked at 1.09 GiB. The enabled timer is pinned to
+the verified detached recovery release `7de9858`; draft PR #18 remains unmerged.
+VIX remains explicitly UNKNOWN, and the September 8 action deadline is unchanged.
+
 See [the coverage contract](universe-expansion-v1.md) and
 [completion receipt](universe-expansion-v1-receipt.md) for actual deployment,
 snapshot clocks/fingerprint, measured scale, tests and remaining limitations.
