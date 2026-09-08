@@ -9,7 +9,8 @@ Working prototype baseline: `401e1b0afd6ad2a4678af4f1040014b5c9b568e9`
 ## Industry alignment — validated for draft review
 
 `AP-PRODUCT-ALIGNMENT-001` continues from shutdown commit `000a356` on
-`codex/product-alignment-001`, stacked on draft PR #19. PRs #18 and #19 were
+`codex/product-alignment-001`, delivered as draft [PR #20](https://github.com/mmoore114/market-dashboard/pull/20),
+stacked on draft PR #19. PRs #18 and #19 were
 verified open, draft and unmerged before changes. The owner selected INDUSTRY,
 with all 75 full parent paths retained. New Decision/Regime V2 policies and compact
 industry-first research views are implemented; the current setup cell is a
