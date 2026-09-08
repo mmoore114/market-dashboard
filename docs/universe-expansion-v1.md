@@ -197,3 +197,14 @@ Input Parquet readback compares every row and field in fixed-size batches with
 exact numeric equality, avoiding simultaneous full object-dtype frames. Recovery
 spill storage must be on the disk-backed workspace when the host mounts `/tmp`
 as tmpfs; the expanded replay uses the checkpoint workspace for normalization.
+
+Expanded symbol detail uses `/api/v2/symbols/{symbol}` (`symbol-detail-v2`).
+The canonical local fields are unchanged; shared Leadership and Regime inputs
+become index-and-hash references into the validated normalized graph. Every
+canonical output also has its complete graph reference. `/api/v2/evidence` exposes
+all nodes in bounded pages and requires the snapshot fingerprint, refusing a page
+from a different activated snapshot. This preserves full evidence without expanding
+bootstrap provenance quadratically in a single symbol response. The browser uses
+the V2 view. The V1 symbol route remains available for retained snapshots; expanded
+coverage receives an explicit `409 NORMALIZED_SYMBOL_DETAIL_REQUIRED` migration
+response before serialization. Snapshot storage and engine versions are unchanged.

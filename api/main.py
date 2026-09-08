@@ -16,6 +16,11 @@ from market_dashboard.aperture.decision_contracts import SizingProposalV1
 from market_dashboard.aperture.rules import load_aperture_rules
 from market_dashboard.data.security_identity import MarketDataSymbol
 from market_dashboard.workstation import projections
+from market_dashboard.workstation.detail_v2 import (
+    EvidencePageV2,
+    SymbolDetailV2,
+    symbol_view,
+)
 from market_dashboard.workstation.fixtures import build_fixture
 from market_dashboard.workstation.models import (
     BriefV1,
@@ -214,8 +219,43 @@ def create_app(store=None):
 
     @app.get("/api/v1/symbols/{symbol}", response_model=SymbolDetailV1)
     def symbol_detail(symbol: str):
-        return SymbolDetailV1(
-            meta=store.meta(), records=exact_records(symbol, store.require())
+        snapshot = store.require()
+        records = exact_records(symbol, snapshot)
+        if (
+            snapshot.evaluation
+            and snapshot.evaluation.bootstrap
+            and snapshot.evaluation.bootstrap.version == "coverage-current-state-v1"
+        ):
+            raise ApiError(
+                409,
+                "NORMALIZED_SYMBOL_DETAIL_REQUIRED",
+                "Expanded coverage uses /api/v2/symbols/{symbol}; complete shared evidence is available through /api/v2/evidence.",
+            )
+        return SymbolDetailV1(meta=store.meta(), records=records)
+
+    @app.get("/api/v2/symbols/{symbol}", response_model=SymbolDetailV2)
+    def symbol_detail_v2(symbol: str):
+        snapshot = store.require()
+        return symbol_view(snapshot, exact_records(symbol, snapshot), store.meta())
+
+    @app.get("/api/v2/evidence", response_model=EvidencePageV2)
+    def evidence_page(
+        fingerprint: str,
+        offset: int = Query(0, ge=0),
+        limit: int = Query(100, ge=1, le=1000),
+    ):
+        snapshot = store.require()
+        if fingerprint != snapshot.logical_fingerprint:
+            raise ApiError(
+                409,
+                "SNAPSHOT_CHANGED",
+                "Request evidence from the same snapshot fingerprint.",
+            )
+        return EvidencePageV2(
+            meta=store.meta(),
+            offset=offset,
+            total=len(snapshot.evidence),
+            nodes=snapshot.evidence[offset : offset + limit],
         )
 
     @app.post("/api/v1/sizer", response_model=SizerResponseV1)

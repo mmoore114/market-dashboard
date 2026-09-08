@@ -125,4 +125,6 @@ def activate(candidate, root, *, expected_hash, now=None):
     atomic_replace(target, raw)
     if digest(target) != expected_hash:
         raise ValueError("ACTIVATION_READBACK_MISMATCH")
+    # Release the validated candidate before independently loading its activation.
+    del s
     return status(root, now)

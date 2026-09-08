@@ -208,6 +208,9 @@ def refresh(config, *, scheduled=False, now=None):
                     "missing_inputs": missing,
                 },
             )
+            # Construction already verified the candidate. Activation independently
+            # verifies it again; do not retain another full decoded graph or frames.
+            del snapshot, loaded, seed
             successful = activate(
                 run / "snapshot.json", root, expected_hash=digest(run / "snapshot.json")
             )

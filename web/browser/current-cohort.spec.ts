@@ -80,7 +80,7 @@ for (const width of [1366, 390]) {
     expect(rules.versions.structure).toBe("structure-engine-v2");
     expect(rules.versions.setup).toBe("setup-engine-v2");
     const detail = await request.get(
-      "http://127.0.0.1:8000/api/v1/symbols/AAPL",
+      "http://127.0.0.1:8000/api/v2/symbols/AAPL",
     );
     expect(detail.ok()).toBe(true);
     expect(errors).toEqual([]);
