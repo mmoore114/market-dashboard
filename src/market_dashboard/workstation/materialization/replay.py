@@ -342,6 +342,18 @@ def replay(plan, loaded, *, optimize_current=True, checkpoint_root=None):
         )
     )
 
+    # Validate common model identities once, including all nested model validators.
+    # This preserves the defense against unvalidated model_copy values without
+    # expanding bootstrap provenance quadratically through Leadership/Regime.
+    from market_dashboard.model_validation import ModelValidationCache
+
+    validation_cache = ModelValidationCache()
+    source, universe, leadership, regime, engine_rules = (
+        validation_cache.validate(value)
+        for value in (source, universe, leadership, regime, engine_rules)
+    )
+    shared_validation = dict(validation_cache.objects)
+
     def records():
         for symbol in sorted(universe.symbols):
             structure = final_structures[symbol]
@@ -383,7 +395,10 @@ def replay(plan, loaded, *, optimize_current=True, checkpoint_root=None):
                     ),
                     rules=engine_rules,
                 )
-                output = evaluate_decision(inputs, calendar=calendar)
+                output = evaluate_decision(
+                    inputs, calendar=calendar, validation_cache=validation_cache
+                )
+                validation_cache.objects = dict(shared_validation)
                 yield SymbolRecordV1(
                     output=output,
                     display_name=str(names.get(symbol, symbol)),

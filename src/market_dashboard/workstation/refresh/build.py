@@ -128,6 +128,15 @@ def build_current(
         versions=VersionsV1(security_master=seed_plan.versions.security_master),
         manifest_fingerprint=fingerprint(manifest.model_dump(mode="json")),
     )
+    from market_dashboard.workstation.materialization.io import atomic_write
+
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    # Persist reconstruction identity before expensive work, not only on success.
+    atomic_write(output.parent / "plan.json", plan.model_dump_json(indent=2).encode())
+    atomic_write(
+        output.parent / "manifest.json", manifest.model_dump_json(indent=2).encode()
+    )
     snapshot, diagnostics = replay(plan, loaded, checkpoint_root=checkpoint_root)
     decoded = snapshot
     if (
@@ -143,6 +152,4 @@ def build_current(
 
     gc.collect()
     decoded = read_snapshot(output)
-    (output.parent / "plan.json").write_text(plan.model_dump_json(indent=2))
-    (output.parent / "manifest.json").write_text(manifest.model_dump_json(indent=2))
     return decoded, diagnostics

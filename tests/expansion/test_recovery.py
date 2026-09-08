@@ -62,7 +62,7 @@ def test_checkpoint_resume_and_invalidation(snapshot, tmp_path):
         source=structure.inputs.source,
         calendar=snapshot.calendar,
         as_of=snapshot.as_of_session,
-        corporate_actions={},
+        corporate_actions={("A", snapshot.as_of_session): ("VERIFIED", ("split",))},
     )
     frame = pd.DataFrame({"ticker": [structure.inputs.symbol], "close": [1.0]})
     key = checkpoint.identity(structure.inputs.symbol, frame)
@@ -140,3 +140,51 @@ def test_batched_readback_checks_every_row_and_exact_values(tmp_path):
         verify_frame(path, changed, batch_size=2)
     with pytest.raises(ValueError, match="ROW_COUNT"):
         verify_frame(path, pd.concat([frame, frame.iloc[:1]]), batch_size=2)
+
+
+def test_compatible_downstream_change_reuses_shard_but_price_change_refuses(
+    snapshot, tmp_path
+):
+    from market_dashboard.workstation.materialization.checkpoint import (
+        engine_code_files,
+    )
+
+    structure = snapshot.records[0].output.inputs.structure
+    setup = snapshot.records[0].output.inputs.setups
+    kwargs = {
+        "versions": snapshot.versions,
+        "source": structure.inputs.source,
+        "calendar": snapshot.calendar,
+        "as_of": snapshot.as_of_session,
+        "corporate_actions": {},
+    }
+    before = engine_code_files()
+    before["aperture/decision_adapters.py"] = "0" * 64
+    old = ReplayCheckpoint(tmp_path, **kwargs)
+    old.basis["code_sha256"] = fingerprint(before)
+    frame = pd.DataFrame({"ticker": [structure.inputs.symbol], "close": [1.0]})
+    old_key = old.identity(structure.inputs.symbol, frame)
+    old.save(old_key, structure, setup)
+    compatibility = tmp_path / "compatibility"
+    compatibility.mkdir()
+    proof = {
+        "schema_version": "replay-code-compatibility-v1",
+        "from": fingerprint(before),
+        "to": fingerprint(engine_code_files()),
+        "from_files": before,
+    }
+    path = compatibility / "proof.json"
+    path.write_text(json.dumps(proof))
+    current = ReplayCheckpoint(tmp_path, **kwargs)
+    key = current.identity(structure.inputs.symbol, frame)
+    assert key != old_key
+    assert current.load(key) == (structure, setup)
+    assert (
+        current.load(current.identity(structure.inputs.symbol, frame.assign(close=2.0)))
+        is None
+    )
+    proof["from_files"]["aperture/structure_v2.py"] = "0" * 64
+    proof["from"] = fingerprint(proof["from_files"])
+    path.write_text(json.dumps(proof))
+    with pytest.raises(ValueError, match="COMPATIBILITY_PROOF_INVALID"):
+        ReplayCheckpoint(tmp_path, **kwargs)

@@ -49,8 +49,8 @@ def regime_gate(inputs):
         session_date=r.inputs.session_date,eligible_from_session=r.eligible_from_session,reasons=tuple(reasons))
 
 
-def evaluate_decision(inputs, *, calendar):
-    inputs=validate_inputs(inputs,calendar)
+def evaluate_decision(inputs, *, calendar, validation_cache=None):
+    inputs=validate_inputs(inputs,calendar,validation_cache=validation_cache)
     f=inputs.features
     extension=extension_evidence(ExtensionInputV1(features=f,direction=inputs.direction),inputs.rules)
     earnings=evaluate_earnings(symbol=f.symbol,session=f.session_date,action_session=inputs.action_session,

@@ -15,17 +15,45 @@ from market_dashboard.workstation.evidence_graph import CANONICAL
 from .io import atomic_write
 
 
-def engine_code_digest():
+def engine_code_files():
     root = Path(__file__).resolve().parents[2]
     files = sorted(
         [*(root / "aperture").glob("*.py"), *(root / "features").glob("*.py")]
     )
-    return fingerprint(
-        {
-            str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in files
-        }
-    )
+    return {
+        str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in files
+    }
+
+
+def engine_code_digest():
+    return fingerprint(engine_code_files())
+
+
+def compatible_code_digests(root):
+    """Admit only hash-proven changes outside Structure/Setup replay dependencies.
+
+    Old shards bound an intentionally broad aperture/features source digest.
+    These two downstream decision modules cannot affect saved price-engine
+    outputs. Every other source byte and the complete input identity must match.
+    """
+    current = engine_code_files()
+    result = []
+    for path in sorted((Path(root) / "compatibility").glob("*.json")):
+        receipt = json.loads(path.read_bytes())
+        if receipt.get("to") != fingerprint(current):
+            continue
+        before = receipt.get("from_files", {})
+        if (
+            receipt.get("schema_version") != "replay-code-compatibility-v1"
+            or fingerprint(before) != receipt.get("from")
+            or set(before) != set(current)
+            or not {name for name in current if current[name] != before[name]}
+            <= {"aperture/decision_adapters.py", "aperture/decision_risk.py"}
+        ):
+            raise ValueError("REPLAY_COMPATIBILITY_PROOF_INVALID")
+        result.append(receipt["from"])
+    return tuple(result)
 
 
 class ReplayCheckpoint:
@@ -40,11 +68,13 @@ class ReplayCheckpoint:
             "as_of": str(as_of),
             "code_sha256": engine_code_digest(),
             "corporate_actions": sorted(
-                (str(k), str(v)) for k, v in corporate_actions.items()
+                [str(k), str(v)] for k, v in corporate_actions.items()
             ),
         }
         self.reused = 0
         self.saved = 0
+        self.compatible_codes = compatible_code_digests(self.root)
+        self.aliases = {}
 
     def identity(self, symbol, history):
         import pyarrow as pa
@@ -54,24 +84,38 @@ class ReplayCheckpoint:
         with pa.ipc.new_stream(sink, table.schema) as writer:
             writer.write_table(table)
         digest = hashlib.sha256(sink.getvalue()).hexdigest()
-        return fingerprint(
-            {
-                **self.basis,
-                "symbol": symbol,
-                "history_sha256": digest,
-                "columns": list(history.columns),
-                "dtypes": [str(d) for d in history.dtypes],
-            }
+        identity = {
+            **self.basis,
+            "symbol": symbol,
+            "history_sha256": digest,
+            "columns": list(history.columns),
+            "dtypes": [str(d) for d in history.dtypes],
+        }
+        key = fingerprint(identity)
+        self.aliases[key] = tuple(
+            (fingerprint({**identity, "code_sha256": code}), code)
+            for code in self.compatible_codes
         )
+        return key
 
     def load(self, key):
         path = self.root / (key + ".json")
+        basis = self.basis
         if not path.exists():
-            return None
+            for old_key, code in self.aliases.get(key, ()):
+                candidate = self.root / (old_key + ".json")
+                if candidate.exists():
+                    path = candidate
+                    basis = {**self.basis, "code_sha256": code}
+                    break
+            else:
+                return None
         receipt = json.loads(path.read_bytes())
         payload = receipt["payload"]
-        if receipt.get("key") != key or fingerprint(payload) != receipt.get(
-            "payload_sha256"
+        if (
+            receipt.get("key") != path.stem
+            or receipt.get("basis") != basis
+            or fingerprint(payload) != receipt.get("payload_sha256")
         ):
             raise ValueError("REPLAY_CHECKPOINT_HASH_MISMATCH")
         outputs = []

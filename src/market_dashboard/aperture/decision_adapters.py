@@ -91,9 +91,12 @@ def universe_from_snapshot(
     )
 
 
-def validate_inputs(inputs, calendar):
+def validate_inputs(inputs, calendar, *, validation_cache=None):
     # Also validate nested models passed via Pydantic's unvalidated model_copy API.
-    inputs = DecisionInputV1.model_validate(inputs.model_dump())
+    from market_dashboard.model_validation import ModelValidationCache
+
+    cache = validation_cache if validation_cache is not None else ModelValidationCache()
+    inputs = cache.validate(inputs, DecisionInputV1)
     if (
         inputs.structure is not None
         and inputs.setups is not None

@@ -208,3 +208,19 @@ bootstrap provenance quadratically in a single symbol response. The browser uses
 the V2 view. The V1 symbol route remains available for retained snapshots; expanded
 coverage receives an explicit `409 NORMALIZED_SYMBOL_DETAIL_REQUIRED` migration
 response before serialization. Snapshot storage and engine versions are unchanged.
+
+Decision-input revalidation also walks the frozen model graph with invocation-local
+identity memoization. Every distinct nested model is reconstructed through its
+validators, including unvalidated `model_copy` values. Repeated shared identities
+reuse that validated result; they do not expand the entire Leadership/Regime graph
+into a Python dictionary for each symbol. Decision formulas and engine fingerprints
+are unchanged.
+
+The initial checkpoint digest conservatively covered all Aperture and feature
+modules. A `replay-code-compatibility-v1` receipt can reuse those shards across
+changes restricted to the two downstream decision adapter/orchestrator modules.
+It binds the prior complete file-hash map and current digest; every other source
+file, all input history bytes, source, calendar, corporate actions and engine
+versions must match. Any price-engine change refuses compatibility. Original shards
+are read in place and never relabeled or overwritten. Construction plan and manifest
+are persisted atomically before replay/assembly, including failed attempts.
