@@ -2,13 +2,25 @@
 import math
 from datetime import date
 
-from market_dashboard.aperture.leadership import fingerprint, validate_calendar, POLICY as LEADERSHIP_POLICY
+from market_dashboard.aperture.leadership import POLICY as LEADERSHIP_POLICY
+from market_dashboard.aperture.leadership import fingerprint, validate_calendar
 from market_dashboard.aperture.regime_contracts import (
-    State, Vote, PredicateV1, IndexVoteV1, IndexSleeveV1, FractionV1,
-    BreadthSleeveV1, InternalsSleeveV1, VolatilitySleeveV1, StyleSleeveV1,
-    SleevesV1, RegimeMemoryV1, RegimeOutputV1,
+    BreadthSleeveV1,
+    FractionV1,
+    IndexSleeveV1,
+    IndexVoteV1,
+    InternalsSleeveV1,
+    PredicateV1,
+    RegimeMemoryV1,
+    RegimeOutputV1,
+    SleevesV1,
+    State,
+    StyleSleeveV1,
+    VolatilitySleeveV1,
+    Vote,
 )
-from market_dashboard.aperture.regime_policy import THRESHOLDS as P, RULES_FINGERPRINT
+from market_dashboard.aperture.regime_policy import RULES_FINGERPRINT
+from market_dashboard.aperture.regime_policy import THRESHOLDS as P
 
 
 def finite(value):
@@ -24,10 +36,10 @@ def predicates(**values):
 
 
 def sleeve_fields(state, checks=(), reasons=()):
-    return dict(state=state, score={State.GREEN: 1, State.YELLOW: 0, State.RED: -1}.get(state),
-                predicates=checks, reasons=tuple(reasons) + tuple(
+    return {'state': state, 'score': {State.GREEN: 1, State.YELLOW: 0, State.RED: -1}.get(state),
+                'predicates': checks, 'reasons': tuple(reasons) + tuple(
                     ('MISSING_' if p.passed is None else 'FAILED_') + p.name
-                    for p in checks if p.passed is not True))
+                    for p in checks if p.passed is not True)}
 
 
 def index_sleeve(inputs):
@@ -87,9 +99,9 @@ def breadth_sleeve(inputs, structure=None):
         equal_sma50_count=sum(positive(i.close,i.sma50) and i.close==i.sma50 for i in inputs))
 
 
-def internals_sleeve(leadership, population):
+def internals_sleeve(leadership, population, *, kind="SUB_INDUSTRY", output_type=InternalsSleeveV1):
     symbols = leadership.symbols if leadership else ()
-    groups = [g for g in leadership.groups if g.group_type=='SUB_INDUSTRY'] if leadership else []
+    groups = [g for g in leadership.groups if g.group_type==kind] if leadership else []
     eligible = [g for g in groups if g.leadership_rank is not None and
                 g.valid_RS_comp_count >= LEADERSHIP_POLICY.minimum_group_members and g.coverage >= LEADERSHIP_POLICY.minimum_coverage and
                 g.median_RS_comp is not None and g.median_rotation_delta is not None]
@@ -99,15 +111,15 @@ def internals_sleeve(leadership, population):
     d = fraction([g.median_RS_comp for g in eligible], len(groups), lambda v: v>=P.group_leading_threshold)
     e = fraction([g.median_rotation_delta for g in eligible], len(groups), lambda v: v>0)
     checks = predicates(COMPOSITE_COVERAGE_COUNT=member_gate(a), ROTATION_COVERAGE_COUNT=member_gate(b),
-        DELTA_COVERAGE_COUNT=member_gate(c), SUB_INDUSTRY_COUNT=len(eligible)>=P.minimum_groups)
+        DELTA_COVERAGE_COUNT=member_gate(c), **{kind+"_COUNT": len(eligible)>=P.minimum_groups})
     values = (b.fraction,c.fraction,d.fraction,e.fraction)
     state = (State.UNKNOWN if not all(p.passed for p in checks) else
              State.GREEN if all(v>=t for v,t in zip(values,P.internals_green)) else
              State.RED if all(v<t for v,t in zip(values,P.internals_red)) else State.YELLOW)
     names = tuple(sorted(g.group_id for g in eligible))
-    return InternalsSleeveV1(**sleeve_fields(state, checks), strong_leadership=a, strong_rotation=b,
-        positive_rotation=c, leading_groups=d, improving_groups=e, eligible_sub_industries=names,
-        excluded_sub_industries=tuple(sorted(g.group_id for g in groups if g.group_id not in names)))
+    return output_type(**sleeve_fields(state, checks), strong_leadership=a, strong_rotation=b,
+        positive_rotation=c, leading_groups=d, improving_groups=e, **{("eligible_industries" if kind=="INDUSTRY" else "eligible_sub_industries"): names,
+           ("excluded_industries" if kind=="INDUSTRY" else "excluded_sub_industries"): tuple(sorted(g.group_id for g in groups if g.group_id not in names))})
 
 
 def volatility_sleeve(i):
@@ -183,6 +195,13 @@ def calendar_hash(calendar, session):
 
 
 def evaluate_regime(inputs, *, calendar, previous=None):
+    if inputs.schema_version != "market-regime-input-v1":
+        raise ValueError("V1 regime requires V1 input contract")
+    return _evaluate_regime(inputs, calendar=calendar, previous=previous)
+
+
+def _evaluate_regime(inputs, *, calendar, previous=None, rules_fingerprint=RULES_FINGERPRINT,
+                     output_type=RegimeOutputV1, sleeves_type=SleevesV1, internals_rule=internals_sleeve):
     positions = validate_calendar(calendar)
     if any(type(d) is not date for d in calendar):
         raise ValueError('Date-only exchange calendar required')
@@ -196,7 +215,7 @@ def evaluate_regime(inputs, *, calendar, previous=None):
     memory, continuous = RegimeMemoryV1(), False
     if previous is not None:
         pt = previous.inputs.session_date
-        if pt not in positions or pt>=t or previous.rules_fingerprint!=RULES_FINGERPRINT or previous.inputs.source!=inputs.source:
+        if pt not in positions or pt>=t or previous.rules_fingerprint!=rules_fingerprint or previous.inputs.source!=inputs.source:
             raise ValueError('Previous regime date/source/version mismatch')
         if previous.inputs.calendar_fingerprint!=calendar_hash(calendar,pt):
             raise ValueError('Previous calendar history changed; replay required')
@@ -204,8 +223,8 @@ def evaluate_regime(inputs, *, calendar, previous=None):
             raise ValueError('Previous volatility identity/universe policy mismatch; replay required')
         memory = previous.memory
         continuous = positions[t]==positions[pt]+1
-    sleeves = SleevesV1(index=index_sleeve(inputs.indexes), breadth=breadth_sleeve(inputs.breadth,inputs.structure),
-        internals=internals_sleeve(inputs.leadership,len(inputs.universe.symbols)),
+    sleeves = sleeves_type(index=index_sleeve(inputs.indexes), breadth=breadth_sleeve(inputs.breadth,inputs.structure),
+        internals=internals_rule(inputs.leadership,len(inputs.universe.symbols)),
         volatility=volatility_sleeve(inputs.volatility), style=style_sleeve(inputs.style))
     states = tuple(getattr(sleeves,k).state for k in type(sleeves).model_fields)
     candidate = aggregate_candidate(states)
@@ -216,7 +235,7 @@ def evaluate_regime(inputs, *, calendar, previous=None):
         override_reasons.append('SPOT_VOLATILITY_GE_30')
     state, memory_out, reason = transition(memory,candidate,t,continuous=continuous,override=bool(override_reasons))
     next_session = calendar[positions[t]+1] if positions[t]+1<len(calendar) else None
-    return RegimeOutputV1(rules_fingerprint=RULES_FINGERPRINT, inputs=inputs, sleeves=sleeves, candidate=candidate,
+    return output_type(rules_fingerprint=rules_fingerprint, inputs=inputs, sleeves=sleeves, candidate=candidate,
         status=state or State.UNKNOWN, state=state, previous_state=memory.confirmed_state,
         entered_date=memory_out.entered_date if state is not None else None,
         sessions_in_state=memory_out.confirmed_sessions_in_state if state is not None else 0,

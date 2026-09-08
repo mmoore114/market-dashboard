@@ -185,7 +185,23 @@ def strength(universe, i=T):
         ),
         identity_version="synthetic-security-master-v1",
     )
-    groups = aggregate_groups(ranked, (membership, theme), CALENDAR[i])
+    industry_ids = tuple(f"Synthetic industry {n:02d}" for n in range(1, 13))
+    industry = GroupMembershipV1(
+        provenance=provenance(),
+        group_type="INDUSTRY",
+        group_ids=industry_ids,
+        members=tuple(
+            GroupMemberV1(
+                group_id=industry_ids[j * len(industry_ids) // len(universe.symbols)],
+                source_symbol=s,
+                market_data_symbol=s,
+                identity_reason="SYNTHETIC_EXACT_IDENTITY",
+            )
+            for j, s in enumerate(universe.symbols)
+        ),
+        identity_version="synthetic-security-master-v1",
+    )
+    groups = aggregate_groups(ranked, (membership, industry, theme), CALENDAR[i])
     return LeadershipOutputV1(
         session_date=CALENDAR[i],
         source=SOURCE,
@@ -482,4 +498,61 @@ def build_fixture(rules, scenario="GREEN"):
         **values,
         universe=values["regime"].inputs.universe,
         leadership=values["records"][0].output.inputs.leadership,
+    )
+
+
+def build_industry_fixture(rules, scenario="GREEN"):
+    """Explicit synthetic V2 policy variant; no historical snapshot migration."""
+    from market_dashboard.aperture.industry import (
+        evaluate_industry_decision,
+        evaluate_industry_regime,
+    )
+    from market_dashboard.aperture.industry_contracts import DecisionInputV2
+    from market_dashboard.aperture.industry_policy import DECISION_RULES, REGIME_RULES
+    from market_dashboard.workstation.snapshot_v2 import materialize_v2
+
+    old = build_fixture(rules, scenario)
+    regime = evaluate_industry_regime(old.regime.inputs, calendar=old.calendar)
+    records = []
+    for record in old.records:
+        inputs = record.output.inputs
+        current = DecisionInputV2(
+            **{
+                key: getattr(inputs, key)
+                for key in type(inputs).model_fields
+                if key not in ("schema_version", "regime")
+            },
+            regime=regime,
+        )
+        records.append(
+            record.model_copy(
+                update={
+                    "output": evaluate_industry_decision(current, calendar=old.calendar)
+                }
+            )
+        )
+    versions = old.versions.model_copy(
+        update={
+            "regime": "market-regime-v2",
+            "decision_risk": "decision-risk-v2",
+            "regime_fingerprint": REGIME_RULES,
+            "decision_fingerprint": DECISION_RULES,
+        }
+    )
+    return materialize_v2(
+        snapshot_id=old.snapshot_id + "-industry-v2",
+        generated_at=old.generated_at,
+        as_of_session=old.as_of_session,
+        action_session=old.action_session,
+        mode="FIXTURE",
+        freshness=old.freshness,
+        source=old.source,
+        universe=old.regime.inputs.universe,
+        leadership=old.regime.inputs.leadership,
+        regime=regime,
+        groups=old.groups,
+        rules=old.rules,
+        calendar=old.calendar,
+        versions=versions,
+        records=records,
     )

@@ -258,3 +258,43 @@ identity, earnings, adjusted-history and freshness gates. It never creates histo
 membership/rotation. Retained V1/V2 snapshots preserve their original fingerprints.
 See [published coverage V1](universe-expansion-v1.md) and its completion receipt for
 observed population, source limits, scale verification and scheduler deployment.
+
+## 14. Industry authority and current-setup alignment
+
+Under owner-authorized `AP-PRODUCT-ALIGNMENT-001`, the primary comparison is the
+captured **INDUSTRY** level, preserving all 75 distinct full parent paths (73 leaf
+labels). GROUP is broader navigation; SUB_INDUSTRY and themes are secondary
+context. The owner explicitly resolved this column choice on September 8.
+
+`decision-risk-v2` and `market-regime-v2` use industries' own memberships,
+coverage and eligible ranking population. The not-lagging rule remains
+rank ≤ ceil(0.8 × eligible industry count); regime internals use industry medians.
+Subindustry is no longer an independent V2 actionability gate. V1 contracts,
+registry addresses, snapshots and decisions retain their original identities.
+New version selections default to the coherent V2 policy pair; the installed
+production runtime remains pinned to the pre-alignment release until a separately
+authorized integration. No production activation occurs in this task.
+
+Research follows market environment → themes/groups → leaders → current setups
+→ candidates → sizing. Structure, Setup, Lifecycle, Leadership, Extension and
+Actionability remain independent. `current-setup-display-v1` selects one valid,
+evaluated, same-direction active instance by lifecycle relevance and stable ID.
+It does not select a sole engine setup or replace decision eligibility. Other
+instances and available lifecycle history stay in detail.
+
+The EP-only corporate-action QA error is detector-scoped at origin, while the
+written Decision V1 policy applies setup errors globally. V2 retains that veto
+pending an explicit error-scope policy decision. No error is suppressed.
+See the [alignment contract](product-alignment-001.md) for the complete trace,
+threshold interpretation, compatibility boundary and remaining decision.
+
+
+## 15. Versioned secondary taxonomy validation
+
+`AP-PREINTEGRATION-001` adds `market-regime-input-v2` for new industry-policy
+materialization. Secondary subindustry ambiguity remains disclosed without vetoing
+valid industry evidence; shared source/date/universe/calendar/version checks and
+industry membership integrity remain enforced. V1 retains its original overlap
+rejection, and existing V2 outputs with V1 inputs retain their meaning and registry.
+No INDUSTRY threshold, current-setup selection or global EP-veto policy changes.
+See [the pre-integration review](preintegration-review-001.md).

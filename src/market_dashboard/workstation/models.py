@@ -17,6 +17,13 @@ from market_dashboard.aperture.decision_policy import (
     RULES_FINGERPRINT as DECISION_RULES,
 )
 from market_dashboard.aperture.decision_policy import validate_rules
+from market_dashboard.aperture.industry_contracts import DecisionRiskOutputV2
+from market_dashboard.aperture.industry_policy import (
+    DECISION_RULES as INDUSTRY_DECISION_RULES,
+)
+from market_dashboard.aperture.industry_policy import (
+    REGIME_RULES as INDUSTRY_REGIME_RULES,
+)
 from market_dashboard.aperture.leadership import RULES_FINGERPRINT as LEADERSHIP_RULES
 from market_dashboard.aperture.leadership import fingerprint
 from market_dashboard.aperture.leadership_contracts import (
@@ -50,21 +57,29 @@ class VersionsV1(ContractModel):
     )
     setup: Literal["setup-engine-v1", "setup-engine-v2"] = "setup-engine-v2"
     leadership: Literal["leadership-formulas-v1"] = "leadership-formulas-v1"
-    regime: Literal["market-regime-v1"] = "market-regime-v1"
-    decision_risk: Literal["decision-risk-v1"] = "decision-risk-v1"
+    regime: Literal["market-regime-v1", "market-regime-v2"] = "market-regime-v2"
+    decision_risk: Literal["decision-risk-v1", "decision-risk-v2"] = "decision-risk-v2"
     rules: Literal["aperture-rules-v1"] = "aperture-rules-v1"
     structure_fingerprint: Literal[STRUCTURE_RULES, STRUCTURE_V2_RULES] = (
         STRUCTURE_V2_RULES
     )
     setup_fingerprint: Literal[SETUP_RULES, SETUP_V2_RULES] = SETUP_V2_RULES
     leadership_fingerprint: Literal[LEADERSHIP_RULES] = LEADERSHIP_RULES
-    regime_fingerprint: Literal[REGIME_RULES] = REGIME_RULES
-    decision_fingerprint: Literal[DECISION_RULES] = DECISION_RULES
+    regime_fingerprint: Literal[REGIME_RULES, INDUSTRY_REGIME_RULES] = (
+        INDUSTRY_REGIME_RULES
+    )
+    decision_fingerprint: Literal[DECISION_RULES, INDUSTRY_DECISION_RULES] = (
+        INDUSTRY_DECISION_RULES
+    )
 
     @classmethod
     def v1(cls, **kwargs):
         """Explicit historical generation; existing snapshots carry their versions."""
         return cls(
+            regime="market-regime-v1",
+            decision_risk="decision-risk-v1",
+            regime_fingerprint=REGIME_RULES,
+            decision_fingerprint=DECISION_RULES,
             structure="structure-engine-v1",
             setup="setup-engine-v1",
             structure_fingerprint=STRUCTURE_RULES,
@@ -74,6 +89,17 @@ class VersionsV1(ContractModel):
 
     @model_validator(mode="after")
     def engine_pair(self):
+        expected_policy = {
+            ("market-regime-v1", "decision-risk-v1"): (REGIME_RULES, DECISION_RULES),
+            ("market-regime-v2", "decision-risk-v2"): (
+                INDUSTRY_REGIME_RULES,
+                INDUSTRY_DECISION_RULES,
+            ),
+        }.get((self.regime, self.decision_risk))
+        if expected_policy != (self.regime_fingerprint, self.decision_fingerprint):
+            raise ValueError(
+                "Coherent Regime/Decision version and fingerprint pair required"
+            )
         expected = {
             ("structure-engine-v1", "setup-engine-v1"): (STRUCTURE_RULES, SETUP_RULES),
             ("structure-engine-v2", "setup-engine-v2"): (
@@ -109,7 +135,7 @@ class FunnelV1(ContractModel):
 
 
 class SymbolRecordV1(ContractModel):
-    output: DecisionRiskOutputV1
+    output: DecisionRiskOutputV1 | DecisionRiskOutputV2
     display_name: str
     volume: float | None = Field(ge=0)
     volume_reason: str | None

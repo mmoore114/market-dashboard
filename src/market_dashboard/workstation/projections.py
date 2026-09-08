@@ -81,8 +81,8 @@ def group_summary(group):
     return GroupSummaryV1(**{k: getattr(group, k) for k in GroupSummaryV1.model_fields})
 
 
-def brief(snapshot, meta):
-    groups = [g for g in snapshot.groups if g.group_type == "SUB_INDUSTRY"]
+def brief(snapshot, meta, *, group_kind="SUB_INDUSTRY"):
+    groups = [g for g in snapshot.groups if g.group_type == group_kind]
     ranked = sorted(
         (g for g in groups if g.leadership_rank is not None),
         key=lambda g: (g.leadership_rank, g.group_id),
@@ -219,7 +219,9 @@ def rules_view(snapshot, meta):
             ),
         ),
         RuleSectionV1(
-            title="Sub-industry",
+            title="Industry"
+            if snapshot.versions.decision_risk == "decision-risk-v2"
+            else "Sub-industry (stored V1 policy)",
             lines=(
                 f"Leadership rank ≤ ceil({POLICY.group_rank_fraction:g} × eligible group count). Themes do not vote.",
             ),

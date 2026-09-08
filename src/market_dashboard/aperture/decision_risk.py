@@ -1,19 +1,33 @@
 """Composes completed evidence into a transparent, opt-in decision ladder."""
-from market_dashboard.aperture.regime_policy import RULES_FINGERPRINT as REGIME_RULES
-from market_dashboard.aperture.regime import calendar_hash
-from market_dashboard.aperture.setup_contracts import TERMINAL
 from market_dashboard.aperture.decision_adapters import validate_inputs
 from market_dashboard.aperture.decision_components import (
-    reason, unique_reasons, extension_evidence, strength_gate, group_gate, size_idea,
+    extension_evidence,
+    group_gate,
+    reason,
+    size_idea,
+    strength_gate,
+    unique_reasons,
+)
+from market_dashboard.aperture.decision_contracts import (
+    DecisionEvidenceV1,
+    DecisionGateV1,
+    DecisionRiskOutputV1,
+    DecisionState,
+    Direction,
+    Eligibility,
+    ExtensionInputV1,
+    RegimeGateV1,
+    RegimeState,
+    SetupActionEvidenceV1,
+    SizingInputV1,
 )
 from market_dashboard.aperture.decision_events import evaluate_earnings
-from market_dashboard.aperture.decision_contracts import (
-    Direction, DecisionState, Eligibility, RegimeState, RegimeGateV1, ExtensionInputV1,
-    SizingInputV1, DecisionGateV1, SetupActionEvidenceV1, DecisionEvidenceV1, DecisionRiskOutputV1,
-)
+from market_dashboard.aperture.regime import calendar_hash
+from market_dashboard.aperture.regime_policy import RULES_FINGERPRINT as REGIME_RULES
+from market_dashboard.aperture.setup_contracts import TERMINAL
 
 
-def regime_gate(inputs):
+def regime_gate(inputs, *, rules_fingerprint=REGIME_RULES):
     r=inputs.regime
     f=inputs.features
     reasons=[]
@@ -28,8 +42,8 @@ def regime_gate(inputs):
         reasons.append(reason('REGIME_UNIVERSE_MISMATCH','Regime must use the same dated research universe.'))
     if r.inputs.calendar_fingerprint!=f.calendar_fingerprint:
         reasons.append(reason('REGIME_CALENDAR_MISMATCH','Regime must use the same exchange-calendar prefix.'))
-    if r.rules_fingerprint!=REGIME_RULES:
-        reasons.append(reason('REGIME_VERSION_MISMATCH','Current Market Regime V1 rules are required.'))
+    if r.rules_fingerprint!=rules_fingerprint:
+        reasons.append(reason('REGIME_VERSION_MISMATCH','Current Market Regime V1 rules are required.' if rules_fingerprint==REGIME_RULES else 'Current Market Regime V2 rules are required.'))
     if r.eligible_from_session is not None and r.eligible_from_session<=f.session_date:
         reasons.append(reason('REGIME_SAME_SESSION_INELIGIBLE','Regime cannot authorize same-session action.'))
     elif r.eligible_from_session!=inputs.action_session:
@@ -50,15 +64,24 @@ def regime_gate(inputs):
 
 
 def evaluate_decision(inputs, *, calendar, validation_cache=None):
-    inputs=validate_inputs(inputs,calendar,validation_cache=validation_cache)
+    return _evaluate_decision(inputs, calendar=calendar, validation_cache=validation_cache)
+
+
+def _evaluate_decision(inputs, *, calendar, validation_cache=None, input_model=None,
+                       group_rule=group_gate, group_name="SUB_INDUSTRY", regime_rules=REGIME_RULES,
+                       output_type=DecisionRiskOutputV1, decision_type=DecisionEvidenceV1,
+                       setup_type=SetupActionEvidenceV1):
+    from market_dashboard.aperture.decision_contracts import DecisionInputV1
+    inputs=validate_inputs(inputs,calendar,validation_cache=validation_cache,
+                           input_model=input_model or DecisionInputV1)
     f=inputs.features
     extension=extension_evidence(ExtensionInputV1(features=f,direction=inputs.direction),inputs.rules)
     earnings=evaluate_earnings(symbol=f.symbol,session=f.session_date,action_session=inputs.action_session,
         completed_at=inputs.completed_at,events=inputs.events,coverage=inputs.event_coverage,calendar=calendar,rules=inputs.rules)
     symbol_strength=next((s for s in inputs.leadership.symbols if s.inputs.symbol==f.symbol),None) if inputs.leadership else None
     strength=strength_gate(symbol_strength)
-    group=group_gate(f.symbol,inputs.leadership)
-    regime=regime_gate(inputs)
+    group=group_rule(f.symbol,inputs.leadership)
+    regime=regime_gate(inputs, rules_fingerprint=regime_rules)
     sizing=size_idea(SizingInputV1(symbol=f.symbol,direction=inputs.direction,session_date=f.session_date,
         action_session=inputs.action_session,proposal=inputs.sizing,wilder_atr14=f.wilder_atr14,
         regime=regime,earnings=earnings),inputs.rules)
@@ -80,7 +103,7 @@ def evaluate_decision(inputs, *, calendar, validation_cache=None):
         (reason('LONG_PROMOTION_ENABLED' if inputs.direction==Direction.LONG else 'SHORT_PROMOTION_DISABLED',
                 'V1 promotion beyond WATCH is enabled only for LONG.'),))
     gate('REGIME',DecisionState.TRADE,regime.eligible,regime.reasons)
-    gate('SUB_INDUSTRY',DecisionState.TRADE,group.status=='NOT_LAGGING',group.reasons)
+    gate(group_name,DecisionState.TRADE,group.status=='NOT_LAGGING',group.reasons)
     setup_evidence=[]
     setup_errors=inputs.setups.errors if inputs.setups else ()
     for e in sorted(inputs.setups.setups if inputs.setups else (),key=lambda e:e.instance.setup_id):
@@ -97,7 +120,7 @@ def evaluate_decision(inputs, *, calendar, validation_cache=None):
         if setup_errors: rs.append(reason('SETUP_ENGINE_ERRORS','Setup engine errors prevent ACT qualification.'))
         eligible=not rs
         if eligible: rs.append(reason('SETUP_QUALIFIES','This setup qualifies independently; no primary setup is selected.'))
-        setup_evidence.append(SetupActionEvidenceV1(setup_id=i.setup_id,family=i.family,direction=i.direction,status=i.status,
+        setup_evidence.append(setup_type(setup_id=i.setup_id,family=i.family,direction=i.direction,status=i.status,
             active=active,evaluated=e.evaluated,replay_required=i.replay_required,setup_eligible=eligible,
             act_eligible=False,invalidation_level=e.invalidation_level,reasons=tuple(rs)))
     qualifying=tuple(e.setup_id for e in setup_evidence if e.setup_eligible)
@@ -118,9 +141,9 @@ def evaluate_decision(inputs, *, calendar, validation_cache=None):
             break
     setup_evidence=tuple(e.model_copy(update={'act_eligible':state==DecisionState.ACT and e.setup_eligible}) for e in setup_evidence)
     vetoes=unique_reasons(r for g in gates if not g.passed for r in g.reasons)
-    decision=DecisionEvidenceV1(symbol=f.symbol,direction=inputs.direction,state=state,gates=tuple(gates),setups=setup_evidence,
+    decision=decision_type(symbol=f.symbol,direction=inputs.direction,state=state,gates=tuple(gates),setups=setup_evidence,
         qualifying_setup_ids=qualifying,act_setup_ids=qualifying if state==DecisionState.ACT else (),reasons=vetoes)
-    return DecisionRiskOutputV1(inputs=inputs,calendar_id=f.source.calendar_id,calendar_fingerprint=f.calendar_fingerprint,
+    return output_type(inputs=inputs,calendar_id=f.source.calendar_id,calendar_fingerprint=f.calendar_fingerprint,
         action_calendar_fingerprint=calendar_hash(calendar,inputs.action_session),aperture_rules_fingerprint=inputs.rules.logical_fingerprint,
         extension=extension,earnings=earnings,strength=strength,group=group,regime=regime,sizing=sizing,decision=decision)
 

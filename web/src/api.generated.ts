@@ -174,6 +174,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v2/research/brief": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Research Brief */
+    get: operations["research_brief_api_v2_research_brief_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v2/research/groups": {
     parameters: {
       query?: never;
@@ -698,6 +715,24 @@ export interface components {
       /** Warn Before Days */
       warn_before_days: number;
     };
+    /**
+     * CurrentSetupV1
+     * @description Display-only selection; never a replacement for canonical eligibility.
+     */
+    CurrentSetupV1: {
+      /**
+       * Schema Version
+       * @default current-setup-display-v1
+       * @constant
+       */
+      schema_version: "current-setup-display-v1";
+      setup?: components["schemas"]["SetupReviewV1"] | null;
+      /**
+       * State
+       * @enum {string}
+       */
+      state: "CURRENT" | "NONE" | "UNAVAILABLE";
+    };
     /** DatedProvenanceV1 */
     DatedProvenanceV1: {
       /** Bootstrap */
@@ -765,6 +800,41 @@ export interface components {
        */
       threshold_version: "decision-risk-thresholds-v1";
     };
+    /** DecisionEvidenceV2 */
+    DecisionEvidenceV2: {
+      /** Act Setup Ids */
+      act_setup_ids: string[];
+      direction: components["schemas"]["Direction"];
+      /**
+       * Formula Version
+       * @default decision-risk-formulas-v2
+       * @constant
+       */
+      formula_version: "decision-risk-formulas-v2";
+      /** Gates */
+      gates: components["schemas"]["DecisionGateV1"][];
+      /** Qualifying Setup Ids */
+      qualifying_setup_ids: string[];
+      /** Reasons */
+      reasons: components["schemas"]["ReasonV1"][];
+      /**
+       * Rules Fingerprint
+       * @default bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab
+       * @constant
+       */
+      rules_fingerprint: "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab";
+      /** Setups */
+      setups: components["schemas"]["SetupActionEvidenceV2"][];
+      state: components["schemas"]["DecisionState"];
+      /** Symbol */
+      symbol: string;
+      /**
+       * Threshold Version
+       * @default decision-risk-thresholds-v2
+       * @constant
+       */
+      threshold_version: "decision-risk-thresholds-v2";
+    };
     /** DecisionFeaturesV1 */
     DecisionFeaturesV1: {
       /** Calendar Fingerprint */
@@ -829,6 +899,48 @@ export interface components {
        * @constant
        */
       schema_version: "decision-risk-input-v1";
+      /** Setups */
+      setups:
+        | components["schemas"]["SetupOutputV1"]
+        | components["schemas"]["SetupOutputV2"]
+        | null;
+      sizing: components["schemas"]["SizingProposalV1"];
+      /** Structure */
+      structure:
+        | components["schemas"]["StructureEvidenceV1"]
+        | components["schemas"]["StructureEvidenceV2"]
+        | null;
+      universe: components["schemas"]["UniverseDecisionInputV1"];
+    };
+    /** DecisionInputV2 */
+    DecisionInputV2: {
+      /**
+       * Action Session
+       * Format: date
+       */
+      action_session: string;
+      /**
+       * Completed At
+       * Format: date-time
+       */
+      completed_at: string;
+      direction: components["schemas"]["Direction"];
+      event_coverage?: components["schemas"]["EventCoverageV1"] | null;
+      /**
+       * Events
+       * @default []
+       */
+      events: components["schemas"]["EventInputV1"][];
+      features: components["schemas"]["DecisionFeaturesV1"];
+      leadership: components["schemas"]["LeadershipOutputV1"] | null;
+      regime: components["schemas"]["RegimeOutputV2"] | null;
+      rules: components["schemas"]["ApertureRules"];
+      /**
+       * Schema Version
+       * @default decision-risk-input-v2
+       * @constant
+       */
+      schema_version: "decision-risk-input-v2";
       /** Setups */
       setups:
         | components["schemas"]["SetupOutputV1"]
@@ -951,12 +1063,18 @@ export interface components {
       active_setups: components["schemas"]["SetupReviewV1"][];
       /** Blockers */
       blockers: components["schemas"]["BlockerV1"][];
+      current_setup: components["schemas"]["CurrentSetupV1"];
       /** Historical Count */
       historical_count: number;
+      industry: components["schemas"]["GroupContextV1"] | null;
+      /** Memberships */
+      memberships: components["schemas"]["GroupContextV1"][];
       /** Notes */
       notes: string[];
       /** Opposite Direction Count */
       opposite_direction_count: number;
+      /** Policy Version */
+      policy_version: string;
       /**
        * Schema Version
        * @default decision-review-v1
@@ -1030,6 +1148,67 @@ export interface components {
        * @constant
        */
       threshold_version: "decision-risk-thresholds-v1";
+    };
+    /** DecisionRiskOutputV2 */
+    DecisionRiskOutputV2: {
+      /** Action Calendar Fingerprint */
+      action_calendar_fingerprint: string;
+      /** Aperture Rules Fingerprint */
+      aperture_rules_fingerprint: string;
+      /** Calendar Fingerprint */
+      calendar_fingerprint: string;
+      /** Calendar Id */
+      calendar_id: string;
+      decision: components["schemas"]["DecisionEvidenceV2"];
+      earnings: components["schemas"]["EarningsEvidenceV1"];
+      /**
+       * Engine Version
+       * @default decision-risk-v2
+       * @constant
+       */
+      engine_version: "decision-risk-v2";
+      extension: components["schemas"]["ExtensionEvidenceV1"];
+      /**
+       * Feature Version
+       * @default decision-risk-features-v1
+       * @constant
+       */
+      feature_version: "decision-risk-features-v1";
+      /**
+       * Formula Version
+       * @default decision-risk-formulas-v2
+       * @constant
+       */
+      formula_version: "decision-risk-formulas-v2";
+      group: components["schemas"]["GroupGateV2"];
+      inputs: components["schemas"]["DecisionInputV2"];
+      regime: components["schemas"]["RegimeGateV1"];
+      /**
+       * Research Status
+       * @default experimental_uncalibrated
+       * @constant
+       */
+      research_status: "experimental_uncalibrated";
+      /**
+       * Rules Fingerprint
+       * @default bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab
+       * @constant
+       */
+      rules_fingerprint: "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab";
+      /**
+       * Schema Version
+       * @default decision-risk-output-v2
+       * @constant
+       */
+      schema_version: "decision-risk-output-v2";
+      sizing: components["schemas"]["SizingResultV1"];
+      strength: components["schemas"]["StrengthGateV1"];
+      /**
+       * Threshold Version
+       * @default decision-risk-thresholds-v2
+       * @constant
+       */
+      threshold_version: "decision-risk-thresholds-v2";
     };
     /**
      * DecisionState
@@ -1343,10 +1522,13 @@ export interface components {
         | components["schemas"]["NormalizedCurrentGroupProvenanceV3"]
         | components["schemas"]["NormalizedDatedProvenanceV1"]
         | components["schemas"]["NormalizedDecisionEvidenceV1"]
+        | components["schemas"]["NormalizedDecisionEvidenceV2"]
         | components["schemas"]["NormalizedDecisionFeaturesV1"]
         | components["schemas"]["NormalizedDecisionGateV1"]
         | components["schemas"]["NormalizedDecisionInputV1"]
+        | components["schemas"]["NormalizedDecisionInputV2"]
         | components["schemas"]["NormalizedDecisionRiskOutputV1"]
+        | components["schemas"]["NormalizedDecisionRiskOutputV2"]
         | components["schemas"]["NormalizedDetectionV1"]
         | components["schemas"]["NormalizedEarningsEvidenceV1"]
         | components["schemas"]["NormalizedEventCoverageV1"]
@@ -1359,11 +1541,13 @@ export interface components {
         | components["schemas"]["NormalizedGeometryV1"]
         | components["schemas"]["NormalizedGroupEvidenceV1"]
         | components["schemas"]["NormalizedGroupGateV1"]
+        | components["schemas"]["NormalizedGroupGateV2"]
         | components["schemas"]["NormalizedGroupMemberV1"]
         | components["schemas"]["NormalizedIndexInputV1"]
         | components["schemas"]["NormalizedIndexSleeveV1"]
         | components["schemas"]["NormalizedIndexVoteV1"]
         | components["schemas"]["NormalizedInternalsSleeveV1"]
+        | components["schemas"]["NormalizedInternalsSleeveV2"]
         | components["schemas"]["NormalizedLeadershipOutputV1"]
         | components["schemas"]["NormalizedLegacyStrengthContextV1"]
         | components["schemas"]["NormalizedMappingUniverseRules"]
@@ -1377,9 +1561,11 @@ export interface components {
         | components["schemas"]["NormalizedReasonV1"]
         | components["schemas"]["NormalizedRegimeGateV1"]
         | components["schemas"]["NormalizedRegimeInputV1"]
+        | components["schemas"]["NormalizedRegimeInputV2"]
         | components["schemas"]["NormalizedRegimeMemoryV1"]
         | components["schemas"]["NormalizedRegimeMultipliers"]
         | components["schemas"]["NormalizedRegimeOutputV1"]
+        | components["schemas"]["NormalizedRegimeOutputV2"]
         | components["schemas"]["NormalizedResearchUniverseRules"]
         | components["schemas"]["NormalizedResearchUniverseV1"]
         | components["schemas"]["NormalizedResidualV1"]
@@ -1387,6 +1573,7 @@ export interface components {
         | components["schemas"]["NormalizedRiskRules"]
         | components["schemas"]["NormalizedRuleV1"]
         | components["schemas"]["NormalizedSetupActionEvidenceV1"]
+        | components["schemas"]["NormalizedSetupActionEvidenceV2"]
         | components["schemas"]["NormalizedSetupEvidenceV1"]
         | components["schemas"]["NormalizedSetupInputV1"]
         | components["schemas"]["NormalizedSetupInputV2"]
@@ -1400,6 +1587,7 @@ export interface components {
         | components["schemas"]["NormalizedSizingProposalV1"]
         | components["schemas"]["NormalizedSizingResultV1"]
         | components["schemas"]["NormalizedSleevesV1"]
+        | components["schemas"]["NormalizedSleevesV2"]
         | components["schemas"]["NormalizedSpotVolatilityIdentityV1"]
         | components["schemas"]["NormalizedStrengthContextV1"]
         | components["schemas"]["NormalizedStrengthEvidenceV1"]
@@ -1562,6 +1750,27 @@ export interface components {
       /** Window */
       window: number;
     };
+    /** GroupContextV1 */
+    GroupContextV1: {
+      /** Coverage */
+      coverage: number;
+      /** Eligible Count */
+      eligible_count: number;
+      /** Group Id */
+      group_id: string;
+      /** Level */
+      level: string;
+      /** Name */
+      name: string;
+      /** Parent */
+      parent: string;
+      /** Rank */
+      rank: number | null;
+      /** Total Members */
+      total_members: number;
+      /** Valid Members */
+      valid_members: number;
+    };
     /** GroupEvidenceV1 */
     GroupEvidenceV1: {
       /** Coverage */
@@ -1703,6 +1912,44 @@ export interface components {
        */
       threshold_version: "decision-risk-thresholds-v1";
     };
+    /** GroupGateV2 */
+    GroupGateV2: {
+      /**
+       * Formula Version
+       * @default decision-risk-formulas-v2
+       * @constant
+       */
+      formula_version: "decision-risk-formulas-v2";
+      /** Group Rotation Rank */
+      group_rotation_rank: number | null;
+      industry: components["schemas"]["GroupEvidenceV1"] | null;
+      /** Rank Limit */
+      rank_limit: number | null;
+      /** Reasons */
+      reasons: components["schemas"]["ReasonV1"][];
+      /** Rotation Rank Advantage */
+      rotation_rank_advantage: number | null;
+      /**
+       * Rules Fingerprint
+       * @default bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab
+       * @constant
+       */
+      rules_fingerprint: "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab";
+      /**
+       * Status
+       * @enum {string}
+       */
+      status: "NOT_LAGGING" | "LAGGING" | "UNKNOWN";
+      sub_industry: components["schemas"]["GroupEvidenceV1"] | null;
+      /** Themes */
+      themes: components["schemas"]["GroupEvidenceV1"][];
+      /**
+       * Threshold Version
+       * @default decision-risk-thresholds-v2
+       * @constant
+       */
+      threshold_version: "decision-risk-thresholds-v2";
+    };
     /** GroupMemberV1 */
     GroupMemberV1: {
       /** Group Id */
@@ -1820,6 +2067,109 @@ export interface components {
       sma20_change_5: number | null;
       vote: components["schemas"]["Vote"];
     };
+    /** IndustryInputViewV2 */
+    IndustryInputViewV2: {
+      /**
+       * Action Session
+       * Format: date
+       */
+      action_session: string;
+      /**
+       * Completed At
+       * Format: date-time
+       */
+      completed_at: string;
+      direction: components["schemas"]["Direction"];
+      event_coverage?: components["schemas"]["EventCoverageV1"] | null;
+      /**
+       * Events
+       * @default []
+       */
+      events: components["schemas"]["EventInputV1"][];
+      features: components["schemas"]["DecisionFeaturesV1"];
+      leadership_ref: components["schemas"]["EvidenceRefV2"] | null;
+      regime_ref: components["schemas"]["EvidenceRefV2"] | null;
+      rules: components["schemas"]["ApertureRules"];
+      /**
+       * Schema Version
+       * @default industry-input-view-v2
+       * @constant
+       */
+      schema_version: "industry-input-view-v2";
+      /** Setups */
+      setups:
+        | components["schemas"]["SetupOutputV1"]
+        | components["schemas"]["SetupOutputV2"]
+        | null;
+      sizing: components["schemas"]["SizingProposalV1"];
+      /** Structure */
+      structure:
+        | components["schemas"]["StructureEvidenceV1"]
+        | components["schemas"]["StructureEvidenceV2"]
+        | null;
+      universe: components["schemas"]["UniverseDecisionInputV1"];
+    };
+    /** IndustryOutputViewV2 */
+    IndustryOutputViewV2: {
+      /** Action Calendar Fingerprint */
+      action_calendar_fingerprint: string;
+      /** Aperture Rules Fingerprint */
+      aperture_rules_fingerprint: string;
+      /** Calendar Fingerprint */
+      calendar_fingerprint: string;
+      /** Calendar Id */
+      calendar_id: string;
+      decision: components["schemas"]["DecisionEvidenceV2"];
+      earnings: components["schemas"]["EarningsEvidenceV1"];
+      /**
+       * Engine Version
+       * @default decision-risk-v2
+       * @constant
+       */
+      engine_version: "decision-risk-v2";
+      extension: components["schemas"]["ExtensionEvidenceV1"];
+      /**
+       * Feature Version
+       * @default decision-risk-features-v1
+       * @constant
+       */
+      feature_version: "decision-risk-features-v1";
+      /**
+       * Formula Version
+       * @default decision-risk-formulas-v2
+       * @constant
+       */
+      formula_version: "decision-risk-formulas-v2";
+      group: components["schemas"]["GroupGateV2"];
+      inputs: components["schemas"]["IndustryInputViewV2"];
+      regime: components["schemas"]["RegimeGateV1"];
+      /**
+       * Research Status
+       * @default experimental_uncalibrated
+       * @constant
+       */
+      research_status: "experimental_uncalibrated";
+      /**
+       * Rules Fingerprint
+       * @default bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab
+       * @constant
+       */
+      rules_fingerprint: "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab";
+      /**
+       * Schema Version
+       * @default industry-output-view-v2
+       * @constant
+       */
+      schema_version: "industry-output-view-v2";
+      sizing: components["schemas"]["SizingResultV1"];
+      strength: components["schemas"]["StrengthGateV1"];
+      /**
+       * Threshold Version
+       * @default decision-risk-thresholds-v2
+       * @constant
+       */
+      threshold_version: "decision-risk-thresholds-v2";
+    };
     /** InputClockBindingV1 */
     InputClockBindingV1: {
       /** Artifact Sha256 */
@@ -1847,6 +2197,28 @@ export interface components {
       eligible_sub_industries: string[];
       /** Excluded Sub Industries */
       excluded_sub_industries: string[];
+      improving_groups: components["schemas"]["FractionV1"];
+      leading_groups: components["schemas"]["FractionV1"];
+      positive_rotation: components["schemas"]["FractionV1"];
+      /**
+       * Predicates
+       * @default []
+       */
+      predicates: components["schemas"]["PredicateV1"][];
+      /** Reasons */
+      reasons: string[];
+      /** Score */
+      score: (-1 | 0 | 1) | null;
+      state: components["schemas"]["State"];
+      strong_leadership: components["schemas"]["FractionV1"];
+      strong_rotation: components["schemas"]["FractionV1"];
+    };
+    /** InternalsSleeveV2 */
+    InternalsSleeveV2: {
+      /** Eligible Industries */
+      eligible_industries: string[];
+      /** Excluded Industries */
+      excluded_industries: string[];
       improving_groups: components["schemas"]["FractionV1"];
       leading_groups: components["schemas"]["FractionV1"];
       positive_rotation: components["schemas"]["FractionV1"];
@@ -2198,6 +2570,28 @@ export interface components {
        */
       model_type: "5";
     };
+    /** NormalizedDecisionEvidenceV2 */
+    NormalizedDecisionEvidenceV2: {
+      /** Fields */
+      fields: [
+        string,
+        "decision-risk-formulas-v2",
+        "decision-risk-thresholds-v2",
+        "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab",
+        components["schemas"]["Direction"],
+        components["schemas"]["DecisionState"],
+        number[],
+        number[],
+        string[],
+        string[],
+        number[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "93";
+    };
     /** NormalizedDecisionFeaturesV1 */
     NormalizedDecisionFeaturesV1: {
       /** Fields */
@@ -2257,6 +2651,31 @@ export interface components {
        */
       model_type: "8";
     };
+    /** NormalizedDecisionInputV2 */
+    NormalizedDecisionInputV2: {
+      /** Fields */
+      fields: [
+        "decision-risk-input-v2",
+        number,
+        components["schemas"]["Direction"],
+        string,
+        string,
+        number,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number[],
+        number | null,
+        number,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "94";
+    };
     /** NormalizedDecisionRiskOutputV1 */
     NormalizedDecisionRiskOutputV1: {
       /** Fields */
@@ -2286,6 +2705,36 @@ export interface components {
        * @enum {string}
        */
       model_type: "9";
+    };
+    /** NormalizedDecisionRiskOutputV2 */
+    NormalizedDecisionRiskOutputV2: {
+      /** Fields */
+      fields: [
+        "decision-risk-formulas-v2",
+        "decision-risk-thresholds-v2",
+        "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab",
+        "decision-risk-output-v2",
+        "decision-risk-v2",
+        "decision-risk-features-v1",
+        "experimental_uncalibrated",
+        number,
+        string,
+        string,
+        string,
+        string,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "95";
     };
     /** NormalizedDetectionV1 */
     NormalizedDetectionV1: {
@@ -2536,6 +2985,28 @@ export interface components {
        */
       model_type: "21";
     };
+    /** NormalizedGroupGateV2 */
+    NormalizedGroupGateV2: {
+      /** Fields */
+      fields: [
+        "decision-risk-formulas-v2",
+        "decision-risk-thresholds-v2",
+        "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab",
+        "NOT_LAGGING" | "LAGGING" | "UNKNOWN",
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number[],
+        number[],
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "96";
+    };
     /** NormalizedGroupMemberV1 */
     NormalizedGroupMemberV1: {
       /** Fields */
@@ -2617,6 +3088,28 @@ export interface components {
        * @enum {string}
        */
       model_type: "26";
+    };
+    /** NormalizedInternalsSleeveV2 */
+    NormalizedInternalsSleeveV2: {
+      /** Fields */
+      fields: [
+        components["schemas"]["State"],
+        (-1 | 0 | 1) | null,
+        string[],
+        number[],
+        number,
+        number,
+        number,
+        number,
+        number,
+        string[],
+        string[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "97";
     };
     /** NormalizedLeadershipOutputV1 */
     NormalizedLeadershipOutputV1: {
@@ -2802,6 +3295,28 @@ export interface components {
        */
       model_type: "39";
     };
+    /** NormalizedRegimeInputV2 */
+    NormalizedRegimeInputV2: {
+      /** Fields */
+      fields: [
+        "market-regime-input-v2",
+        string,
+        number,
+        string,
+        number,
+        number[],
+        number[],
+        number[],
+        number,
+        number | null,
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "101";
+    };
     /** NormalizedRegimeMemoryV1 */
     NormalizedRegimeMemoryV1: {
       /** Fields */
@@ -2863,6 +3378,42 @@ export interface components {
        * @enum {string}
        */
       model_type: "42";
+    };
+    /** NormalizedRegimeOutputV2 */
+    NormalizedRegimeOutputV2: {
+      /** Fields */
+      fields: [
+        "market-regime-output-v2",
+        "market-regime-v2",
+        "market-regime-features-v1",
+        "market-regime-thresholds-v2",
+        "experimental_uncalibrated",
+        "f439214090776469fc36e03d8227440e3a6ff979830c39bbc136292af2c26dbd",
+        number,
+        number,
+        components["schemas"]["State"],
+        components["schemas"]["State"],
+        ("GREEN" | "YELLOW" | "RED") | null,
+        ("GREEN" | "YELLOW" | "RED") | null,
+        string | null,
+        number,
+        number,
+        number,
+        string,
+        boolean,
+        string[],
+        number,
+        number,
+        number,
+        number,
+        string | null,
+        string,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "98";
     };
     /** NormalizedResearchUniverseRules */
     NormalizedResearchUniverseRules: {
@@ -2961,6 +3512,31 @@ export interface components {
        * @enum {string}
        */
       model_type: "49";
+    };
+    /** NormalizedSetupActionEvidenceV2 */
+    NormalizedSetupActionEvidenceV2: {
+      /** Fields */
+      fields: [
+        "decision-risk-formulas-v2",
+        "decision-risk-thresholds-v2",
+        "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab",
+        string,
+        components["schemas"]["Family"],
+        components["schemas"]["Direction"],
+        components["schemas"]["Status"],
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        number | null,
+        number[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "99";
     };
     /** NormalizedSetupEvidenceV1 */
     NormalizedSetupEvidenceV1: {
@@ -3256,6 +3832,16 @@ export interface components {
        * @enum {string}
        */
       model_type: "60";
+    };
+    /** NormalizedSleevesV2 */
+    NormalizedSleevesV2: {
+      /** Fields */
+      fields: [number, number, number, number, number];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "100";
     };
     /** NormalizedSpotVolatilityIdentityV1 */
     NormalizedSpotVolatilityIdentityV1: {
@@ -3909,6 +4495,39 @@ export interface components {
       universe: components["schemas"]["ResearchUniverseV1"];
       volatility: components["schemas"]["VolatilityInputV1"];
     };
+    /**
+     * RegimeInputV2
+     * @description Industry authority; secondary path ambiguity stays in shared evidence.
+     *
+     *     Inherited alignment still validates every group identity/date and all shared
+     *     source, calendar, universe and symbol evidence. Industry overlap is invalid.
+     */
+    RegimeInputV2: {
+      /** Breadth */
+      breadth: components["schemas"]["PriceFeaturesV1"][];
+      /** Calendar Fingerprint */
+      calendar_fingerprint: string;
+      /** Indexes */
+      indexes: components["schemas"]["IndexInputV1"][];
+      leadership?: components["schemas"]["LeadershipOutputV1"] | null;
+      /**
+       * Schema Version
+       * @default market-regime-input-v2
+       * @constant
+       */
+      schema_version: "market-regime-input-v2";
+      /**
+       * Session Date
+       * Format: date
+       */
+      session_date: string;
+      source: components["schemas"]["StrengthSourceV1"];
+      structure?: components["schemas"]["StructureBreadthContextV1"] | null;
+      /** Style */
+      style: components["schemas"]["StyleInputV1"][];
+      universe: components["schemas"]["ResearchUniverseV1"];
+      volatility: components["schemas"]["VolatilityInputV1"];
+    };
     /** RegimeMemoryV1 */
     RegimeMemoryV1: {
       /** Candidate */
@@ -4005,6 +4624,81 @@ export interface components {
       /** Yellow Sleeves */
       yellow_sleeves: number;
     };
+    /** RegimeOutputV2 */
+    RegimeOutputV2: {
+      candidate: components["schemas"]["State"];
+      /** Candidate Streak */
+      candidate_streak: number;
+      /** Eligible From Session */
+      eligible_from_session: string | null;
+      /**
+       * Engine Version
+       * @default market-regime-v2
+       * @constant
+       */
+      engine_version: "market-regime-v2";
+      /** Entered Date */
+      entered_date: string | null;
+      /**
+       * Feature Version
+       * @default market-regime-features-v1
+       * @constant
+       */
+      feature_version: "market-regime-features-v1";
+      /** Green Sleeves */
+      green_sleeves: number;
+      /** Inputs */
+      inputs:
+        | components["schemas"]["RegimeInputV1"]
+        | components["schemas"]["RegimeInputV2"];
+      memory: components["schemas"]["RegimeMemoryV1"];
+      /** Override Reasons */
+      override_reasons: string[];
+      /** Previous State */
+      previous_state: ("GREEN" | "YELLOW" | "RED") | null;
+      /** Red Sleeves */
+      red_sleeves: number;
+      /**
+       * Research Status
+       * @default experimental_uncalibrated
+       * @constant
+       */
+      research_status: "experimental_uncalibrated";
+      /** Risk Off Override */
+      risk_off_override: boolean;
+      /**
+       * Rules Fingerprint
+       * @default f439214090776469fc36e03d8227440e3a6ff979830c39bbc136292af2c26dbd
+       * @constant
+       */
+      rules_fingerprint: "f439214090776469fc36e03d8227440e3a6ff979830c39bbc136292af2c26dbd";
+      /**
+       * Schema Version
+       * @default market-regime-output-v2
+       * @constant
+       */
+      schema_version: "market-regime-output-v2";
+      /** Sessions In State */
+      sessions_in_state: number;
+      sleeves: components["schemas"]["SleevesV2"];
+      /** State */
+      state: ("GREEN" | "YELLOW" | "RED") | null;
+      status: components["schemas"]["State"];
+      /**
+       * Threshold Version
+       * @default market-regime-thresholds-v2
+       * @constant
+       */
+      threshold_version: "market-regime-thresholds-v2";
+      /** Timing Reason */
+      timing_reason: string;
+      /** Transition Reason */
+      transition_reason: string;
+      /** Unknown Sleeves */
+      unknown_sleeves: number;
+      /** Yellow Sleeves */
+      yellow_sleeves: number;
+    };
     /** ResearchGroupV1 */
     ResearchGroupV1: {
       /** Act Count */
@@ -4091,6 +4785,7 @@ export interface components {
       RS_comp: number | null;
       /** Rs Rotation */
       RS_rotation: number | null;
+      current_setup: components["schemas"]["CurrentSetupV1"];
       /** Decision */
       decision: string;
       /** Direction */
@@ -4101,6 +4796,7 @@ export interface components {
       group_label: string | null;
       /** History Count */
       history_count: number;
+      industry: components["schemas"]["GroupContextV1"] | null;
       /** Price */
       price: number | null;
       primary_blocker: components["schemas"]["BlockerV1"] | null;
@@ -4288,6 +4984,46 @@ export interface components {
        * @constant
        */
       threshold_version: "decision-risk-thresholds-v1";
+    };
+    /** SetupActionEvidenceV2 */
+    SetupActionEvidenceV2: {
+      /** Act Eligible */
+      act_eligible: boolean;
+      /** Active */
+      active: boolean;
+      direction: components["schemas"]["Direction"];
+      /** Evaluated */
+      evaluated: boolean;
+      family: components["schemas"]["Family"];
+      /**
+       * Formula Version
+       * @default decision-risk-formulas-v2
+       * @constant
+       */
+      formula_version: "decision-risk-formulas-v2";
+      /** Invalidation Level */
+      invalidation_level: number | null;
+      /** Reasons */
+      reasons: components["schemas"]["ReasonV1"][];
+      /** Replay Required */
+      replay_required: boolean;
+      /**
+       * Rules Fingerprint
+       * @default bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab
+       * @constant
+       */
+      rules_fingerprint: "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab";
+      /** Setup Eligible */
+      setup_eligible: boolean;
+      /** Setup Id */
+      setup_id: string;
+      status: components["schemas"]["Status"];
+      /**
+       * Threshold Version
+       * @default decision-risk-thresholds-v2
+       * @constant
+       */
+      threshold_version: "decision-risk-thresholds-v2";
     };
     /** SetupEvidenceV1 */
     SetupEvidenceV1: {
@@ -4829,6 +5565,14 @@ export interface components {
       breadth: components["schemas"]["BreadthSleeveV1"];
       index: components["schemas"]["IndexSleeveV1"];
       internals: components["schemas"]["InternalsSleeveV1"];
+      style: components["schemas"]["StyleSleeveV1"];
+      volatility: components["schemas"]["VolatilitySleeveV1"];
+    };
+    /** SleevesV2 */
+    SleevesV2: {
+      breadth: components["schemas"]["BreadthSleeveV1"];
+      index: components["schemas"]["IndexSleeveV1"];
+      internals: components["schemas"]["InternalsSleeveV2"];
       style: components["schemas"]["StyleSleeveV1"];
       volatility: components["schemas"]["VolatilitySleeveV1"];
     };
@@ -5496,7 +6240,10 @@ export interface components {
     SymbolRecordV1: {
       /** Display Name */
       display_name: string;
-      output: components["schemas"]["DecisionRiskOutputV1"];
+      /** Output */
+      output:
+        | components["schemas"]["DecisionRiskOutputV1"]
+        | components["schemas"]["DecisionRiskOutputV2"];
       /** Volume */
       volume: number | null;
       /** Volume Reason */
@@ -5506,7 +6253,10 @@ export interface components {
     SymbolRecordV2: {
       /** Display Name */
       display_name: string;
-      output: components["schemas"]["DecisionOutputViewV2"];
+      /** Output */
+      output:
+        | components["schemas"]["DecisionOutputViewV2"]
+        | components["schemas"]["IndustryOutputViewV2"];
       output_ref: components["schemas"]["EvidenceRefV2"];
       review: components["schemas"]["DecisionReviewV1"];
       /** Volume */
@@ -5661,16 +6411,18 @@ export interface components {
     VersionsV1: {
       /**
        * Decision Fingerprint
-       * @default 59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8
-       * @constant
+       * @default bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab
+       * @enum {string}
        */
-      decision_fingerprint: "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8";
+      decision_fingerprint:
+        | "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8"
+        | "bf53911524834bb6dc9d518ac0dde6772504f1e0935c070c5e831f482383e0ab";
       /**
        * Decision Risk
-       * @default decision-risk-v1
-       * @constant
+       * @default decision-risk-v2
+       * @enum {string}
        */
-      decision_risk: "decision-risk-v1";
+      decision_risk: "decision-risk-v1" | "decision-risk-v2";
       /**
        * Exposure
        * @default exposure-policy-v3
@@ -5697,16 +6449,18 @@ export interface components {
       leadership_fingerprint: "30178a5ec7822b97a2341f74b5965f1db3997c72a181f02eb421ded492923485";
       /**
        * Regime
-       * @default market-regime-v1
-       * @constant
+       * @default market-regime-v2
+       * @enum {string}
        */
-      regime: "market-regime-v1";
+      regime: "market-regime-v1" | "market-regime-v2";
       /**
        * Regime Fingerprint
-       * @default 3e13d0e057fbc80d806e8eab8fb3b9060b1c3f5de60bf45f8fb33ae15abec01a
-       * @constant
+       * @default f439214090776469fc36e03d8227440e3a6ff979830c39bbc136292af2c26dbd
+       * @enum {string}
        */
-      regime_fingerprint: "3e13d0e057fbc80d806e8eab8fb3b9060b1c3f5de60bf45f8fb33ae15abec01a";
+      regime_fingerprint:
+        | "3e13d0e057fbc80d806e8eab8fb3b9060b1c3f5de60bf45f8fb33ae15abec01a"
+        | "f439214090776469fc36e03d8227440e3a6ff979830c39bbc136292af2c26dbd";
       /**
        * Rules
        * @default aperture-rules-v1
@@ -6423,6 +7177,62 @@ export interface operations {
       };
     };
   };
+  research_brief_api_v2_research_brief_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["BriefV1"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Unprocessable Content */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Service Unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+    };
+  };
   research_groups_api_v2_research_groups_get: {
     parameters: {
       query?: {
@@ -6675,6 +7485,7 @@ export interface operations {
       query?: {
         page?: number;
         page_size?: number;
+        direction?: ("LONG" | "SHORT") | null;
         action?: ("NONE" | "WATCH" | "TRADE" | "ACT") | null;
         structure?:
           | ("NEUTRAL" | "EMERGING" | "UPTREND" | "DETERIORATING" | "DECLINE")

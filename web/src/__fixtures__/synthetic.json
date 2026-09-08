@@ -186,60 +186,60 @@
     },
     "leading_groups": [
       {
-        "eligible_group_count": 6,
-        "group_id": "Advanced computing",
-        "group_type": "SUB_INDUSTRY",
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 12",
+        "group_type": "INDUSTRY",
         "leadership_rank": 1.0,
-        "median_RS_comp": 91.52542372881356,
-        "median_RS_rotation": 90.67796610169492,
+        "median_RS_comp": 96.1864406779661,
+        "median_RS_rotation": 95.33898305084746,
         "median_rotation_delta": -0.8474576271186436,
         "rotation_rank_advantage": 0.0
       },
       {
-        "eligible_group_count": 6,
-        "group_id": "Healthcare systems",
-        "group_type": "SUB_INDUSTRY",
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 11",
+        "group_type": "INDUSTRY",
         "leadership_rank": 2.0,
-        "median_RS_comp": 75.0,
-        "median_RS_rotation": 74.15254237288136,
+        "median_RS_comp": 87.71186440677965,
+        "median_RS_rotation": 86.86440677966101,
         "median_rotation_delta": -0.8474576271186436,
         "rotation_rank_advantage": 0.0
       },
       {
-        "eligible_group_count": 6,
-        "group_id": "Digital infrastructure",
-        "group_type": "SUB_INDUSTRY",
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 10",
+        "group_type": "INDUSTRY",
         "leadership_rank": 3.0,
-        "median_RS_comp": 58.05084745762712,
-        "median_RS_rotation": 58.050847457627114,
+        "median_RS_comp": 79.23728813559322,
+        "median_RS_rotation": 78.38983050847457,
         "median_rotation_delta": -0.8474576271186436,
         "rotation_rank_advantage": 0.0
       },
       {
-        "eligible_group_count": 6,
-        "group_id": "Consumer technology",
-        "group_type": "SUB_INDUSTRY",
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 09",
+        "group_type": "INDUSTRY",
         "leadership_rank": 4.0,
-        "median_RS_comp": 41.101694915254235,
-        "median_RS_rotation": 41.101694915254235,
-        "median_rotation_delta": 0.0,
+        "median_RS_comp": 70.76271186440678,
+        "median_RS_rotation": 69.91525423728814,
+        "median_rotation_delta": -0.8474576271186436,
         "rotation_rank_advantage": 0.0
       },
       {
-        "eligible_group_count": 6,
-        "group_id": "Industrials",
-        "group_type": "SUB_INDUSTRY",
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 08",
+        "group_type": "INDUSTRY",
         "leadership_rank": 5.0,
-        "median_RS_comp": 24.152542372881356,
-        "median_RS_rotation": 24.152542372881356,
-        "median_rotation_delta": 0.0,
+        "median_RS_comp": 62.28813559322034,
+        "median_RS_rotation": 61.4406779661017,
+        "median_rotation_delta": -0.8474576271186436,
         "rotation_rank_advantage": 0.0
       }
     ],
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "c9330ba1067a238b2b282938c17f1415f295e23c79d6ec3d94d0d5fcc5c47f17",
+      "fingerprint": "75bb1256f90eeee006c6030c6d131148af256a756546aedc3be83261f01730d5",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -289,32 +289,52 @@
     ],
     "weakening_groups": [
       {
-        "eligible_group_count": 6,
-        "group_id": "Advanced computing",
-        "group_type": "SUB_INDUSTRY",
-        "leadership_rank": 1.0,
-        "median_RS_comp": 91.52542372881356,
-        "median_RS_rotation": 90.67796610169492,
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 07",
+        "group_type": "INDUSTRY",
+        "leadership_rank": 6.0,
+        "median_RS_comp": 53.813559322033896,
+        "median_RS_rotation": 53.813559322033896,
         "median_rotation_delta": -0.8474576271186436,
         "rotation_rank_advantage": 0.0
       },
       {
-        "eligible_group_count": 6,
-        "group_id": "Digital infrastructure",
-        "group_type": "SUB_INDUSTRY",
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 08",
+        "group_type": "INDUSTRY",
+        "leadership_rank": 5.0,
+        "median_RS_comp": 62.28813559322034,
+        "median_RS_rotation": 61.4406779661017,
+        "median_rotation_delta": -0.8474576271186436,
+        "rotation_rank_advantage": 0.0
+      },
+      {
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 09",
+        "group_type": "INDUSTRY",
+        "leadership_rank": 4.0,
+        "median_RS_comp": 70.76271186440678,
+        "median_RS_rotation": 69.91525423728814,
+        "median_rotation_delta": -0.8474576271186436,
+        "rotation_rank_advantage": 0.0
+      },
+      {
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 10",
+        "group_type": "INDUSTRY",
         "leadership_rank": 3.0,
-        "median_RS_comp": 58.05084745762712,
-        "median_RS_rotation": 58.050847457627114,
+        "median_RS_comp": 79.23728813559322,
+        "median_RS_rotation": 78.38983050847457,
         "median_rotation_delta": -0.8474576271186436,
         "rotation_rank_advantage": 0.0
       },
       {
-        "eligible_group_count": 6,
-        "group_id": "Healthcare systems",
-        "group_type": "SUB_INDUSTRY",
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 11",
+        "group_type": "INDUSTRY",
         "leadership_rank": 2.0,
-        "median_RS_comp": 75.0,
-        "median_RS_rotation": 74.15254237288136,
+        "median_RS_comp": 87.71186440677965,
+        "median_RS_rotation": 86.86440677966101,
         "median_rotation_delta": -0.8474576271186436,
         "rotation_rank_advantage": 0.0
       }
@@ -324,7 +344,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "c9330ba1067a238b2b282938c17f1415f295e23c79d6ec3d94d0d5fcc5c47f17",
+      "fingerprint": "75bb1256f90eeee006c6030c6d131148af256a756546aedc3be83261f01730d5",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -1394,12 +1414,12 @@
               "wilder_atr14": 2.0
             },
             "leadership_ref": {
-              "id": "1dd3a4284ef015bf15246374a77981aec78230d295f38ae6a9254fe6d2eeb4b0",
-              "index": 283
+              "id": "5a53287948c215c1ad07bf6ee3882d4451e989b90a3b8b375c72c6d98e985d9e",
+              "index": 900
             },
             "regime_ref": {
-              "id": "185aa2c0846e39c3d7bdb82f87348de716c4e9309f2b33750ceab16a6ccbedab",
-              "index": 223
+              "id": "5d5788abb6a619128df30b4c4833f84ed2b476467323a3ce41bca915d14728e9",
+              "index": 923
             },
             "rules": {
               "effective_date": "2026-08-25",
@@ -3025,8 +3045,8 @@
           "threshold_version": "decision-risk-thresholds-v1"
         },
         "output_ref": {
-          "id": "983bc3cc94954c89870bfcfa3e8051fde918a6be2cf48035c0ad188cdc7418be",
-          "index": 1442
+          "id": "d1f060c2dc39086faf93ff8c003097bbed3411120a449c870943ab89e00f7889",
+          "index": 2110
         },
         "review": {
           "active_setups": [
@@ -3058,9 +3078,73 @@
             }
           ],
           "blockers": [],
+          "current_setup": {
+            "schema_version": "current-setup-display-v1",
+            "setup": {
+              "direction": "LONG",
+              "evaluated": true,
+              "family": "RANGE",
+              "invalidation": 99.5,
+              "local_errors": [],
+              "qualification": "Local setup conditions met",
+              "replay_required": false,
+              "setup_id": "SIM110|RANGE|LONG|2026-08-31|RANGE_HIGH",
+              "status": "NEAR_TRIGGER",
+              "trigger": 104.0,
+              "unrelated_errors": []
+            },
+            "state": "CURRENT"
+          },
           "historical_count": 0,
+          "industry": {
+            "coverage": 1.0,
+            "eligible_count": 12,
+            "group_id": "Synthetic industry 12",
+            "level": "INDUSTRY",
+            "name": "Synthetic industry 12",
+            "parent": "",
+            "rank": 1.0,
+            "total_members": 10,
+            "valid_members": 10
+          },
+          "memberships": [
+            {
+              "coverage": 1.0,
+              "eligible_count": 12,
+              "group_id": "Synthetic industry 12",
+              "level": "INDUSTRY",
+              "name": "Synthetic industry 12",
+              "parent": "",
+              "rank": 1.0,
+              "total_members": 10,
+              "valid_members": 10
+            },
+            {
+              "coverage": 1.0,
+              "eligible_count": 6,
+              "group_id": "Advanced computing",
+              "level": "SUB_INDUSTRY",
+              "name": "Advanced computing",
+              "parent": "",
+              "rank": 1.0,
+              "total_members": 19,
+              "valid_members": 19
+            },
+            {
+              "coverage": 1.0,
+              "eligible_count": 1,
+              "group_id": "Synthetic innovators",
+              "level": "THEME",
+              "name": "Synthetic innovators",
+              "parent": "",
+              "rank": 1.0,
+              "total_members": 60,
+              "valid_members": 60
+            }
+          ],
           "notes": [],
           "opposite_direction_count": 1,
+          "policy_version": "decision-risk-v1",
           "schema_version": "decision-review-v1",
           "stored_state": "ACT",
           "strength_summary": "Established strength passes; rotation is an optional alternative.",
@@ -3077,7 +3161,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "c9330ba1067a238b2b282938c17f1415f295e23c79d6ec3d94d0d5fcc5c47f17",
+      "fingerprint": "75bb1256f90eeee006c6030c6d131148af256a756546aedc3be83261f01730d5",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -3097,7 +3181,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "c9330ba1067a238b2b282938c17f1415f295e23c79d6ec3d94d0d5fcc5c47f17",
+      "fingerprint": "75bb1256f90eeee006c6030c6d131148af256a756546aedc3be83261f01730d5",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -3224,7 +3308,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "c9330ba1067a238b2b282938c17f1415f295e23c79d6ec3d94d0d5fcc5c47f17",
+      "fingerprint": "75bb1256f90eeee006c6030c6d131148af256a756546aedc3be83261f01730d5",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -3242,102 +3326,198 @@
     "rows": [
       {
         "act_count": 1,
-        "eligible_group_count": 6,
-        "group_id": "Advanced computing",
-        "group_type": "SUB_INDUSTRY",
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 12",
+        "group_type": "INDUSTRY",
         "leadership_rank": 1.0,
-        "median_RS_comp": 91.52542372881356,
-        "median_RS_rotation": 90.67796610169492,
+        "median_RS_comp": 96.1864406779661,
+        "median_RS_rotation": 95.33898305084746,
         "median_rotation_delta": -0.8474576271186436,
-        "name": "Advanced computing",
+        "name": "Synthetic industry 12",
         "parent": "",
         "reasons": ["MISSING_STRUCTURE_CONTEXT", "MISSING_SETUP_CONTEXT"],
-        "total_members": 19,
-        "valid_members": 19,
-        "watch_count": 0
+        "total_members": 10,
+        "valid_members": 10,
+        "watch_count": 1
       },
       {
-        "act_count": 2,
-        "eligible_group_count": 6,
-        "group_id": "Healthcare systems",
-        "group_type": "SUB_INDUSTRY",
+        "act_count": 0,
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 11",
+        "group_type": "INDUSTRY",
         "leadership_rank": 2.0,
-        "median_RS_comp": 75.0,
-        "median_RS_rotation": 74.15254237288136,
+        "median_RS_comp": 87.71186440677965,
+        "median_RS_rotation": 86.86440677966101,
         "median_rotation_delta": -0.8474576271186436,
-        "name": "Healthcare systems",
+        "name": "Synthetic industry 11",
         "parent": "",
         "reasons": ["MISSING_STRUCTURE_CONTEXT", "MISSING_SETUP_CONTEXT"],
-        "total_members": 20,
-        "valid_members": 20,
+        "total_members": 10,
+        "valid_members": 10,
         "watch_count": 0
       },
       {
         "act_count": 1,
-        "eligible_group_count": 6,
-        "group_id": "Digital infrastructure",
-        "group_type": "SUB_INDUSTRY",
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 10",
+        "group_type": "INDUSTRY",
         "leadership_rank": 3.0,
-        "median_RS_comp": 58.05084745762712,
-        "median_RS_rotation": 58.050847457627114,
+        "median_RS_comp": 79.23728813559322,
+        "median_RS_rotation": 78.38983050847457,
         "median_rotation_delta": -0.8474576271186436,
-        "name": "Digital infrastructure",
+        "name": "Synthetic industry 10",
         "parent": "",
         "reasons": ["MISSING_STRUCTURE_CONTEXT", "MISSING_SETUP_CONTEXT"],
-        "total_members": 20,
-        "valid_members": 20,
+        "total_members": 10,
+        "valid_members": 10,
         "watch_count": 0
       },
       {
-        "act_count": 0,
-        "eligible_group_count": 6,
-        "group_id": "Consumer technology",
-        "group_type": "SUB_INDUSTRY",
+        "act_count": 1,
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 09",
+        "group_type": "INDUSTRY",
         "leadership_rank": 4.0,
-        "median_RS_comp": 41.101694915254235,
-        "median_RS_rotation": 41.101694915254235,
-        "median_rotation_delta": 0.0,
-        "name": "Consumer technology",
+        "median_RS_comp": 70.76271186440678,
+        "median_RS_rotation": 69.91525423728814,
+        "median_rotation_delta": -0.8474576271186436,
+        "name": "Synthetic industry 09",
         "parent": "",
         "reasons": ["MISSING_STRUCTURE_CONTEXT", "MISSING_SETUP_CONTEXT"],
-        "total_members": 20,
-        "valid_members": 20,
+        "total_members": 10,
+        "valid_members": 10,
         "watch_count": 0
       },
       {
         "act_count": 0,
-        "eligible_group_count": 6,
-        "group_id": "Industrials",
-        "group_type": "SUB_INDUSTRY",
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 08",
+        "group_type": "INDUSTRY",
         "leadership_rank": 5.0,
-        "median_RS_comp": 24.152542372881356,
-        "median_RS_rotation": 24.152542372881356,
-        "median_rotation_delta": 0.0,
-        "name": "Industrials",
+        "median_RS_comp": 62.28813559322034,
+        "median_RS_rotation": 61.4406779661017,
+        "median_rotation_delta": -0.8474576271186436,
+        "name": "Synthetic industry 08",
         "parent": "",
         "reasons": ["MISSING_STRUCTURE_CONTEXT", "MISSING_SETUP_CONTEXT"],
-        "total_members": 20,
-        "valid_members": 20,
+        "total_members": 10,
+        "valid_members": 10,
+        "watch_count": 0
+      },
+      {
+        "act_count": 1,
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 07",
+        "group_type": "INDUSTRY",
+        "leadership_rank": 6.0,
+        "median_RS_comp": 53.813559322033896,
+        "median_RS_rotation": 53.813559322033896,
+        "median_rotation_delta": -0.8474576271186436,
+        "name": "Synthetic industry 07",
+        "parent": "",
+        "reasons": ["MISSING_STRUCTURE_CONTEXT", "MISSING_SETUP_CONTEXT"],
+        "total_members": 10,
+        "valid_members": 10,
         "watch_count": 0
       },
       {
         "act_count": 0,
-        "eligible_group_count": 6,
-        "group_id": "Materials",
-        "group_type": "SUB_INDUSTRY",
-        "leadership_rank": 6.0,
-        "median_RS_comp": 8.05084745762712,
-        "median_RS_rotation": 8.05084745762712,
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 06",
+        "group_type": "INDUSTRY",
+        "leadership_rank": 7.0,
+        "median_RS_comp": 45.33898305084746,
+        "median_RS_rotation": 45.33898305084746,
         "median_rotation_delta": 0.0,
-        "name": "Materials",
+        "name": "Synthetic industry 06",
         "parent": "",
         "reasons": ["MISSING_STRUCTURE_CONTEXT", "MISSING_SETUP_CONTEXT"],
-        "total_members": 21,
-        "valid_members": 20,
-        "watch_count": 1
+        "total_members": 10,
+        "valid_members": 10,
+        "watch_count": 0
+      },
+      {
+        "act_count": 0,
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 05",
+        "group_type": "INDUSTRY",
+        "leadership_rank": 8.0,
+        "median_RS_comp": 36.86440677966102,
+        "median_RS_rotation": 36.86440677966102,
+        "median_rotation_delta": 0.0,
+        "name": "Synthetic industry 05",
+        "parent": "",
+        "reasons": ["MISSING_STRUCTURE_CONTEXT", "MISSING_SETUP_CONTEXT"],
+        "total_members": 10,
+        "valid_members": 10,
+        "watch_count": 0
+      },
+      {
+        "act_count": 0,
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 04",
+        "group_type": "INDUSTRY",
+        "leadership_rank": 9.0,
+        "median_RS_comp": 28.389830508474574,
+        "median_RS_rotation": 28.389830508474574,
+        "median_rotation_delta": 0.0,
+        "name": "Synthetic industry 04",
+        "parent": "",
+        "reasons": ["MISSING_STRUCTURE_CONTEXT", "MISSING_SETUP_CONTEXT"],
+        "total_members": 10,
+        "valid_members": 10,
+        "watch_count": 0
+      },
+      {
+        "act_count": 0,
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 03",
+        "group_type": "INDUSTRY",
+        "leadership_rank": 10.0,
+        "median_RS_comp": 19.915254237288135,
+        "median_RS_rotation": 19.915254237288135,
+        "median_rotation_delta": 0.0,
+        "name": "Synthetic industry 03",
+        "parent": "",
+        "reasons": ["MISSING_STRUCTURE_CONTEXT", "MISSING_SETUP_CONTEXT"],
+        "total_members": 10,
+        "valid_members": 10,
+        "watch_count": 0
+      },
+      {
+        "act_count": 0,
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 02",
+        "group_type": "INDUSTRY",
+        "leadership_rank": 11.0,
+        "median_RS_comp": 11.864406779661017,
+        "median_RS_rotation": 11.864406779661017,
+        "median_rotation_delta": 0.0,
+        "name": "Synthetic industry 02",
+        "parent": "",
+        "reasons": ["MISSING_STRUCTURE_CONTEXT", "MISSING_SETUP_CONTEXT"],
+        "total_members": 10,
+        "valid_members": 9,
+        "watch_count": 0
+      },
+      {
+        "act_count": 0,
+        "eligible_group_count": 12,
+        "group_id": "Synthetic industry 01",
+        "group_type": "INDUSTRY",
+        "leadership_rank": 12.0,
+        "median_RS_comp": 3.8135593220338984,
+        "median_RS_rotation": 3.8135593220338984,
+        "median_rotation_delta": 0.0,
+        "name": "Synthetic industry 01",
+        "parent": "",
+        "reasons": ["MISSING_STRUCTURE_CONTEXT", "MISSING_SETUP_CONTEXT"],
+        "total_members": 10,
+        "valid_members": 10,
+        "watch_count": 0
       }
     ],
-    "total": 6
+    "total": 12
   },
   "research_health": {
     "allowed_risk_fraction": 0.0025,
@@ -3345,7 +3525,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "c9330ba1067a238b2b282938c17f1415f295e23c79d6ec3d94d0d5fcc5c47f17",
+      "fingerprint": "75bb1256f90eeee006c6030c6d131148af256a756546aedc3be83261f01730d5",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -3367,137 +3547,41 @@
       {
         "reason": null,
         "row": {
-          "RS_comp": 83.89830508474576,
-          "RS_rotation": 83.05084745762711,
-          "decision": "TRADE",
-          "direction": "LONG",
-          "display_name": "Meridian Labs",
-          "group_label": "Advanced computing",
-          "history_count": 1,
-          "price": 112.0,
-          "primary_blocker": {
-            "category": "STRATEGY",
-            "codes": ["EXTENSION_ABOVE_ENTRY_CAP"],
-            "detail": "Signed extension exceeds the inclusive 4.8 ATR entry cap.",
-            "rung": "ACT",
-            "title": "Extension outside entry range"
-          },
-          "rotation_delta": -0.8474576271186436,
-          "setups": [
-            {
-              "act_eligible": false,
-              "direction": "LONG",
-              "family": "EP",
-              "setup_id": "SIM100|EP|LONG|2026-09-02|GAP_OPEN",
-              "status": "TRIGGERED"
-            },
-            {
-              "act_eligible": false,
-              "direction": "LONG",
-              "family": "RANGE",
-              "setup_id": "SIM100|RANGE|LONG|2026-08-31|RANGE_HIGH",
-              "status": "TRIGGERED"
-            },
-            {
-              "act_eligible": false,
-              "direction": "LONG",
-              "family": "TREND_PULLBACK",
-              "setup_id": "SIM100|TREND_PULLBACK|LONG|2026-09-01|EMA10",
-              "status": "TRIGGERED"
-            }
-          ],
-          "structure": "UPTREND",
-          "sub_industry": "Advanced computing",
-          "symbol": "SIM100",
-          "trade_universe_eligible": true
-        },
-        "symbol": "SIM100"
-      },
-      {
-        "reason": "Outside calculated research coverage; SYNTHETIC_EXACT_IDENTITY",
-        "row": null,
-        "symbol": "SIM101"
-      },
-      {
-        "reason": "Outside calculated research coverage; SYNTHETIC_EXACT_IDENTITY",
-        "row": null,
-        "symbol": "SIM102"
-      },
-      {
-        "reason": "Outside calculated research coverage; SYNTHETIC_EXACT_IDENTITY",
-        "row": null,
-        "symbol": "SIM103"
-      },
-      {
-        "reason": "Outside calculated research coverage; SYNTHETIC_EXACT_IDENTITY",
-        "row": null,
-        "symbol": "SIM104"
-      },
-      {
-        "reason": null,
-        "row": {
-          "RS_comp": 88.13559322033899,
-          "RS_rotation": 87.28813559322033,
-          "decision": "TRADE",
-          "direction": "LONG",
-          "display_name": "Summit Instruments",
-          "group_label": "Advanced computing",
-          "history_count": 3,
-          "price": 110.0,
-          "primary_blocker": {
-            "category": "STRATEGY",
-            "codes": ["EXTENSION_ABOVE_ENTRY_CAP"],
-            "detail": "Signed extension exceeds the inclusive 4.8 ATR entry cap.",
-            "rung": "ACT",
-            "title": "Extension outside entry range"
-          },
-          "rotation_delta": -0.8474576271186578,
-          "setups": [
-            {
-              "act_eligible": false,
-              "direction": "LONG",
-              "family": "RANGE",
-              "setup_id": "SIM105|RANGE|LONG|2026-08-31|RANGE_HIGH",
-              "status": "TRIGGERED"
-            }
-          ],
-          "structure": "UPTREND",
-          "sub_industry": "Advanced computing",
-          "symbol": "SIM105",
-          "trade_universe_eligible": true
-        },
-        "symbol": "SIM105"
-      },
-      {
-        "reason": "Outside calculated research coverage; SYNTHETIC_EXACT_IDENTITY",
-        "row": null,
-        "symbol": "SIM106"
-      },
-      {
-        "reason": "Outside calculated research coverage; SYNTHETIC_EXACT_IDENTITY",
-        "row": null,
-        "symbol": "SIM107"
-      },
-      {
-        "reason": "Outside calculated research coverage; SYNTHETIC_EXACT_IDENTITY",
-        "row": null,
-        "symbol": "SIM108"
-      },
-      {
-        "reason": "Outside calculated research coverage; SYNTHETIC_EXACT_IDENTITY",
-        "row": null,
-        "symbol": "SIM109"
-      },
-      {
-        "reason": null,
-        "row": {
           "RS_comp": 92.37288135593221,
           "RS_rotation": 91.52542372881356,
+          "current_setup": {
+            "schema_version": "current-setup-display-v1",
+            "setup": {
+              "direction": "LONG",
+              "evaluated": true,
+              "family": "RANGE",
+              "invalidation": 99.5,
+              "local_errors": [],
+              "qualification": "Local setup conditions met",
+              "replay_required": false,
+              "setup_id": "SIM110|RANGE|LONG|2026-08-31|RANGE_HIGH",
+              "status": "NEAR_TRIGGER",
+              "trigger": 104.0,
+              "unrelated_errors": []
+            },
+            "state": "CURRENT"
+          },
           "decision": "ACT",
           "direction": "LONG",
           "display_name": "Aster Systems",
           "group_label": "Advanced computing",
           "history_count": 1,
+          "industry": {
+            "coverage": 1.0,
+            "eligible_count": 12,
+            "group_id": "Synthetic industry 12",
+            "level": "INDUSTRY",
+            "name": "Synthetic industry 12",
+            "parent": "",
+            "rank": 1.0,
+            "total_members": 10,
+            "valid_members": 10
+          },
           "price": 103.7,
           "primary_blocker": null,
           "rotation_delta": -0.8474576271186436,
@@ -3549,11 +3633,39 @@
         "row": {
           "RS_comp": 96.61016949152543,
           "RS_rotation": 95.76271186440678,
+          "current_setup": {
+            "schema_version": "current-setup-display-v1",
+            "setup": {
+              "direction": "LONG",
+              "evaluated": true,
+              "family": "RANGE",
+              "invalidation": 99.5,
+              "local_errors": [],
+              "qualification": "Local setup conditions met",
+              "replay_required": false,
+              "setup_id": "SIM115|RANGE|LONG|2026-08-31|RANGE_HIGH",
+              "status": "NEAR_TRIGGER",
+              "trigger": 104.0,
+              "unrelated_errors": []
+            },
+            "state": "CURRENT"
+          },
           "decision": "TRADE",
           "direction": "LONG",
           "display_name": "Northstar Energy",
           "group_label": "Advanced computing",
           "history_count": 1,
+          "industry": {
+            "coverage": 1.0,
+            "eligible_count": 12,
+            "group_id": "Synthetic industry 12",
+            "level": "INDUSTRY",
+            "name": "Synthetic industry 12",
+            "parent": "",
+            "rank": 1.0,
+            "total_members": 10,
+            "valid_members": 10
+          },
           "price": 103.7,
           "primary_blocker": {
             "category": "MISSING_DATA",
@@ -3597,6 +3709,76 @@
         "symbol": "SIM117"
       },
       {
+        "reason": null,
+        "row": {
+          "RS_comp": 99.15254237288136,
+          "RS_rotation": 98.30508474576271,
+          "current_setup": {
+            "schema_version": "current-setup-display-v1",
+            "setup": {
+              "direction": "LONG",
+              "evaluated": true,
+              "family": "RANGE",
+              "invalidation": 99.5,
+              "local_errors": [],
+              "qualification": "Local setup conditions met",
+              "replay_required": false,
+              "setup_id": "SIM118|RANGE|LONG|2026-08-31|RANGE_HIGH",
+              "status": "NEAR_TRIGGER",
+              "trigger": 104.0,
+              "unrelated_errors": []
+            },
+            "state": "CURRENT"
+          },
+          "decision": "WATCH",
+          "direction": "LONG",
+          "display_name": "Harbor Mobility",
+          "group_label": "Materials",
+          "history_count": 1,
+          "industry": {
+            "coverage": 1.0,
+            "eligible_count": 12,
+            "group_id": "Synthetic industry 12",
+            "level": "INDUSTRY",
+            "name": "Synthetic industry 12",
+            "parent": "",
+            "rank": 1.0,
+            "total_members": 10,
+            "valid_members": 10
+          },
+          "price": 103.7,
+          "primary_blocker": {
+            "category": "STRATEGY",
+            "codes": ["SUB_INDUSTRY_LAGGING"],
+            "detail": "Leadership rank 6.0 is compared with the inclusive rank limit 5.",
+            "rung": "TRADE",
+            "title": "Stored V1 sub-industry gate does not qualify"
+          },
+          "rotation_delta": -0.8474576271186436,
+          "setups": [
+            {
+              "act_eligible": false,
+              "direction": "LONG",
+              "family": "RANGE",
+              "setup_id": "SIM118|RANGE|LONG|2026-08-31|RANGE_HIGH",
+              "status": "NEAR_TRIGGER"
+            },
+            {
+              "act_eligible": false,
+              "direction": "LONG",
+              "family": "TREND_PULLBACK",
+              "setup_id": "SIM118|TREND_PULLBACK|LONG|2026-09-01|EMA10",
+              "status": "NEAR_TRIGGER"
+            }
+          ],
+          "structure": "UPTREND",
+          "sub_industry": "Materials",
+          "symbol": "SIM118",
+          "trade_universe_eligible": true
+        },
+        "symbol": "SIM118"
+      },
+      {
         "reason": "Outside calculated research coverage; SYNTHETIC_EXACT_IDENTITY",
         "row": null,
         "symbol": "SIM119"
@@ -3605,7 +3787,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "c9330ba1067a238b2b282938c17f1415f295e23c79d6ec3d94d0d5fcc5c47f17",
+      "fingerprint": "75bb1256f90eeee006c6030c6d131148af256a756546aedc3be83261f01730d5",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -3620,13 +3802,13 @@
     },
     "page": 1,
     "pages": 1,
-    "total": 19
+    "total": 10
   },
   "research_tape": {
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "c9330ba1067a238b2b282938c17f1415f295e23c79d6ec3d94d0d5fcc5c47f17",
+      "fingerprint": "75bb1256f90eeee006c6030c6d131148af256a756546aedc3be83261f01730d5",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -3645,11 +3827,27 @@
       {
         "RS_comp": null,
         "RS_rotation": null,
+        "current_setup": {
+          "schema_version": "current-setup-display-v1",
+          "setup": null,
+          "state": "UNAVAILABLE"
+        },
         "decision": "NONE",
         "direction": "LONG",
         "display_name": "Unobserved Research",
         "group_label": "Materials",
         "history_count": 0,
+        "industry": {
+          "coverage": 0.9,
+          "eligible_count": 12,
+          "group_id": "Synthetic industry 02",
+          "level": "INDUSTRY",
+          "name": "Synthetic industry 02",
+          "parent": "",
+          "rank": 11.0,
+          "total_members": 10,
+          "valid_members": 9
+        },
         "price": null,
         "primary_blocker": {
           "category": "MISSING_DATA",
@@ -3668,11 +3866,39 @@
       {
         "RS_comp": 33.05084745762712,
         "RS_rotation": 33.05084745762712,
+        "current_setup": {
+          "schema_version": "current-setup-display-v1",
+          "setup": {
+            "direction": "LONG",
+            "evaluated": true,
+            "family": "RANGE",
+            "invalidation": 99.5,
+            "local_errors": [],
+            "qualification": "Local setup conditions met",
+            "replay_required": false,
+            "setup_id": "SIM040|RANGE|LONG|2026-08-31|RANGE_HIGH",
+            "status": "NEAR_TRIGGER",
+            "trigger": 104.0,
+            "unrelated_errors": []
+          },
+          "state": "CURRENT"
+        },
         "decision": "NONE",
         "direction": "LONG",
         "display_name": "Cedar Materials",
         "group_label": "Consumer technology",
         "history_count": 1,
+        "industry": {
+          "coverage": 1.0,
+          "eligible_count": 12,
+          "group_id": "Synthetic industry 05",
+          "level": "INDUSTRY",
+          "name": "Synthetic industry 05",
+          "parent": "",
+          "rank": 8.0,
+          "total_members": 10,
+          "valid_members": 10
+        },
         "price": 103.7,
         "primary_blocker": {
           "category": "STRATEGY",
@@ -3712,11 +3938,39 @@
       {
         "RS_comp": 50.0,
         "RS_rotation": 100.0,
+        "current_setup": {
+          "schema_version": "current-setup-display-v1",
+          "setup": {
+            "direction": "LONG",
+            "evaluated": true,
+            "family": "RANGE",
+            "invalidation": 99.5,
+            "local_errors": [],
+            "qualification": "Local setup conditions met",
+            "replay_required": false,
+            "setup_id": "SIM060|RANGE|LONG|2026-08-31|RANGE_HIGH",
+            "status": "NEAR_TRIGGER",
+            "trigger": 104.0,
+            "unrelated_errors": []
+          },
+          "state": "CURRENT"
+        },
         "decision": "ACT",
         "direction": "LONG",
         "display_name": "Newbridge Robotics",
         "group_label": "Digital infrastructure",
         "history_count": 1,
+        "industry": {
+          "coverage": 1.0,
+          "eligible_count": 12,
+          "group_id": "Synthetic industry 07",
+          "level": "INDUSTRY",
+          "name": "Synthetic industry 07",
+          "parent": "",
+          "rank": 6.0,
+          "total_members": 10,
+          "valid_members": 10
+        },
         "price": 103.7,
         "primary_blocker": null,
         "rotation_delta": 50.0,
@@ -3744,11 +3998,39 @@
       {
         "RS_comp": 58.47457627118644,
         "RS_rotation": 57.6271186440678,
+        "current_setup": {
+          "schema_version": "current-setup-display-v1",
+          "setup": {
+            "direction": "LONG",
+            "evaluated": true,
+            "family": "RANGE",
+            "invalidation": 99.5,
+            "local_errors": [],
+            "qualification": "Local setup conditions met",
+            "replay_required": false,
+            "setup_id": "SIM070|RANGE|LONG|2026-08-31|RANGE_HIGH",
+            "status": "NEAR_TRIGGER",
+            "trigger": 104.0,
+            "unrelated_errors": []
+          },
+          "state": "CURRENT"
+        },
         "decision": "NONE",
         "direction": "LONG",
         "display_name": "Orion Devices",
         "group_label": "Digital infrastructure",
         "history_count": 1,
+        "industry": {
+          "coverage": 1.0,
+          "eligible_count": 12,
+          "group_id": "Synthetic industry 08",
+          "level": "INDUSTRY",
+          "name": "Synthetic industry 08",
+          "parent": "",
+          "rank": 5.0,
+          "total_members": 10,
+          "valid_members": 10
+        },
         "price": 103.7,
         "primary_blocker": {
           "category": "STRATEGY",
@@ -3787,11 +4069,39 @@
       {
         "RS_comp": 66.94915254237289,
         "RS_rotation": 66.10169491525424,
+        "current_setup": {
+          "schema_version": "current-setup-display-v1",
+          "setup": {
+            "direction": "LONG",
+            "evaluated": true,
+            "family": "RANGE",
+            "invalidation": 99.5,
+            "local_errors": [],
+            "qualification": "Local setup conditions met",
+            "replay_required": false,
+            "setup_id": "SIM080|RANGE|LONG|2026-08-31|RANGE_HIGH",
+            "status": "NEAR_TRIGGER",
+            "trigger": 104.0,
+            "unrelated_errors": []
+          },
+          "state": "CURRENT"
+        },
         "decision": "ACT",
         "direction": "LONG",
         "display_name": "Atlas Components",
         "group_label": "Healthcare systems",
         "history_count": 1,
+        "industry": {
+          "coverage": 1.0,
+          "eligible_count": 12,
+          "group_id": "Synthetic industry 09",
+          "level": "INDUSTRY",
+          "name": "Synthetic industry 09",
+          "parent": "",
+          "rank": 4.0,
+          "total_members": 10,
+          "valid_members": 10
+        },
         "price": 103.7,
         "primary_blocker": null,
         "rotation_delta": -0.8474576271186436,
@@ -3819,11 +4129,39 @@
       {
         "RS_comp": 75.42372881355932,
         "RS_rotation": 74.57627118644068,
+        "current_setup": {
+          "schema_version": "current-setup-display-v1",
+          "setup": {
+            "direction": "LONG",
+            "evaluated": true,
+            "family": "CONTRACTION",
+            "invalidation": 99.3,
+            "local_errors": [],
+            "qualification": "Local conditions met; retained global veto",
+            "replay_required": false,
+            "setup_id": "SIM090|CONTRACTION|LONG|2026-08-31|PIVOT_HIGH",
+            "status": "NEAR_TRIGGER",
+            "trigger": 104.0,
+            "unrelated_errors": ["insufficient_range_history"]
+          },
+          "state": "CURRENT"
+        },
         "decision": "TRADE",
         "direction": "LONG",
         "display_name": "Cobalt Networks",
         "group_label": "Healthcare systems",
         "history_count": 0,
+        "industry": {
+          "coverage": 1.0,
+          "eligible_count": 12,
+          "group_id": "Synthetic industry 10",
+          "level": "INDUSTRY",
+          "name": "Synthetic industry 10",
+          "parent": "",
+          "rank": 3.0,
+          "total_members": 10,
+          "valid_members": 10
+        },
         "price": 103.7,
         "primary_blocker": {
           "category": "LEGACY_SCOPE",
@@ -3857,11 +4195,39 @@
       {
         "RS_comp": 79.66101694915254,
         "RS_rotation": 78.8135593220339,
+        "current_setup": {
+          "schema_version": "current-setup-display-v1",
+          "setup": {
+            "direction": "LONG",
+            "evaluated": true,
+            "family": "RANGE",
+            "invalidation": 99.5,
+            "local_errors": [],
+            "qualification": "Local setup conditions met",
+            "replay_required": false,
+            "setup_id": "SIM095|RANGE|LONG|2026-08-31|RANGE_HIGH",
+            "status": "NEAR_TRIGGER",
+            "trigger": 104.0,
+            "unrelated_errors": []
+          },
+          "state": "CURRENT"
+        },
         "decision": "ACT",
         "direction": "LONG",
         "display_name": "Beacon Software",
         "group_label": "Healthcare systems",
         "history_count": 1,
+        "industry": {
+          "coverage": 1.0,
+          "eligible_count": 12,
+          "group_id": "Synthetic industry 10",
+          "level": "INDUSTRY",
+          "name": "Synthetic industry 10",
+          "parent": "",
+          "rank": 3.0,
+          "total_members": 10,
+          "valid_members": 10
+        },
         "price": 103.7,
         "primary_blocker": null,
         "rotation_delta": -0.8474576271186436,
@@ -3889,11 +4255,39 @@
       {
         "RS_comp": 83.89830508474576,
         "RS_rotation": 83.05084745762711,
+        "current_setup": {
+          "schema_version": "current-setup-display-v1",
+          "setup": {
+            "direction": "LONG",
+            "evaluated": true,
+            "family": "EP",
+            "invalidation": 99.5,
+            "local_errors": [],
+            "qualification": "Local setup conditions met",
+            "replay_required": false,
+            "setup_id": "SIM100|EP|LONG|2026-09-02|GAP_OPEN",
+            "status": "TRIGGERED",
+            "trigger": 110.0,
+            "unrelated_errors": []
+          },
+          "state": "CURRENT"
+        },
         "decision": "TRADE",
         "direction": "LONG",
         "display_name": "Meridian Labs",
         "group_label": "Advanced computing",
         "history_count": 1,
+        "industry": {
+          "coverage": 1.0,
+          "eligible_count": 12,
+          "group_id": "Synthetic industry 11",
+          "level": "INDUSTRY",
+          "name": "Synthetic industry 11",
+          "parent": "",
+          "rank": 2.0,
+          "total_members": 10,
+          "valid_members": 10
+        },
         "price": 112.0,
         "primary_blocker": {
           "category": "STRATEGY",
@@ -3934,11 +4328,39 @@
       {
         "RS_comp": 88.13559322033899,
         "RS_rotation": 87.28813559322033,
+        "current_setup": {
+          "schema_version": "current-setup-display-v1",
+          "setup": {
+            "direction": "LONG",
+            "evaluated": true,
+            "family": "RANGE",
+            "invalidation": 99.5,
+            "local_errors": [],
+            "qualification": "Local setup conditions met",
+            "replay_required": false,
+            "setup_id": "SIM105|RANGE|LONG|2026-08-31|RANGE_HIGH",
+            "status": "TRIGGERED",
+            "trigger": 104.0,
+            "unrelated_errors": []
+          },
+          "state": "CURRENT"
+        },
         "decision": "TRADE",
         "direction": "LONG",
         "display_name": "Summit Instruments",
         "group_label": "Advanced computing",
         "history_count": 3,
+        "industry": {
+          "coverage": 1.0,
+          "eligible_count": 12,
+          "group_id": "Synthetic industry 11",
+          "level": "INDUSTRY",
+          "name": "Synthetic industry 11",
+          "parent": "",
+          "rank": 2.0,
+          "total_members": 10,
+          "valid_members": 10
+        },
         "price": 110.0,
         "primary_blocker": {
           "category": "STRATEGY",
@@ -3965,11 +4387,39 @@
       {
         "RS_comp": 92.37288135593221,
         "RS_rotation": 91.52542372881356,
+        "current_setup": {
+          "schema_version": "current-setup-display-v1",
+          "setup": {
+            "direction": "LONG",
+            "evaluated": true,
+            "family": "RANGE",
+            "invalidation": 99.5,
+            "local_errors": [],
+            "qualification": "Local setup conditions met",
+            "replay_required": false,
+            "setup_id": "SIM110|RANGE|LONG|2026-08-31|RANGE_HIGH",
+            "status": "NEAR_TRIGGER",
+            "trigger": 104.0,
+            "unrelated_errors": []
+          },
+          "state": "CURRENT"
+        },
         "decision": "ACT",
         "direction": "LONG",
         "display_name": "Aster Systems",
         "group_label": "Advanced computing",
         "history_count": 1,
+        "industry": {
+          "coverage": 1.0,
+          "eligible_count": 12,
+          "group_id": "Synthetic industry 12",
+          "level": "INDUSTRY",
+          "name": "Synthetic industry 12",
+          "parent": "",
+          "rank": 1.0,
+          "total_members": 10,
+          "valid_members": 10
+        },
         "price": 103.7,
         "primary_blocker": null,
         "rotation_delta": -0.8474576271186436,
@@ -3997,11 +4447,39 @@
       {
         "RS_comp": 96.61016949152543,
         "RS_rotation": 95.76271186440678,
+        "current_setup": {
+          "schema_version": "current-setup-display-v1",
+          "setup": {
+            "direction": "LONG",
+            "evaluated": true,
+            "family": "RANGE",
+            "invalidation": 99.5,
+            "local_errors": [],
+            "qualification": "Local setup conditions met",
+            "replay_required": false,
+            "setup_id": "SIM115|RANGE|LONG|2026-08-31|RANGE_HIGH",
+            "status": "NEAR_TRIGGER",
+            "trigger": 104.0,
+            "unrelated_errors": []
+          },
+          "state": "CURRENT"
+        },
         "decision": "TRADE",
         "direction": "LONG",
         "display_name": "Northstar Energy",
         "group_label": "Advanced computing",
         "history_count": 1,
+        "industry": {
+          "coverage": 1.0,
+          "eligible_count": 12,
+          "group_id": "Synthetic industry 12",
+          "level": "INDUSTRY",
+          "name": "Synthetic industry 12",
+          "parent": "",
+          "rank": 1.0,
+          "total_members": 10,
+          "valid_members": 10
+        },
         "price": 103.7,
         "primary_blocker": {
           "category": "MISSING_DATA",
@@ -4035,18 +4513,46 @@
       {
         "RS_comp": 99.15254237288136,
         "RS_rotation": 98.30508474576271,
+        "current_setup": {
+          "schema_version": "current-setup-display-v1",
+          "setup": {
+            "direction": "LONG",
+            "evaluated": true,
+            "family": "RANGE",
+            "invalidation": 99.5,
+            "local_errors": [],
+            "qualification": "Local setup conditions met",
+            "replay_required": false,
+            "setup_id": "SIM118|RANGE|LONG|2026-08-31|RANGE_HIGH",
+            "status": "NEAR_TRIGGER",
+            "trigger": 104.0,
+            "unrelated_errors": []
+          },
+          "state": "CURRENT"
+        },
         "decision": "WATCH",
         "direction": "LONG",
         "display_name": "Harbor Mobility",
         "group_label": "Materials",
         "history_count": 1,
+        "industry": {
+          "coverage": 1.0,
+          "eligible_count": 12,
+          "group_id": "Synthetic industry 12",
+          "level": "INDUSTRY",
+          "name": "Synthetic industry 12",
+          "parent": "",
+          "rank": 1.0,
+          "total_members": 10,
+          "valid_members": 10
+        },
         "price": 103.7,
         "primary_blocker": {
           "category": "STRATEGY",
           "codes": ["SUB_INDUSTRY_LAGGING"],
           "detail": "Leadership rank 6.0 is compared with the inclusive rank limit 5.",
           "rung": "TRADE",
-          "title": "Sub-industry does not qualify"
+          "title": "Stored V1 sub-industry gate does not qualify"
         },
         "rotation_delta": -0.8474576271186436,
         "setups": [
@@ -4077,7 +4583,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "c9330ba1067a238b2b282938c17f1415f295e23c79d6ec3d94d0d5fcc5c47f17",
+      "fingerprint": "75bb1256f90eeee006c6030c6d131148af256a756546aedc3be83261f01730d5",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -4120,7 +4626,7 @@
           "Leadership rank \u2264 ceil(0.8 \u00d7 eligible group count). Themes do not vote."
         ],
         "technical_lines": [],
-        "title": "Sub-industry"
+        "title": "Sub-industry (stored V1 policy)"
       },
       {
         "lines": [
@@ -4202,7 +4708,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "c9330ba1067a238b2b282938c17f1415f295e23c79d6ec3d94d0d5fcc5c47f17",
+      "fingerprint": "75bb1256f90eeee006c6030c6d131148af256a756546aedc3be83261f01730d5",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",
@@ -4391,7 +4897,7 @@
     "meta": {
       "action_session": "2026-09-03",
       "as_of_session": "2026-09-02",
-      "fingerprint": "c9330ba1067a238b2b282938c17f1415f295e23c79d6ec3d94d0d5fcc5c47f17",
+      "fingerprint": "75bb1256f90eeee006c6030c6d131148af256a756546aedc3be83261f01730d5",
       "freshness": "FRESH",
       "mode": "FIXTURE",
       "mode_label": "SYNTHETIC FIXTURE",

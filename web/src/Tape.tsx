@@ -4,6 +4,7 @@ import { Chip, ErrorPanel, PageTitle, money, number } from "./ui";
 import { label, type Row, type Direction } from "./research";
 export interface Filters {
   action: string;
+  direction: Direction;
   min_rs_comp: string;
   min_rs_rotation: string;
   veto: string;
@@ -16,6 +17,7 @@ export interface Filters {
 }
 export const initialFilters: Filters = {
   action: "",
+  direction: "LONG",
   min_rs_comp: "",
   min_rs_rotation: "",
   veto: "",
@@ -28,6 +30,7 @@ export const initialFilters: Filters = {
 };
 export function tapeQuery(f: Filters) {
   const q = new URLSearchParams({
+    direction: f.direction,
     page: String(f.page),
     sort: f.sort,
     descending: String(f.order === "desc"),
@@ -71,42 +74,33 @@ export function StockRows({
           <td>
             <Chip value={r.structure} />
           </td>
-          <td
-            className="setup-cell"
-            title={r.setups
-              .map((s) => label(s.family) + " · " + label(s.status))
-              .join("; ")}
-          >
-            {r.setups.length ? (
+          <td className="setup-cell">
+            {r.current_setup.setup ? (
               <>
-                {label(r.setups[0].family)} · {label(r.setups[0].status)}
-                {r.setups.length > 1 && <span> +{r.setups.length - 1}</span>}
+                {label(r.current_setup.setup.family)} ·{" "}
+                {label(r.current_setup.setup.status)}
               </>
             ) : (
-              <span className="muted">No active setup</span>
-            )}
-            {r.history_count > 0 && (
-              <button
-                className="history-link"
-                onClick={() => onSelect(r.symbol, r.direction as Direction)}
-              >
-                {r.history_count} other/history
-              </button>
+              <span className="muted">
+                {r.current_setup.state === "NONE"
+                  ? "No current setup"
+                  : "Evaluation unavailable"}
+              </span>
             )}
           </td>
           <td>
             <Chip value={r.decision} />
           </td>
           <td className="group-cell">
-            {r.sub_industry && onGroup ? (
+            {r.industry && onGroup ? (
               <button
-                title={r.sub_industry}
-                onClick={() => onGroup(r.sub_industry!)}
+                title={`${r.industry.parent} · rank ${r.industry.rank ?? "unavailable"} / ${r.industry.eligible_count}`}
+                onClick={() => onGroup(r.industry!.group_id)}
               >
-                {r.group_label}
+                {r.industry.name}
               </button>
             ) : (
-              (r.group_label ?? "Unassigned")
+              (r.industry?.name ?? "Industry unavailable")
             )}
           </td>
           <td className="blocker-cell" title={r.primary_blocker?.detail}>
@@ -148,9 +142,17 @@ export function Tape({
   return (
     <>
       <PageTitle eyebrow="STOCK RESEARCH" title="Research tape">
-        <span className="muted">
-          Trade-universe membership ≠ TRADE decision
-        </span>
+        <label>
+          Tape direction{" "}
+          <select
+            aria-label="Tape direction"
+            value={f.direction}
+            onChange={(e) => update("direction", e.target.value)}
+          >
+            <option>LONG</option>
+            <option>SHORT</option>
+          </select>
+        </label>
       </PageTitle>
       <div className="filters">
         {(
@@ -163,7 +165,7 @@ export function Tape({
             ],
             [
               "setup",
-              "Active setup",
+              "Current setup",
               ["EP", "CONTRACTION", "TREND_PULLBACK", "RANGE"],
             ],
           ] as const
@@ -223,8 +225,8 @@ export function Tape({
       ) : (
         <>
           <div className="list-caption">
-            {query.data?.total ?? "…"} symbol/direction records · current
-            same-direction setups only
+            {query.data?.total ?? "…"} symbol/direction records · current one
+            current setup per direction
           </div>
           <div className="table-scroll research-table">
             <table aria-label="Research tape">
@@ -235,9 +237,9 @@ export function Tape({
                     ["price", "Price"],
                     ["RS_comp", "RS"],
                     ["", "Structure"],
-                    ["", "Active setup"],
-                    ["decision", "Decision"],
-                    ["", "Sub-industry"],
+                    ["", "Current setup"],
+                    ["decision", "Stored decision"],
+                    ["", "Industry"],
                     ["", "Primary blocker"],
                   ].map(([key, title]) => (
                     <th key={title}>

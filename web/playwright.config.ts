@@ -23,7 +23,12 @@ export default defineConfig({
             APERTURE_MODE: "LOCAL_SNAPSHOT",
             APERTURE_SNAPSHOT_PATH: process.env.APERTURE_REAL_SNAPSHOT,
           }
-        : { APERTURE_MODE: "FIXTURE", APERTURE_FIXTURE_SCENARIO: "GREEN" },
+        : {
+            APERTURE_MODE: "FIXTURE",
+            APERTURE_FIXTURE_SCENARIO: "GREEN",
+            APERTURE_FIXTURE_POLICY:
+              process.env.APERTURE_FIXTURE_POLICY || "V1",
+          },
     },
     { command: "npm run dev", url: "http://127.0.0.1:5173" },
   ],

@@ -15,6 +15,10 @@ from market_dashboard.aperture.decision_contracts import (
     DecisionInputV1,
     DecisionRiskOutputV1,
 )
+from market_dashboard.aperture.industry_contracts import (
+    DecisionInputV2,
+    DecisionRiskOutputV2,
+)
 
 from .evidence_graph import Digest, EvidenceNodeV2, NodeRef
 from .models import SymbolRecordV1, ViewMetaV1
@@ -57,11 +61,32 @@ DecisionOutputViewV2 = view_model(
         "inputs": (DecisionInputViewV2, ...),
     },
 )
+IndustryInputViewV2 = view_model(
+    "IndustryInputViewV2",
+    DecisionInputV2,
+    {
+        "schema_version": (Literal["industry-input-view-v2"], "industry-input-view-v2"),
+        "leadership_ref": (EvidenceRefV2 | None, ...),
+        "regime_ref": (EvidenceRefV2 | None, ...),
+    },
+    omitted={"leadership", "regime"},
+)
+IndustryOutputViewV2 = view_model(
+    "IndustryOutputViewV2",
+    DecisionRiskOutputV2,
+    {
+        "schema_version": (
+            Literal["industry-output-view-v2"],
+            "industry-output-view-v2",
+        ),
+        "inputs": (IndustryInputViewV2, ...),
+    },
+)
 SymbolRecordV2 = view_model(
     "SymbolRecordV2",
     SymbolRecordV1,
     {
-        "output": (DecisionOutputViewV2, ...),
+        "output": (DecisionOutputViewV2 | IndustryOutputViewV2, ...),
         "output_ref": (EvidenceRefV2, ...),
         "review": (DecisionReviewV1, ...),
     },
@@ -94,6 +119,9 @@ def symbol_view(snapshot, records, meta):
     rows = []
     for record in records:
         output = record.output
+        industry = output.engine_version == "decision-risk-v2"
+        input_view = IndustryInputViewV2 if industry else DecisionInputViewV2
+        output_view = IndustryOutputViewV2 if industry else DecisionOutputViewV2
         inputs = {
             k: getattr(output.inputs, k)
             for k in DecisionInputV1.model_fields
@@ -116,9 +144,7 @@ def symbol_view(snapshot, records, meta):
                     if k != "output"
                 },
                 review=review(output),
-                output=DecisionOutputViewV2(
-                    **values, inputs=DecisionInputViewV2(**inputs)
-                ),
+                output=output_view(**values, inputs=input_view(**inputs)),
                 output_ref=ref(
                     indexes[output.decision.symbol, output.decision.direction]
                 ),

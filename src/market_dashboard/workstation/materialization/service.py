@@ -22,6 +22,17 @@ from .io import (
 from .replay import field_digests, replay
 
 
+def _evaluate_snapshot_decision(snapshot, inputs):
+    from market_dashboard.aperture.industry import evaluate_industry_decision
+
+    engine = (
+        evaluate_industry_decision
+        if snapshot.versions.decision_risk == "decision-risk-v2"
+        else evaluate_decision
+    )
+    return engine(inputs, calendar=snapshot.calendar)
+
+
 def verify_audit(plan, receipt_path):
     report = MaterializationReadinessV1.model_validate(read_json(receipt_path))
     if report.receipt_fingerprint != fingerprint(
@@ -79,10 +90,7 @@ def validate(snapshot_path, receipt_path):
     # Canonical decision/extension/events/sizing recalculation; no input file or
     # historical bar is needed. Structure/Setup/replay hashes remain audit-bound.
     for record in s.records:
-        if (
-            evaluate_decision(record.output.inputs, calendar=s.calendar)
-            != record.output
-        ):
+        if _evaluate_snapshot_decision(s, record.output.inputs) != record.output:
             raise Refusal("CANONICAL_DECISION_PARITY_MISMATCH")
     return {
         "status": "VALID",
@@ -127,10 +135,7 @@ def build(plan, receipt_path, expected_plan_fingerprint):
         # Complete V2 and canonical field parity are checked before any valid name
         # is exposed. The receipt is required: an interrupted publication is unusable.
         for r in snapshot.records:
-            if (
-                evaluate_decision(r.output.inputs, calendar=snapshot.calendar)
-                != r.output
-            ):
+            if _evaluate_snapshot_decision(snapshot, r.output.inputs) != r.output:
                 raise Refusal("CANONICAL_DECISION_PARITY_MISMATCH")
 
         def strict_temporary(path):
