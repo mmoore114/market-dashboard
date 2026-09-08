@@ -390,6 +390,125 @@
         "title": "CorporateActionQA",
         "type": "string"
       },
+      "CoverageContextV1": {
+        "additionalProperties": false,
+        "description": "Current calculation over an explicitly published expanded population.",
+        "properties": {
+          "action_session": {
+            "format": "date",
+            "title": "Action Session",
+            "type": "string"
+          },
+          "calculation_mode": {
+            "const": "CURRENT_STATE_BOOTSTRAP",
+            "default": "CURRENT_STATE_BOOTSTRAP",
+            "title": "Calculation Mode",
+            "type": "string"
+          },
+          "calculation_start": {
+            "format": "date",
+            "title": "Calculation Start",
+            "type": "string"
+          },
+          "coverage_manifest_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Coverage Manifest Sha256",
+            "type": "string"
+          },
+          "covered_population": {
+            "exclusiveMinimum": 0.0,
+            "title": "Covered Population",
+            "type": "integer"
+          },
+          "evaluation_timestamp": {
+            "format": "date-time",
+            "title": "Evaluation Timestamp",
+            "type": "string"
+          },
+          "first_observations": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "format": "date",
+                  "type": "string"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "First Observations",
+            "type": "array"
+          },
+          "historical_membership_status": {
+            "const": "UNKNOWN_BEFORE_BOOTSTRAP",
+            "default": "UNKNOWN_BEFORE_BOOTSTRAP",
+            "title": "Historical Membership Status",
+            "type": "string"
+          },
+          "mapping_members": {
+            "minimum": 0.0,
+            "title": "Mapping Members",
+            "type": "integer"
+          },
+          "market_as_of_session": {
+            "format": "date",
+            "title": "Market As Of Session",
+            "type": "string"
+          },
+          "missing_observations": {
+            "minimum": 0.0,
+            "title": "Missing Observations",
+            "type": "integer"
+          },
+          "not_yet_observed": {
+            "minimum": 0.0,
+            "title": "Not Yet Observed",
+            "type": "integer"
+          },
+          "population_scope": {
+            "const": "published expanded covered population",
+            "default": "published expanded covered population",
+            "title": "Population Scope",
+            "type": "string"
+          },
+          "rank_basis": {
+            "const": "CURRENT_COHORT_AT_E",
+            "default": "CURRENT_COHORT_AT_E",
+            "title": "Rank Basis",
+            "type": "string"
+          },
+          "strict_trade_members": {
+            "minimum": 0.0,
+            "title": "Strict Trade Members",
+            "type": "integer"
+          },
+          "version": {
+            "const": "coverage-current-state-v1",
+            "default": "coverage-current-state-v1",
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "market_as_of_session",
+          "evaluation_timestamp",
+          "action_session",
+          "calculation_start",
+          "first_observations",
+          "covered_population",
+          "strict_trade_members",
+          "mapping_members",
+          "not_yet_observed",
+          "missing_observations",
+          "coverage_manifest_sha256"
+        ],
+        "title": "CoverageContextV1",
+        "type": "object"
+      },
       "CurrentGroupProvenanceV2": {
         "additionalProperties": false,
         "description": "Current-cohort analysis only; never a historical membership attestation.",
@@ -414,12 +533,16 @@
           "bootstrap": {
             "anyOf": [
               {
+                "$ref": "#/components/schemas/CoverageContextV1"
+              },
+              {
                 "$ref": "#/components/schemas/BootstrapContextV1"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Bootstrap"
           },
           "effective_session": {
             "format": "date",
@@ -506,12 +629,16 @@
           "bootstrap": {
             "anyOf": [
               {
+                "$ref": "#/components/schemas/CoverageContextV1"
+              },
+              {
                 "$ref": "#/components/schemas/BootstrapContextV1"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Bootstrap"
           },
           "effective_session": {
             "format": "date",
@@ -617,12 +744,16 @@
           "bootstrap": {
             "anyOf": [
               {
+                "$ref": "#/components/schemas/CoverageContextV1"
+              },
+              {
                 "$ref": "#/components/schemas/BootstrapContextV1"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Bootstrap"
           },
           "effective_session": {
             "format": "date",
@@ -1410,12 +1541,16 @@
           "bootstrap": {
             "anyOf": [
               {
+                "$ref": "#/components/schemas/CoverageContextV1"
+              },
+              {
                 "$ref": "#/components/schemas/BootstrapContextV1"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Bootstrap"
           },
           "comparison": {
             "anyOf": [

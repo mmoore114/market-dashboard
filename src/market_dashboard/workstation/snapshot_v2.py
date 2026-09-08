@@ -61,12 +61,15 @@ from .legacy_registry import (
     CURRENT_GROUP_TYPE_CODES,
     LEGACY_REGISTRY_FINGERPRINT,
     LEGACY_TYPE_CODES,
+    MEMBERSHIP_REGISTRY_FINGERPRINT,
+    MEMBERSHIP_TYPE_CODES,
 )
 
 
 class SharedContextV2(ContractModel):
     registry_fingerprint: Literal[
         REGISTRY_FINGERPRINT,
+        MEMBERSHIP_REGISTRY_FINGERPRINT,
         ACTIVATION_REGISTRY_FINGERPRINT,
         CURRENT_GROUP_REGISTRY_FINGERPRINT,
         LEGACY_REGISTRY_FINGERPRINT,
@@ -126,7 +129,9 @@ class WorkstationSnapshotV2(ContractModel):
     @model_validator(mode="after")
     def integrity(self):
         retained_types = (
-            CURRENT_GROUP_TYPE_CODES
+            MEMBERSHIP_TYPE_CODES
+            if self.shared.registry_fingerprint == MEMBERSHIP_REGISTRY_FINGERPRINT
+            else CURRENT_GROUP_TYPE_CODES
             if self.shared.registry_fingerprint == CURRENT_GROUP_REGISTRY_FINGERPRINT
             else ACTIVATION_TYPE_CODES
         )
@@ -181,6 +186,21 @@ class WorkstationSnapshotV2(ContractModel):
         action_prefix = calendar_hash(calendar, self.action_session)
         p = universe.provenance
         if p.bootstrap:
+            from market_dashboard.aperture.leadership_contracts import CoverageContextV1
+
+            if isinstance(p.bootstrap, CoverageContextV1):
+                bindings = (
+                    {b.name: b for b in self.evaluation.input_bindings}
+                    if self.evaluation
+                    else {}
+                )
+                coverage_binding = bindings.get("universe_coverage")
+                if (
+                    coverage_binding is None
+                    or coverage_binding.artifact_sha256
+                    != p.bootstrap.coverage_manifest_sha256
+                ):
+                    raise ValueError("Expanded coverage evidence binding mismatch")
             if not self.evaluation or self.evaluation.bootstrap != p.bootstrap:
                 raise ValueError("Bootstrap provenance missing or contradictory")
             if p.bootstrap.market_as_of_session != t:

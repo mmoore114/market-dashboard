@@ -240,3 +240,21 @@ The separate hashed policy authorizes reuse; it is not provider reconfirmation.
 Original schedules/receipts and historical selection remain unchanged. Independent
 identity, tradability, earnings and other controls are not extended. See
 [the policy contract and receipt](membership-maintenance-v1.md).
+
+
+## 13. Explicit expanded coverage
+
+The owner-authorized `AP-UNIVERSE-EXPANSION-001` replaces the initial cohort as a
+permanent operational cap with a hash-pinned, versioned coverage publication.
+Candidate identity, research, strict trade, mapping and history readiness remain
+separate. Existing security/exposure/universe rules and V2 engine formulas are
+unchanged. Missing taxonomy/themes do not exclude otherwise eligible stocks.
+Unresolved identities and incomplete histories stay explicit in private coverage.
+
+`coverage-current-state-v1` binds current API evidence to the published coverage
+manifest. Daily refresh acquires every published covered identity and required
+benchmark, rejects unreviewed additions and preserves independent membership,
+identity, earnings, adjusted-history and freshness gates. It never creates historical
+membership/rotation. Retained V1/V2 snapshots preserve their original fingerprints.
+See [published coverage V1](universe-expansion-v1.md) and its completion receipt for
+observed population, source limits, scale verification and scheduler deployment.

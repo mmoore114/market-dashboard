@@ -13,6 +13,7 @@ from market_dashboard.aperture.contracts import ContractModel
 from market_dashboard.aperture.leadership import fingerprint
 from market_dashboard.aperture.leadership_contracts import (
     BootstrapContextV1,
+    CoverageContextV1,
     StrengthSourceV1,
 )
 from market_dashboard.aperture.regime_contracts import SpotVolatilityIdentityV1
@@ -28,7 +29,7 @@ class BootstrapManifestV1(ContractModel):
     )
     source: StrengthSourceV1
     volatility_identity: SpotVolatilityIdentityV1
-    bootstrap: BootstrapContextV1
+    bootstrap: CoverageContextV1 | BootstrapContextV1
     foundation_fingerprint: str
     artifact_hashes: tuple[tuple[str, str], ...]
     historical_receipt_status: Literal["UNKNOWN"] = "UNKNOWN"
@@ -62,6 +63,34 @@ class BootstrapPlanV1(ContractModel):
             raise ValueError("CONTEXT_ALREADY_EXPIRED_AT_E")
         if self.freshness_deadline.date() > self.action_session:
             raise ValueError("CONTEXT_EXTENDS_BEYOND_ACTION")
+        return self
+
+
+class CoveragePlanV1(BootstrapPlanV1):
+    """Limits derive from the hash-bound published coverage, never a hidden seed."""
+
+    schema_version: Literal["coverage-materialization-plan-v1"] = (
+        "coverage-materialization-plan-v1"
+    )
+    bootstrap: CoverageContextV1
+    covered_symbols: tuple[str, ...]
+    max_symbols: int = Field(gt=0)
+    # Expanded transport is losslessly compressed; canonical bytes remain bounded
+    # per admitted record plus the unchanged fixed Groups catalogue allowance.
+    max_output_bytes: int = Field(gt=0)
+
+    @model_validator(mode="after")
+    def coverage_limits(self):
+        if self.covered_symbols != tuple(sorted(set(self.covered_symbols))):
+            raise ValueError("INVALID_COVERAGE_IDENTITIES")
+        if self.max_symbols != len(self.covered_symbols):
+            raise ValueError("COVERAGE_LIMIT_MISMATCH")
+        if self.max_output_bytes != 24 * 1024**2 + self.max_symbols * 65536:
+            raise ValueError("COVERAGE_BYTE_BUDGET_MISMATCH")
+        if not set(dict(self.bootstrap.first_observations)) <= set(
+            self.covered_symbols
+        ):
+            raise ValueError("UNPUBLISHED_RESEARCH_IDENTITY")
         return self
 
 

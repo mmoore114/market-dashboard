@@ -333,6 +333,76 @@ export interface components {
       | "SUSPECTED_SPLIT"
       | "UNKNOWN";
     /**
+     * CoverageContextV1
+     * @description Current calculation over an explicitly published expanded population.
+     */
+    CoverageContextV1: {
+      /**
+       * Action Session
+       * Format: date
+       */
+      action_session: string;
+      /**
+       * Calculation Mode
+       * @default CURRENT_STATE_BOOTSTRAP
+       * @constant
+       */
+      calculation_mode: "CURRENT_STATE_BOOTSTRAP";
+      /**
+       * Calculation Start
+       * Format: date
+       */
+      calculation_start: string;
+      /** Coverage Manifest Sha256 */
+      coverage_manifest_sha256: string;
+      /** Covered Population */
+      covered_population: number;
+      /**
+       * Evaluation Timestamp
+       * Format: date-time
+       */
+      evaluation_timestamp: string;
+      /** First Observations */
+      first_observations: [string, string][];
+      /**
+       * Historical Membership Status
+       * @default UNKNOWN_BEFORE_BOOTSTRAP
+       * @constant
+       */
+      historical_membership_status: "UNKNOWN_BEFORE_BOOTSTRAP";
+      /** Mapping Members */
+      mapping_members: number;
+      /**
+       * Market As Of Session
+       * Format: date
+       */
+      market_as_of_session: string;
+      /** Missing Observations */
+      missing_observations: number;
+      /** Not Yet Observed */
+      not_yet_observed: number;
+      /**
+       * Population Scope
+       * @default published expanded covered population
+       * @constant
+       */
+      population_scope: "published expanded covered population";
+      /**
+       * Rank Basis
+       * @default CURRENT_COHORT_AT_E
+       * @constant
+       */
+      rank_basis: "CURRENT_COHORT_AT_E";
+      /** Strict Trade Members */
+      strict_trade_members: number;
+      /**
+       * Version
+       * @default coverage-current-state-v1
+       * @constant
+       */
+      version: "coverage-current-state-v1";
+    };
+    /**
      * CurrentGroupProvenanceV2
      * @description Current-cohort analysis only; never a historical membership attestation.
      */
@@ -354,7 +424,11 @@ export interface components {
        * @constant
        */
       analysis_version: "current-group-analysis-v2";
-      bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
+      /** Bootstrap */
+      bootstrap?:
+        | components["schemas"]["CoverageContextV1"]
+        | components["schemas"]["BootstrapContextV1"]
+        | null;
       /**
        * Effective Session
        * Format: date
@@ -417,7 +491,11 @@ export interface components {
        * @constant
        */
       analysis_version: "current-group-analysis-v3";
-      bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
+      /** Bootstrap */
+      bootstrap?:
+        | components["schemas"]["CoverageContextV1"]
+        | components["schemas"]["BootstrapContextV1"]
+        | null;
       /**
        * Effective Session
        * Format: date
@@ -479,7 +557,11 @@ export interface components {
     };
     /** DatedProvenanceV1 */
     DatedProvenanceV1: {
-      bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
+      /** Bootstrap */
+      bootstrap?:
+        | components["schemas"]["CoverageContextV1"]
+        | components["schemas"]["BootstrapContextV1"]
+        | null;
       /**
        * Effective Session
        * Format: date
@@ -833,7 +915,11 @@ export interface components {
        * Format: date
        */
       action_session: string;
-      bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
+      /** Bootstrap */
+      bootstrap?:
+        | components["schemas"]["CoverageContextV1"]
+        | components["schemas"]["BootstrapContextV1"]
+        | null;
       comparison?: components["schemas"]["EngineComparisonV1"] | null;
       /**
        * Evaluation Timestamp

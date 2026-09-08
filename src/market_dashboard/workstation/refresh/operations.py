@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 
-from market_dashboard.workstation.snapshot_v2 import WorkstationSnapshotV2
+from market_dashboard.workstation.archive import copy_payload, read_snapshot
 
 
 def digest(path):
@@ -53,7 +53,7 @@ def status(root, now):
     if not path.exists():
         return {"available": False, "reason": "NO_SUCCESSFUL_SNAPSHOT"}
     try:
-        s = WorkstationSnapshotV2.model_validate_json(path.read_bytes())
+        s = read_snapshot(path)
         return {
             "available": s.freshness.state == "FRESH"
             and s.generated_at <= now < s.freshness.valid_until,
@@ -88,7 +88,7 @@ def activate(candidate, root, *, expected_hash, now=None):
     raw = candidate.read_bytes()
     if hashlib.sha256(raw).hexdigest() != expected_hash:
         raise ValueError("CANDIDATE_HASH_CHANGED")
-    s = WorkstationSnapshotV2.model_validate_json(raw)
+    s = read_snapshot(candidate)
     if (
         s.mode != "LOCAL_SNAPSHOT"
         or s.versions.structure != "structure-engine-v2"
@@ -105,6 +105,7 @@ def activate(candidate, root, *, expected_hash, now=None):
     backups = root / "activation-backups"
     backups.mkdir(exist_ok=True)
     if target.exists():
+        copy_payload(target, backups)
         before = target.read_bytes()
         h = hashlib.sha256(before).hexdigest()
         backup = backups / f"{h}.json"
@@ -120,6 +121,7 @@ def activate(candidate, root, *, expected_hash, now=None):
         root / "activation-intent.json",
         json.dumps({"candidate": str(candidate), "sha256": expected_hash}).encode(),
     )
+    copy_payload(candidate, root)
     atomic_replace(target, raw)
     if digest(target) != expected_hash:
         raise ValueError("ACTIVATION_READBACK_MISMATCH")

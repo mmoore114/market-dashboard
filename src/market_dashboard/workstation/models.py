@@ -21,6 +21,7 @@ from market_dashboard.aperture.leadership import RULES_FINGERPRINT as LEADERSHIP
 from market_dashboard.aperture.leadership import fingerprint
 from market_dashboard.aperture.leadership_contracts import (
     BootstrapContextV1,
+    CoverageContextV1,
     GroupEvidenceV1,
     StrengthSourceV1,
 )
@@ -141,7 +142,7 @@ class EvaluationV1(ContractModel):
     source_fingerprint: str | None = Field(
         default=None, pattern=r"^[0-9a-f]{64}$", exclude_if=lambda v: v is None
     )
-    bootstrap: BootstrapContextV1 | None = Field(
+    bootstrap: CoverageContextV1 | BootstrapContextV1 | None = Field(
         default=None, exclude_if=lambda v: v is None
     )
     comparison: EngineComparisonV1 | None = Field(

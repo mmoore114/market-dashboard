@@ -30,6 +30,7 @@ class SnapshotStore:
         self.failure = None
         self.path = path if mode == "LOCAL_SNAPSHOT" else None
         self._file_signature = None
+        self._archive_payload = None
         try:
             if mode not in ("FIXTURE", "LOCAL_SNAPSHOT"):
                 raise SnapshotUnavailable(
@@ -97,6 +98,14 @@ class SnapshotStore:
                     "SNAPSHOT_INVALID",
                     "The local snapshot does not match the required contract.",
                 )
+            if payload.get("schema_version") == "workstation-snapshot-archive-v1":
+                from .archive import read_snapshot
+
+                snapshot = read_snapshot(target)
+                self._archive_payload = target.parent / payload["payload"]
+                if snapshot.mode != "LOCAL_SNAPSHOT":
+                    raise SnapshotUnavailable("SNAPSHOT_MODE_MISMATCH")
+                return snapshot
             if payload.get("schema_version") != "workstation-snapshot-v2":
                 raise SnapshotUnavailable(
                     "SNAPSHOT_VERSION_UNSUPPORTED",
@@ -115,6 +124,7 @@ class SnapshotStore:
                     "The local snapshot failed its logical fingerprint check.",
                 )
             snapshot = WorkstationSnapshotV2.model_validate(payload)
+            self._archive_payload = None
             if snapshot.mode != "LOCAL_SNAPSHOT":
                 raise SnapshotUnavailable(
                     "SNAPSHOT_MODE_MISMATCH",
@@ -136,7 +146,11 @@ class SnapshotStore:
         if not self.path:
             return None
         stat = Path(self.path).stat()
-        return stat.st_ino, stat.st_mtime_ns, stat.st_size
+        signature = (stat.st_ino, stat.st_mtime_ns, stat.st_size)
+        if self._archive_payload:
+            payload = self._archive_payload.stat()
+            signature += (payload.st_ino, payload.st_mtime_ns, payload.st_size)
+        return signature
 
     def _reload(self):
         if self.mode != "LOCAL_SNAPSHOT" or not self.path:

@@ -157,3 +157,15 @@ policy. It preserves this original receipt and its source schedules. See
 3/2-day warnings, original-date age accounting, complete read-only operational
 status and the distinction between the verified next-session simulation and real
 refresh execution. No historical membership or old snapshot was relabeled.
+
+
+## Expanded coverage continuation
+
+The later owner-authorized `AP-UNIVERSE-EXPANSION-001` replaces the fixed covered
+population restriction above only when an explicit versioned coverage manifest and
+its expected hash are configured. The original receipt remains historical evidence.
+Every published covered symbol and required benchmark participates in bounded daily
+acquisition. A separate current coverage context binds the API evidence; retained
+bootstrap loading and historical membership behavior remain available. See
+[published coverage V1](universe-expansion-v1.md) for acquisition, admission,
+resumption, lossless snapshot transport, scheduler isolation and limitations.

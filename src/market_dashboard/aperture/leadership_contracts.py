@@ -63,6 +63,16 @@ class BootstrapContextV1(ContractModel):
         return self
 
 
+class CoverageContextV1(BootstrapContextV1):
+    """Current calculation over an explicitly published expanded population."""
+
+    version: Literal["coverage-current-state-v1"] = "coverage-current-state-v1"
+    population_scope: Literal["published expanded covered population"] = (
+        "published expanded covered population"
+    )
+    coverage_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
 class DatedProvenanceV1(ContractModel):
     snapshot_id: str = Field(min_length=1)
     version: str = Field(min_length=1)
@@ -70,7 +80,7 @@ class DatedProvenanceV1(ContractModel):
     effective_session: date
     known_session: date
     valid_through: date
-    bootstrap: BootstrapContextV1 | None = Field(
+    bootstrap: CoverageContextV1 | BootstrapContextV1 | None = Field(
         default=None, exclude_if=lambda v: v is None
     )
 

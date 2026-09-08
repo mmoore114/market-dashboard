@@ -28,13 +28,17 @@ and 31 themes. The last completed price session remains visible independently of
 membership capture dates and evaluation time. Historical membership and historical
 group rotation are not inferred from current captures.
 
-The verified current snapshot contains 75 research and 49 trade members, with
-63 NONE / 12 WATCH / 0 TRADE / 0 ACT. Missing VIX/earnings evidence stays explicit.
-See [daily refresh and its completion receipt](docs/current-refresh-v2.md).
+The original 75-stock bootstrap remains preserved. The expanded coverage milestone
+publishes an explicit candidate/admission manifest instead of using that cohort as
+a permanent cap. Missing or short history remains visible independently of research
+and trade eligibility; missing VIX/earnings evidence stays explicit. See
+[published universe coverage](docs/universe-expansion-v1.md),
+[its completion receipt](docs/universe-expansion-v1-receipt.md), and
+[daily refresh](docs/current-refresh-v2.md).
 
 ## Launch and refresh
 
-From the installed repository, with private configuration at
+From the tested installed repository (the pinned release used by the timer), with private configuration at
 `${XDG_CONFIG_HOME:-$HOME/.config}/aperture/refresh.json`:
 
 ```bash

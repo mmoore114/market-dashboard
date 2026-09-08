@@ -56,9 +56,35 @@ def regime_input_from_bars(bars, spot_bars, *, session, calendar, source, univer
     validate_calendar(calendar)
     if any(type(d) is not date for d in calendar) or session not in calendar:
         raise ValueError('Explicit date-only exchange calendar containing T required')
-    index = calendar.index(session)
     closes = prepare_closes(bars,calendar,session,source)
     spot = prepare_spot_closes(spot_bars,calendar,session,volatility_identity)
+    return _regime_from_prepared(closes, spot, session=session, calendar=calendar,
+        source=source, universe=universe, volatility_identity=volatility_identity,
+        structure=structure, leadership=leadership)
+
+
+class PreparedRegimeBars:
+    """Validate one immutable replay input once, then address only sessions <= T."""
+    def __init__(self, bars, spot_bars, *, calendar, as_of, source, volatility_identity):
+        self.calendar = tuple(calendar)
+        self.as_of = as_of
+        self.source = source
+        self.volatility_identity = volatility_identity
+        self.closes = prepare_closes(bars, self.calendar, as_of, source)
+        self.spot = prepare_spot_closes(spot_bars, self.calendar, as_of, volatility_identity)
+
+    def at(self, session, *, universe, structure=None, leadership=None):
+        if session not in self.calendar or session > self.as_of:
+            raise ValueError("Prepared replay session outside verified range")
+        return _regime_from_prepared(self.closes, self.spot, session=session,
+            calendar=self.calendar, source=self.source, universe=universe,
+            volatility_identity=self.volatility_identity, structure=structure,
+            leadership=leadership)
+
+
+def _regime_from_prepared(closes, spot, *, session, calendar, source, universe,
+                          volatility_identity, structure=None, leadership=None):
+    index = calendar.index(session)
     def price_features(symbol):
         return dict(symbol=symbol,close=close_at(closes,symbol,calendar,index),
                     sma20=sma(closes,symbol,calendar,index,20),sma50=sma(closes,symbol,calendar,index,50))
