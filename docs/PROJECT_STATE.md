@@ -6,6 +6,69 @@ Current product authority: `docs/APERTURE_CURRENT_AUTHORITY.md`
 
 Working prototype baseline: `401e1b0afd6ad2a4678af4f1040014b5c9b568e9`
 
+## Session closed — 2026-09-08 07:39 UTC
+
+The owner requested safe shutdown. Refresh timer was **enabled and active**;
+it is now **enabled but temporarily stopped**, with configuration unchanged.
+The last refresh finished successfully at 07:34:34 UTC (`ALREADY_CURRENT`). No
+refresh/build was running at shutdown. Workstation API/frontend and task-owned
+previews are stopped; ports 8000, 5173, 5174 and 5175 are closed. Unrelated
+processes were left alone. Do not automatically restart the timer tonight.
+
+Saved UX implementation: branch `codex/workstation-ux-001`, commit
+`8239a633a0aa62d34dd293b6fc66d3bf4df1695e`, pushed. This checkpoint is a
+documentation-only descendant; use `git rev-parse HEAD` for its exact commit
+and the private `end-of-session.json` receipt for the final pushed identity.
+Draft [PR #19](https://github.com/mmoore114/market-dashboard/pull/19) is based on
+`codex/universe-expansion-v1` at `57c8aaaf1875d63a0e65b802229b33c8a215f7aa`.
+Draft [PR #18](https://github.com/mmoore114/market-dashboard/pull/18) has that
+head and is based on `main` at `3a1499e2d22a7321c55dc4e03b4dba382d590aad`.
+Both remain unmerged. Actual production is still pinned to
+`7de9858f055e7e79d26c6ac8a42896956497b43c`; UX is **not deployed**.
+
+Private locations below are relative to the operator's `$HOME`:
+
+- UX checkout: `aperture-workstation-ux-code`; pinned runtime:
+  `aperture-universe-release-7de9858`.
+- Active snapshot envelope: `aperture-universe-expansion-2026-09-08/refresh/current.json`;
+  payload is the adjacent content-addressed gzip named by that envelope.
+  Retained build envelope:
+  `aperture-universe-expansion-2026-09-08/refresh/runs/bounded-20260908T052316Z/snapshot.json`.
+- Snapshot fingerprint:
+  `4d8ca015e9deadc1ca7f26b53596134072720ae9714c2be89e778df8ca6798c6`.
+  Original expiry **2026-09-08 13:30 UTC / 08:30 CDT** remains unchanged;
+  it must not be treated as current tomorrow or have its deadline extended.
+- Replay shards: `aperture-universe-expansion-2026-09-08/refresh/replay-checkpoints`.
+  Recovery receipt: `aperture-universe-expansion-2026-09-08/recovery-final.json`.
+  Existing activation/membership-policy backups remain under `refresh`.
+- Screenshots: `aperture-workstation-ux-2026-09-08/before-complete` and
+  `aperture-workstation-ux-2026-09-08/after-accepted` (laptop and mobile).
+  Existing completion/integrity receipts and the shutdown receipt remain in
+  `aperture-workstation-ux-2026-09-08`; no private artifacts are committed.
+
+Essential artifact presence and existing receipts were checked; no replay,
+rebuild, acquisition, deployment, test suite or full artifact rehash was run.
+The owner's existing `.vscode/settings.json` modification remains byte-for-byte
+unchanged and uncommitted in the main checkout. Reported free disk at shutdown:
+**1,539,067,904 bytes (about 1.43 GiB)**. Check storage before further large work.
+
+VIX/regime confirmation and earnings coverage remain missing. Decision V1's
+retained global EP-error veto is disclosed by UX review, not silently removed;
+inspect its intended family/direction scope before proposing a versioned change.
+
+Tomorrow: review PRs #18/#19 and UX screenshots, inspect the veto's intended
+scope, and check refresh status before deciding on integration. Neither merge
+nor deployment is authorized by this checkpoint. After reviewing status and
+storage, resume scheduling deliberately with:
+
+```bash
+systemctl --user start aperture-refresh.timer
+```
+
+Stopping an enabled timer is temporary; user-manager restart/login may activate
+it again. Check actual timer state on resume. No enablement/configuration change
+was made to suppress that normal behavior.
+
 ## Daily research UX — implemented on a stacked draft
 
 AP-WORKSTATION-UX-001 is implemented on `codex/workstation-ux-001`, based on
