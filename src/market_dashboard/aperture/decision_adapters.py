@@ -10,6 +10,7 @@ from market_dashboard.aperture.decision_contracts import (
 from market_dashboard.aperture.decision_policy import validate_rules
 from market_dashboard.aperture.leadership import RULES_FINGERPRINT as LEADERSHIP_RULES
 from market_dashboard.aperture.leadership import validate_calendar
+from market_dashboard.aperture.leadership_contracts import group_supports_session
 from market_dashboard.aperture.regime import calendar_hash
 from market_dashboard.aperture.setup import RULES_FINGERPRINT as SETUP_RULES
 from market_dashboard.aperture.setup_v2 import RULES_FINGERPRINT as SETUP_V2_RULES
@@ -260,9 +261,24 @@ def validate_inputs(inputs, calendar):
         if len(keys) != len(set(keys)):
             raise ValueError("Duplicate group identity")
         for g in c.groups:
+            from market_dashboard.aperture.leadership_contracts import (
+                CurrentGroupProvenanceV2,
+            )
+
+            context = u.universe.provenance.bootstrap
+            if isinstance(g.membership, CurrentGroupProvenanceV2) and (
+                context is None
+                or (
+                    g.membership.market_as_of_session,
+                    g.membership.evaluation_timestamp,
+                    g.membership.action_session,
+                )
+                != (t, context.evaluation_timestamp, inputs.action_session)
+            ):
+                raise ValueError("Current-group decision clock mismatch")
             if (
                 g.session_date != t
-                or not g.membership.effective_session <= t <= g.membership.valid_through
+                or not group_supports_session(g.membership, t)
                 or g.membership.effective_session not in positions
             ):
                 raise ValueError("Group session/effective membership mismatch")

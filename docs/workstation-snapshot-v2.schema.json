@@ -448,7 +448,9 @@
                 "87": "#/$defs/NormalizedStructureEvidenceV2",
                 "88": "#/$defs/NormalizedStructureInputV2",
                 "89": "#/$defs/NormalizedStructureMeasuresV2",
-                "9": "#/$defs/NormalizedDecisionRiskOutputV1"
+                "9": "#/$defs/NormalizedDecisionRiskOutputV1",
+                "90": "#/$defs/NormalizedCurrentGroupProvenanceV2",
+                "91": "#/$defs/NormalizedCurrentGroupProvenanceV3"
               },
               "propertyName": "model_type"
             },
@@ -464,6 +466,12 @@
               },
               {
                 "$ref": "#/$defs/NormalizedBreadthSleeveV1"
+              },
+              {
+                "$ref": "#/$defs/NormalizedCurrentGroupProvenanceV2"
+              },
+              {
+                "$ref": "#/$defs/NormalizedCurrentGroupProvenanceV3"
               },
               {
                 "$ref": "#/$defs/NormalizedDatedProvenanceV1"
@@ -825,6 +833,7 @@
       "GroupType": {
         "enum": [
           "SECTOR",
+          "GROUP",
           "INDUSTRY",
           "SUB_INDUSTRY",
           "THEME"
@@ -1191,6 +1200,197 @@
           "fields"
         ],
         "title": "NormalizedBreadthSleeveV1",
+        "type": "object"
+      },
+      "NormalizedCurrentGroupProvenanceV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 13,
+            "minItems": 13,
+            "prefixItems": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "const": "CURRENT_COHORT_AT_E",
+                "type": "string"
+              },
+              {
+                "const": "current-group-analysis-v2",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 90,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedCurrentGroupProvenanceV2",
+        "type": "object"
+      },
+      "NormalizedCurrentGroupProvenanceV3": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 19,
+            "minItems": 19,
+            "prefixItems": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "const": "CURRENT_COHORT_AT_E",
+                "type": "string"
+              },
+              {
+                "const": "current-group-analysis-v3",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "const": "membership-reuse-policy-v1",
+                "type": "string"
+              },
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 366,
+                "type": "integer"
+              },
+              {
+                "minimum": 1,
+                "type": "integer"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 91,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedCurrentGroupProvenanceV3",
         "type": "object"
       },
       "NormalizedDatedProvenanceV1": {
@@ -8360,10 +8560,13 @@
             "type": "integer"
           },
           "registry_fingerprint": {
-            "default": "8a0c2a762f0ec293fa107ebc87fde5881559606a5808ecf361ce0c381772a148",
+            "default": "852d8761d6a5a24ec4484b62043e2ebc4570fffdbae63de3b3c6fd1fce99b607",
             "enum": [
-              "8a0c2a762f0ec293fa107ebc87fde5881559606a5808ecf361ce0c381772a148",
-              "454a474905e65a3c1b74af17161ca5a839c0ef5709c4fdb6544abf2d4341d291"
+              "852d8761d6a5a24ec4484b62043e2ebc4570fffdbae63de3b3c6fd1fce99b607",
+              "53d77137cff3f89e1cff2a3ecba2a51bf0855bb0b9f170aeb62b76eeb493fa49",
+              "ee0e9b89e1f855263ea98ea5542a37f787bb07d50b1f162c4471b46f28abd206",
+              "454a474905e65a3c1b74af17161ca5a839c0ef5709c4fdb6544abf2d4341d291",
+              "8a0c2a762f0ec293fa107ebc87fde5881559606a5808ecf361ce0c381772a148"
             ],
             "title": "Registry Fingerprint",
             "type": "string"
@@ -8496,7 +8699,7 @@
             "type": "string"
           },
           "setup": {
-            "default": "setup-engine-v1",
+            "default": "setup-engine-v2",
             "enum": [
               "setup-engine-v1",
               "setup-engine-v2"
@@ -8505,7 +8708,7 @@
             "type": "string"
           },
           "setup_fingerprint": {
-            "default": "823647ca53b5c4623fef7f00beb294a18b5a8e8166d398ef8290b534cdcbfc38",
+            "default": "0f2acac1a4fa4546467db39098d33383212f0149f8bb9af1c660088e7f229aa2",
             "enum": [
               "823647ca53b5c4623fef7f00beb294a18b5a8e8166d398ef8290b534cdcbfc38",
               "0f2acac1a4fa4546467db39098d33383212f0149f8bb9af1c660088e7f229aa2"
@@ -8514,7 +8717,7 @@
             "type": "string"
           },
           "structure": {
-            "default": "structure-engine-v1",
+            "default": "structure-engine-v2",
             "enum": [
               "structure-engine-v1",
               "structure-engine-v2"
@@ -8523,7 +8726,7 @@
             "type": "string"
           },
           "structure_fingerprint": {
-            "default": "b0faf4774c772c0f4d09120f8eafd311853c59d751fe5bc7649a9a1b380bcf0d",
+            "default": "b9c2ae96d1cf00ef23168af4ca188f41101f3823dc5e827216ca77b02897d071",
             "enum": [
               "b0faf4774c772c0f4d09120f8eafd311853c59d751fe5bc7649a9a1b380bcf0d",
               "b9c2ae96d1cf00ef23168af4ca188f41101f3823dc5e827216ca77b02897d071"
@@ -8714,6 +8917,48 @@
         "price50_gate",
         "equal_sma20_count",
         "equal_sma50_count"
+      ]
+    },
+    "CurrentGroupProvenanceV2": {
+      "code": 90,
+      "fields": [
+        "snapshot_id",
+        "version",
+        "source_as_of_date",
+        "effective_session",
+        "known_session",
+        "valid_through",
+        "bootstrap",
+        "analysis_basis",
+        "analysis_version",
+        "market_as_of_session",
+        "evaluation_timestamp",
+        "action_session",
+        "known_at"
+      ]
+    },
+    "CurrentGroupProvenanceV3": {
+      "code": 91,
+      "fields": [
+        "snapshot_id",
+        "version",
+        "source_as_of_date",
+        "effective_session",
+        "known_session",
+        "valid_through",
+        "bootstrap",
+        "analysis_basis",
+        "analysis_version",
+        "market_as_of_session",
+        "evaluation_timestamp",
+        "action_session",
+        "known_at",
+        "reuse_policy_version",
+        "reuse_policy_sha256",
+        "source_schedule_sha256",
+        "reuse_authorized_at",
+        "max_source_age_days",
+        "warn_before_days"
       ]
     },
     "DatedProvenanceV1": {
@@ -9959,5 +10204,5 @@
       ]
     }
   },
-  "registry_fingerprint": "8a0c2a762f0ec293fa107ebc87fde5881559606a5808ecf361ce0c381772a148"
+  "registry_fingerprint": "852d8761d6a5a24ec4484b62043e2ebc4570fffdbae63de3b3c6fd1fce99b607"
 }

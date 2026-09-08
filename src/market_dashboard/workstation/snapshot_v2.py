@@ -20,6 +20,7 @@ from market_dashboard.aperture.leadership_contracts import (
     LeadershipOutputV1,
     ResearchUniverseV1,
     StrengthSourceV1,
+    group_supports_session,
 )
 from market_dashboard.aperture.regime import calendar_hash
 from market_dashboard.aperture.regime_contracts import RegimeOutputV1
@@ -53,13 +54,24 @@ class CompactRecordV2(ContractModel):
     output_ref: NodeRef
 
 
-from .legacy_registry import LEGACY_REGISTRY_FINGERPRINT, LEGACY_TYPE_CODES
+from .legacy_registry import (
+    ACTIVATION_REGISTRY_FINGERPRINT,
+    ACTIVATION_TYPE_CODES,
+    CURRENT_GROUP_REGISTRY_FINGERPRINT,
+    CURRENT_GROUP_TYPE_CODES,
+    LEGACY_REGISTRY_FINGERPRINT,
+    LEGACY_TYPE_CODES,
+)
 
 
 class SharedContextV2(ContractModel):
-    registry_fingerprint: Literal[REGISTRY_FINGERPRINT, LEGACY_REGISTRY_FINGERPRINT] = (
-        REGISTRY_FINGERPRINT
-    )
+    registry_fingerprint: Literal[
+        REGISTRY_FINGERPRINT,
+        ACTIVATION_REGISTRY_FINGERPRINT,
+        CURRENT_GROUP_REGISTRY_FINGERPRINT,
+        LEGACY_REGISTRY_FINGERPRINT,
+        "8a0c2a762f0ec293fa107ebc87fde5881559606a5808ecf361ce0c381772a148",
+    ] = REGISTRY_FINGERPRINT
     source_ref: NodeRef
     universe_ref: NodeRef
     leadership_ref: NodeRef | None
@@ -113,6 +125,15 @@ class WorkstationSnapshotV2(ContractModel):
 
     @model_validator(mode="after")
     def integrity(self):
+        retained_types = (
+            CURRENT_GROUP_TYPE_CODES
+            if self.shared.registry_fingerprint == CURRENT_GROUP_REGISTRY_FINGERPRINT
+            else ACTIVATION_TYPE_CODES
+        )
+        if self.shared.registry_fingerprint != REGISTRY_FINGERPRINT and any(
+            n.value.model_type not in retained_types.values() for n in self.evidence
+        ):
+            raise ValueError("Retained registry cannot contain current-cohort evidence")
         if self.shared.registry_fingerprint == LEGACY_REGISTRY_FINGERPRINT and (
             self.shared.versions.structure != "structure-engine-v1"
             or any(
@@ -186,10 +207,38 @@ class WorkstationSnapshotV2(ContractModel):
         if group_keys != sorted(set(group_keys)):
             raise ValueError("Duplicate or unordered shared group key")
         for g in groups:
-            if (
-                g.session_date != t
-                or not g.membership.effective_session <= t <= g.membership.valid_through
+            from market_dashboard.aperture.leadership_contracts import (
+                CurrentGroupProvenanceV2,
+                CurrentGroupProvenanceV3,
+            )
+
+            if isinstance(g.membership, CurrentGroupProvenanceV2) and (
+                self.evaluation is None
+                or (
+                    g.membership.market_as_of_session,
+                    g.membership.evaluation_timestamp,
+                    g.membership.action_session,
+                )
+                != (t, self.evaluation.evaluation_timestamp, self.action_session)
             ):
+                raise ValueError("Current-group snapshot clock mismatch")
+            if isinstance(g.membership, CurrentGroupProvenanceV3):
+                bindings = {b.name: b for b in self.evaluation.input_bindings}
+                policy = bindings.get("membership_reuse_policy")
+                capture = bindings.get(
+                    "themes" if g.group_type == "THEME" else "hierarchy"
+                )
+                if (
+                    policy is None
+                    or capture is None
+                    or policy.artifact_sha256 != g.membership.reuse_policy_sha256
+                    or policy.available_at != g.membership.reuse_authorized_at
+                    or capture.artifact_sha256 != g.membership.source_schedule_sha256
+                    or capture.available_at != g.membership.known_at
+                    or self.freshness.valid_until > g.membership.reuse_expires_at
+                ):
+                    raise ValueError("Current-group reuse evidence binding mismatch")
+            if g.session_date != t or not group_supports_session(g.membership, t):
                 raise ValueError("Group session/effective interval mismatch")
             if g.membership.effective_session not in positions:
                 raise ValueError("Group calendar mismatch")

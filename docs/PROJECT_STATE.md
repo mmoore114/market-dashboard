@@ -1,6 +1,6 @@
 # Aperture Project State
 
-Updated: 2026-09-07
+Updated: 2026-09-08
 
 Current product authority: `docs/APERTURE_CURRENT_AUTHORITY.md`
 
@@ -48,20 +48,20 @@ can be relaunched from the retained local snapshot.
 
 ## Known product gaps
 
-- The current snapshot does not contain published group membership, so Groups
-  presents explicit missing evidence.
+- The current snapshot contains 312 current-cohort Groups; historical membership
+  and historical group rotation remain unavailable before their actual effective dates.
 - Deepvue sub-industry and theme captures are verified bootstrap sources but remain
   local and are not runtime dependencies.
 - Earnings/catalyst coverage is incomplete.
 - The initial population is bounded, not the full U.S. equity research universe.
-- Book, Journal, benchmark learning, and routine daily refresh remain future work.
+- Book, Journal and benchmark learning remain future work.
 - The current UI needs user-driven workflow and visual refinement.
 - Aperture intentionally does not include charts; Deepvue handles chart review.
 
 ## Engine alignment status
 
 `AP-ENGINE-ALIGNMENT-001` is implemented and verified on the V2 branch. Runtime V1
-remains reproducible and is still the default materializer selection. V2 is an
+remains reproducible through explicit selection. New selections default to V2, an
 explicit coherent `structure-engine-v2` / `setup-engine-v2` pair; no production
 source data or existing snapshot was relabeled.
 
@@ -118,8 +118,85 @@ preserved at `docs/history/PROJECT_STATE-through-current-bootstrap-v1.md`.
 Historical task receipts and implementation documents remain available under
 `docs/`; consult them only when routed by a current task or when auditing provenance.
 
+## V2 defaults and Groups activation
+
+Reviewed PRs #15 and #16 were merged with merge commits and branches retained.
+`AP-V2-GROUPS-ACTIVATION-001` makes new version selections use the reviewed V2 pair.
+Original V1 and comparison snapshots still decode with unchanged fingerprints.
+
+A separate local database and Parquet publication now contains September 7
+hierarchy and September 5 themes, plus typed membership schedules effective
+September 8 only. The production source database was not changed. Research
+coverage is 75/75 for all four hierarchy fields and 58/75 for themes (114
+memberships); trade coverage is 49/49 for hierarchy and 40/49 for themes (84
+memberships). Unassigned themes remain unknown. Four conflicting child labels
+remain separate per-symbol paths, with no stocks removed to repair a hierarchy.
+
+Groups supports all five levels, path identities, dated provenance, complete
+member lists, and existing leadership/RS evidence and eligibility reasons. No new
+ranking formula was introduced. Available catalogs have 11 sectors, 25 groups,
+75 industry paths, 170 sub-industry paths and 31 themes. Source labels remain
+73 industries and 164 sub-industries; path counts differ because parents conflict.
+
+The original snapshots still have empty Groups and unchanged fingerprints. The
+owner-authorized continuation corrected current-state timing using
+`CurrentGroupProvenanceV2`: completed September 4 prices can be analyzed using
+September 7 hierarchy / September 5 themes known at evaluation and valid for the
+September 8 action. Historical selection and rotation changes remain strict.
+
+At the preceding milestone, a separate real snapshot was activated, fingerprint
+`59a5dca7832288b8b3534fdddb47b97608805409d1c8a31adaad08d111660b83`.
+Evaluation: September 8, 00:31:12.937673 UTC; action September 8; validity through
+its 13:30 UTC open. Size 7,352,531 bytes; 312 Groups, 75 research / 49 trade,
+funnel 63 NONE / 12 WATCH / 0 TRADE / 0 ACT. Some RS evidence is available for 104
+groups; one passes existing leadership-rank gates. The checked FRED source lacks
+September 4 VIX, which stays null/UNKNOWN. No price freshness was fabricated.
+
+One launch/refresh/status command, exclusive locking, bounded cached provider
+acquisition, private recoverable publication, immutable candidates, verified atomic
+activation and reload are implemented. The installed user-systemd timer dispatches
+every 15 minutes and at startup, using pinned exchange close plus a 45-minute buffer.
+It catches up when Linux resumes; it cannot run while Linux is stopped/suspended.
+
+Verification: 25 focused tests; 359 integration tests with four optional artifact
+skips; 13 frontend components; two real desktop/mobile Workstation smoke tests.
+Type/build/lint/schema checks passed. Repeated refresh returned ALREADY_CURRENT;
+a controlled failed refresh preserved the usable real snapshot. Temporary browser
+services stopped; the refresh timer remains enabled as requested.
+
 ## Next work
 
-Engine alignment is complete; no additional engine changes, refresh, production
-switch, or merge is authorized merely by this status file. See
-`docs/CODEX_NEXT_TASK.md` for the completed assignment and delivery boundary.
+The current Workstation is delivered in draft PR #17, which remains unmerged.
+Beyond the September 8 action, the separately published operator reuse policy
+authorizes current-cohort membership within original-source age limits; the
+retained publication itself is not extended. See [the detailed receipt](current-refresh-v2.md)
+and `docs/CODEX_NEXT_TASK.md` for source limits and local operation.
+
+## Membership maintenance and operational status
+
+PR #17 now includes a private, versioned carry-forward authorization: hierarchy
+14 calendar days, themes 7, warning 3/2 days before exclusive expiry. New typed
+current-cohort evidence binds the policy and original schedules while retaining
+the original source/effective/known/valid-through fields. No historical rotation
+is generated. New verified captures supersede prospectively; repeated runs and
+republication do not reset source age. Independent controls still block normally.
+
+Status independently verifies the retained snapshot and reports clocks, expiry,
+usability, attempt outcome/failure, VIX and other missing inputs, capture ages,
+policy expiry, held lock, next eligible attempt and separate timer dispatch. Groups
+shows source age and explicit operator reuse without redesign or charts.
+
+Verification: 45 focused tests, 253 relevant integration tests, 14 frontend tests
+and two real desktop/mobile smoke tests passed. September 8 close → September 9
+action was simulated using synthetic data in a disposable test workspace; it is
+not a real September 8 after-close completion. See
+[the current completion receipt](membership-maintenance-v1.md) for the real policy,
+refresh outcome, scheduler status and exact periodic maintenance requirements.
+
+The maintenance continuation completed a real September 8 pre-open refresh using
+September 4 prices, producing fingerprint
+`ebc6f1d7fad7ce255b6657f66330fe1ada619852e8eba27ef7a89ab0e0939161`.
+Its evaluation is 01:43:41.143924 UTC and expiry remains its own September 8
+13:30 UTC action open. All 312 groups bind the separate reuse policy. The immediate
+repeat was ALREADY_CURRENT, VIX remained UNKNOWN, and the enabled timer was
+resumed. This does not claim real September 8 after-close completion.

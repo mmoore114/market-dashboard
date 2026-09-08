@@ -30,10 +30,16 @@ def build_action_population(
     action_session,
     rules,
     master_version,
+    action_open=None,
+    prior_trade_members=(),
 ):
     if (
         evaluation.utcoffset() is None
-        or not market_session <= evaluation.date() < action_session
+        or not market_session <= evaluation.date() <= action_session
+        or (
+            evaluation.date() == action_session
+            and (action_open is None or evaluation >= action_open)
+        )
     ):
         raise ValueError("INVALID_CURRENT_POPULATION_CLOCKS")
     if len(symbols) != len(set(symbols)):
@@ -73,7 +79,7 @@ def build_action_population(
                 average_dollar_volume_20=number(f.average_dollar_volume_20),
                 adr_percent_20=number(f.adr_percent_20),
             ),
-            prior_trade_member=False,
+            prior_trade_member=symbol in prior_trade_members,
             rules=rules,
         )
         members.append(MemberV1(symbol=symbol, memberships=memberships))

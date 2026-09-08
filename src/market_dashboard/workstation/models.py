@@ -45,20 +45,31 @@ class VersionsV1(ContractModel):
     universe: Literal["aperture-universe-v1"] = "aperture-universe-v1"
     feature: Literal["decision-risk-features-v1"] = "decision-risk-features-v1"
     structure: Literal["structure-engine-v1", "structure-engine-v2"] = (
-        "structure-engine-v1"
+        "structure-engine-v2"
     )
-    setup: Literal["setup-engine-v1", "setup-engine-v2"] = "setup-engine-v1"
+    setup: Literal["setup-engine-v1", "setup-engine-v2"] = "setup-engine-v2"
     leadership: Literal["leadership-formulas-v1"] = "leadership-formulas-v1"
     regime: Literal["market-regime-v1"] = "market-regime-v1"
     decision_risk: Literal["decision-risk-v1"] = "decision-risk-v1"
     rules: Literal["aperture-rules-v1"] = "aperture-rules-v1"
     structure_fingerprint: Literal[STRUCTURE_RULES, STRUCTURE_V2_RULES] = (
-        STRUCTURE_RULES
+        STRUCTURE_V2_RULES
     )
-    setup_fingerprint: Literal[SETUP_RULES, SETUP_V2_RULES] = SETUP_RULES
+    setup_fingerprint: Literal[SETUP_RULES, SETUP_V2_RULES] = SETUP_V2_RULES
     leadership_fingerprint: Literal[LEADERSHIP_RULES] = LEADERSHIP_RULES
     regime_fingerprint: Literal[REGIME_RULES] = REGIME_RULES
     decision_fingerprint: Literal[DECISION_RULES] = DECISION_RULES
+
+    @classmethod
+    def v1(cls, **kwargs):
+        """Explicit historical generation; existing snapshots carry their versions."""
+        return cls(
+            structure="structure-engine-v1",
+            setup="setup-engine-v1",
+            structure_fingerprint=STRUCTURE_RULES,
+            setup_fingerprint=SETUP_RULES,
+            **kwargs,
+        )
 
     @model_validator(mode="after")
     def engine_pair(self):
@@ -451,7 +462,23 @@ class ErrorV1(ContractModel):
     fields: tuple[ErrorFieldV1, ...] = ()
 
 
+class MembershipMaintenanceV1(ContractModel):
+    role: Literal["hierarchy", "themes"]
+    capture_date: date
+    age_days: int
+    reuse_status: str
+    expires_at: datetime | None = None
+    warning_at: datetime | None = None
+    max_age_days: int | None = None
+    warn_before_days: int | None = None
+    original_valid_through: date
+    policy_sha256: str | None = None
+    reason: str | None = None
+    applies_to_snapshot_capture: bool = True
+
+
 class GroupsViewV1(ContractModel):
     meta: ViewMetaV1
     groups: tuple[GroupEvidenceV1, ...]
     reasons: tuple[ReasonV1, ...]
+    membership_maintenance: tuple[MembershipMaintenanceV1, ...] = ()

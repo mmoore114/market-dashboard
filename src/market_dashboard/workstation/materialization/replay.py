@@ -116,8 +116,14 @@ def replay(plan, loaded):
         bootstrap.mapping_members,
     ):
         raise Refusal("BOOTSTRAP_MEMBERSHIP_COUNTS_MISMATCH")
+    # Select independently by level; a taxonomy publication includes four levels.
+    from market_dashboard.aperture.leadership_contracts import GroupType
+
     group_schedules = tuple(
-        loaded[n].snapshots for n in ("taxonomy", "themes") if n in loaded
+        tuple(g for g in loaded[n].snapshots if g.group_type == kind)
+        for n in ("taxonomy", "themes")
+        if n in loaded
+        for kind in GroupType
     )
     structure_source = StructureSourceV1(
         **source.model_dump(exclude={"schema_version", "calendar_id"})
@@ -192,6 +198,27 @@ def replay(plan, loaded):
         groups = with_history(
             aggregate_groups(strength, selected, session), group_history, indices
         )
+        if session == plan.as_of_session and "current_groups" in loaded:
+            from market_dashboard.aperture.leadership_contracts import (
+                CurrentGroupProvenanceV2,
+            )
+
+            current_groups = loaded["current_groups"].snapshots
+            for group in current_groups:
+                p = group.provenance
+                if not isinstance(p, CurrentGroupProvenanceV2) or (
+                    p.market_as_of_session,
+                    p.evaluation_timestamp,
+                    p.action_session,
+                ) != (
+                    plan.as_of_session,
+                    plan.evaluation.evaluation_timestamp,
+                    plan.action_session,
+                ):
+                    raise Refusal("CURRENT_GROUP_EVALUATION_MISMATCH")
+            if groups:
+                raise Refusal("CURRENT_AND_HISTORICAL_GROUPS_MIXED")
+            groups = aggregate_groups(strength, current_groups, session)
         for g in groups:
             h = group_history.setdefault((g.group_type, g.group_id), {})
             h[indices[session]] = g

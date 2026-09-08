@@ -2,7 +2,7 @@
 
 Status: **CURRENT PRODUCT AUTHORITY**
 
-Effective: 2026-09-07
+Effective: 2026-09-08
 
 Scope: product identity, terminology, architecture, target Structure/Setup design,
 document precedence, and legacy boundaries
@@ -89,8 +89,9 @@ source provenance, exact version selection, and explicit interpretations:
 
 The current runtime `structure-engine-v1` uses an EMA10/SMA20/SMA50 stack and a
 different predicate/transition model. It remains reproducible V1 output alongside
-the explicitly selected V2 implementation. The original snapshot and default V1
-materialization selection are preserved; no production default was switched.
+the explicitly selected V2 implementation. Existing snapshots retain their explicit engine identities. Under owner-authorized
+`AP-V2-GROUPS-ACTIVATION-001`, newly constructed version selections default to the
+reviewed coherent V2 pair and fingerprints. Explicit V1 generation remains available.
 
 ## 6. Settled Setup decisions
 
@@ -198,3 +199,44 @@ If a future decision changes this authority, update this file and its effective
 date, record the reason, identify affected runtime versions, and preserve the prior
 implementation history. Never resolve a conflict by silently choosing the oldest,
 longest, or most detailed document.
+
+
+## 11. V2 activation and dated Groups publication
+
+`AP-V2-GROUPS-ACTIVATION-001` activates the reviewed pair for new selections without
+changing formulas, thresholds or 60/40 lifetimes. Retained V1 and V2 snapshots
+remain readable with original fingerprints and freshness clocks.
+
+Verified Deepvue hierarchy (September 7) and themes (September 5) are separately
+published to a private local database/Parquet workspace. Production source inputs
+remain unchanged. Sector, Group, Industry and Sub-Industry use full source parent
+paths as group identities; conflicting labels are not canonicalized. Themes remain
+many-to-many. Missing and unresolved identities remain explicit. Existing
+Leadership V1 aggregation and eligibility gates are unchanged.
+
+Historical membership first applies September 8 under its retained publication.
+The owner-authorized continuation now permits explicitly versioned
+`CURRENT_COHORT_AT_E` Groups to analyze completed-session price evidence using
+membership known by evaluation and valid for the action session. This corrects the
+prior historical-only restriction for current-state analysis. It does not backdate
+membership or historical rotation. See [the current refresh contract and receipt](current-refresh-v2.md).
+
+The verified real snapshot has 312 Groups. A supported locked daily refresh command
+uses pinned XNYS closes/opens, bounded existing provider acquisition, recoverable
+local publication and verified atomic activation. New pre-open evaluations derive
+validity from their own action open and controls; old snapshot expiry is unchanged.
+User-systemd scheduling and resume/premarket catch-up are installed locally. Linux
+must be running; no unattended-host guarantee is made. Future membership validity,
+provider delays and incomplete earnings remain explicit source/control limits.
+
+## 12. Operator-approved current membership reuse
+
+The owner-authorized PR #17 continuation adds `membership-reuse-policy-v1` and
+`CurrentGroupProvenanceV3`. Verified captures can support CURRENT_COHORT_AT_E
+between captures for 14 calendar days (hierarchy) / 7 (themes), warning 3 / 2 days
+before exclusive UTC expiry. Source age remains anchored to the original capture
+date, never authorization or rebuild time. New captures supersede prospectively.
+The separate hashed policy authorizes reuse; it is not provider reconfirmation.
+Original schedules/receipts and historical selection remain unchanged. Independent
+identity, tradability, earnings and other controls are not extended. See
+[the policy contract and receipt](membership-maintenance-v1.md).

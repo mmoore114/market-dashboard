@@ -1,6 +1,6 @@
 """Opt-in, frozen strength and group-ranking contracts, independent of legacy scores."""
 
-from datetime import date, datetime
+from datetime import UTC, date, datetime, time, timedelta
 from enum import StrEnum
 from typing import Literal
 
@@ -106,6 +106,98 @@ class DatedProvenanceV1(ContractModel):
         return self
 
 
+class CurrentGroupProvenanceV2(DatedProvenanceV1):
+    """Current-cohort analysis only; never a historical membership attestation."""
+
+    analysis_basis: Literal["CURRENT_COHORT_AT_E"] = "CURRENT_COHORT_AT_E"
+    analysis_version: Literal["current-group-analysis-v2"] = "current-group-analysis-v2"
+    market_as_of_session: date
+    evaluation_timestamp: datetime
+    action_session: date
+    known_at: datetime
+
+    def supports_calculation(self, session):
+        return session == self.market_as_of_session
+
+    @model_validator(mode="after")
+    def current_clocks(self):
+        if (
+            self.bootstrap is not None
+            or any(
+                d.utcoffset() is None
+                for d in (self.known_at, self.evaluation_timestamp)
+            )
+            or not (
+                self.source_as_of_date <= self.known_at.date()
+                and self.known_at <= self.evaluation_timestamp
+                and self.market_as_of_session
+                <= self.evaluation_timestamp.date()
+                <= self.action_session
+                and self.effective_session <= self.action_session <= self.valid_through
+            )
+        ):
+            raise ValueError("Invalid current-cohort group clocks")
+        return self
+
+
+class CurrentGroupProvenanceV3(CurrentGroupProvenanceV2):
+    """Operator reuse of an immutable capture, never provider reconfirmation."""
+
+    analysis_version: Literal["current-group-analysis-v3"] = "current-group-analysis-v3"
+    reuse_policy_version: Literal["membership-reuse-policy-v1"] = (
+        "membership-reuse-policy-v1"
+    )
+    reuse_policy_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    source_schedule_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    reuse_authorized_at: datetime
+    max_source_age_days: int = Field(gt=0, le=366)
+    warn_before_days: int = Field(ge=1)
+
+    @property
+    def reuse_expires_at(self):
+        return datetime.combine(
+            self.source_as_of_date + timedelta(days=self.max_source_age_days),
+            time(),
+            UTC,
+        )
+
+    @model_validator(mode="after")
+    def current_clocks(self):
+        # Override V2's action <= original valid-through requirement only here.
+        # The inherited source/effective/known/valid-through dates remain unchanged.
+        if (
+            self.bootstrap is not None
+            or any(
+                d.utcoffset() is None
+                for d in (
+                    self.known_at,
+                    self.evaluation_timestamp,
+                    self.reuse_authorized_at,
+                )
+            )
+            or self.warn_before_days >= self.max_source_age_days
+            or not (
+                self.source_as_of_date <= self.known_at.date()
+                and max(self.known_at, self.reuse_authorized_at)
+                <= self.evaluation_timestamp
+                and self.market_as_of_session
+                <= self.evaluation_timestamp.date()
+                <= self.action_session
+                and self.effective_session <= self.action_session
+                and self.evaluation_timestamp < self.reuse_expires_at
+                and self.action_session < self.reuse_expires_at.date()
+            )
+        ):
+            raise ValueError("Invalid current-cohort reuse clocks")
+        return self
+
+
+def group_supports_session(provenance, session):
+    if isinstance(provenance, CurrentGroupProvenanceV2):
+        return provenance.supports_calculation(session)
+    return provenance.effective_session <= session <= provenance.valid_through
+
+
 class ResearchUniverseV1(ContractModel):
     schema_version: Literal["research-universe-input-v1"] = "research-universe-input-v1"
     provenance: DatedProvenanceV1
@@ -125,6 +217,7 @@ class ResearchUniverseV1(ContractModel):
 
 class GroupType(StrEnum):
     SECTOR = "SECTOR"
+    GROUP = "GROUP"
     INDUSTRY = "INDUSTRY"
     SUB_INDUSTRY = "SUB_INDUSTRY"
     THEME = "THEME"
@@ -156,7 +249,7 @@ class GroupMemberV1(ContractModel):
 
 class GroupMembershipV1(ContractModel):
     schema_version: Literal["group-membership-v1"] = "group-membership-v1"
-    provenance: DatedProvenanceV1
+    provenance: DatedProvenanceV1 | CurrentGroupProvenanceV2 | CurrentGroupProvenanceV3
     group_type: GroupType
     group_ids: tuple[str, ...]
     members: tuple[GroupMemberV1, ...]
@@ -267,7 +360,7 @@ class GroupEvidenceV1(ContractModel):
     session_date: date
     group_type: GroupType
     group_id: str
-    membership: DatedProvenanceV1
+    membership: DatedProvenanceV1 | CurrentGroupProvenanceV2 | CurrentGroupProvenanceV3
     members: tuple[GroupMemberV1, ...]
     total_members: int = Field(ge=0)
     excluded_non_security_count: int = Field(ge=0)
@@ -303,6 +396,24 @@ class GroupEvidenceV1(ContractModel):
     leadership_rank_reasons: tuple[str, ...]
     rotation_rank_reasons: tuple[str, ...]
     missing_context_reasons: tuple[str, ...]
+
+    @model_validator(mode="after")
+    def current_history(self):
+        if isinstance(self.membership, CurrentGroupProvenanceV2) and (
+            any(
+                v is not None
+                for v in (
+                    self.rank_change_5,
+                    self.rank_change_20,
+                    self.rotation_rank_change_5,
+                    self.rotation_rank_change_20,
+                )
+            )
+            or self.top_quintile_streak
+            or self.rotation_top_quintile_streak
+        ):
+            raise ValueError("Current-cohort group history is unavailable")
+        return self
 
 
 class LeadershipOutputV1(ContractModel):

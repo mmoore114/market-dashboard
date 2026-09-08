@@ -460,7 +460,7 @@ def fixture_arguments(rules, scenario="GREEN"):
         ),
         "source": SOURCE,
         "calendar": CALENDAR,
-        "versions": VersionsV1(security_master="synthetic-security-master-v1"),
+        "versions": VersionsV1.v1(security_master="synthetic-security-master-v1"),
         "rules": rules,
         "regime": regime,
         "funnel": FunnelV1(**counts),

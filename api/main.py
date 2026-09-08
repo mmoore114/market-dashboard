@@ -29,6 +29,7 @@ from market_dashboard.workstation.models import (
     SymbolDetailV1,
     TapeV1,
 )
+from market_dashboard.workstation.refresh.report import membership_maintenance
 from market_dashboard.workstation.snapshot_v2 import sizing_input
 from market_dashboard.workstation.store import SnapshotStore, SnapshotUnavailable
 
@@ -250,6 +251,7 @@ def create_app(store=None):
         return GroupsViewV1(
             meta=store.meta(),
             groups=snapshot.groups,
+            membership_maintenance=membership_maintenance(store, snapshot),
             reasons=()
             if snapshot.groups
             else (
@@ -268,7 +270,12 @@ def create_app(store=None):
             raise ApiError(
                 404, "GROUP_NOT_FOUND", "No published evidence for this exact group."
             )
-        return GroupsViewV1(meta=store.meta(), groups=selected, reasons=())
+        return GroupsViewV1(
+            meta=store.meta(),
+            groups=selected,
+            reasons=(),
+            membership_maintenance=membership_maintenance(store, snapshot),
+        )
 
     @app.get("/api/v1/time-machine/{session}", response_model=ErrorV1)
     def time_machine(session: date):
