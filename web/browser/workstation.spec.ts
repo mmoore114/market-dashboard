@@ -4,7 +4,7 @@ const evidenceDir =
   process.env.APERTURE_SMOKE_EVIDENCE_DIR ?? "test-results/evidence";
 
 for (const viewport of [
-  { width: 1366, height: 900 },
+  { width: 1366, height: 768 },
   { width: 390, height: 844 },
 ]) {
   test(`fixture workstation at ${viewport.width}px`, async ({ page }) => {
@@ -21,7 +21,7 @@ for (const viewport of [
       fullPage: true,
     });
     await page
-      .getByRole("navigation")
+      .getByRole("navigation", { name: "Primary navigation" })
       .getByRole("link", { name: /Tape/ })
       .click();
     await page
@@ -34,18 +34,20 @@ for (const viewport of [
       .getByRole("button", { name: "Sort by Price", exact: true })
       .click();
     await expect(
-      page.getByRole("columnheader", { name: "5 sessions", exact: true }),
+      page.getByRole("columnheader", { name: "Active setup", exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByRole("columnheader", { name: "21 sessions", exact: true }),
+      page.getByRole("columnheader", { name: "Primary blocker", exact: true }),
     ).toBeVisible();
     if (viewport.width === 390) {
-      const scroll = page.locator(".table-scroll");
+      const scroll = page
+        .getByRole("table", { name: "Research tape", exact: true })
+        .locator("..");
       expect(
         await scroll.evaluate((el) => el.scrollWidth > el.clientWidth),
       ).toBe(true);
       await page
-        .getByRole("columnheader", { name: "Veto / status", exact: true })
+        .getByRole("columnheader", { name: "Primary blocker", exact: true })
         .scrollIntoViewIfNeeded();
       expect(await scroll.evaluate((el) => el.scrollLeft > 0)).toBe(true);
       await page
@@ -58,7 +60,9 @@ for (const viewport of [
     });
     await page.getByRole("button", { name: "SIM110", exact: true }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
-    await expect(page.getByText("Decision checklist")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Primary blockers" }),
+    ).toBeVisible();
     await page.screenshot({
       path: `${evidenceDir}/detail-${viewport.width}.png`,
     });
@@ -68,29 +72,31 @@ for (const viewport of [
       page.getByRole("button", { name: "SIM110", exact: true }),
     ).toBeFocused();
     await page
-      .getByRole("navigation")
+      .getByRole("navigation", { name: "Primary navigation" })
       .getByRole("link", { name: /Rules/ })
       .click();
     await expect(
       page.getByRole("heading", { name: "Rules & evidence" }),
     ).toBeVisible();
     await page
-      .getByRole("navigation")
+      .getByRole("navigation", { name: "Primary navigation" })
       .getByRole("link", { name: /Tape/ })
       .click();
     await expect(
       page.getByRole("combobox", { name: "Decision", exact: true }),
     ).toHaveValue("ACT");
     await page
-      .getByRole("navigation")
+      .getByRole("navigation", { name: "Primary navigation" })
       .getByRole("link", { name: /Sizer/ })
       .click();
-    await page.getByLabel("Exact symbol").fill("SIM110");
+    await page.getByLabel("Symbol search").fill("SIM110");
+    await page.getByLabel("Account equity ($)").fill("25000");
+    await page.getByLabel("Available buying power ($)").fill("10000");
     await page.getByLabel("Proposed entry ($)").fill("104");
     await page.getByLabel("Proposed stop ($)").fill("100.8");
     await page.getByRole("button", { name: "Calculate size" }).click();
     await expect(
-      page.getByRole("heading", { name: "Canonical sizing result" }),
+      page.getByRole("heading", { name: "Policy-qualified sizing" }),
     ).toBeVisible();
     await page.screenshot({
       path: `${evidenceDir}/sizer-${viewport.width}.png`,

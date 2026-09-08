@@ -6,6 +6,21 @@ Current product authority: `docs/APERTURE_CURRENT_AUTHORITY.md`
 
 Working prototype baseline: `401e1b0afd6ad2a4678af4f1040014b5c9b568e9`
 
+## Daily research UX — implemented on a stacked draft
+
+AP-WORKSTATION-UX-001 is implemented on `codex/workstation-ux-001`, based on
+PR #18 head `57c8aaaf1875d63a0e65b802229b33c8a215f7aa`. The compact research
+workflow uses bounded V2 projections and preserves the shared evidence graph.
+The separate `decision-review-v1` explanation contract attributes errors without
+rewriting stored decisions or changing thresholds. Future preparation extends the
+verified calendar for the earnings horizon; no data acquisition or replay occurred.
+
+The final live workflow was checked against the unchanged expanded fingerprint
+while it was fresh. Production remains pinned to `7de9858`; the existing timer and
+walkthrough services were preserved. PR #18 and the UX draft remain unmerged; no
+runtime switch is authorized by this task. See the [UX receipt](workstation-ux-001-receipt.md)
+for sampled blockers, compatibility limits, focused checks and measured performance.
+
 ## Expanded coverage milestone
 
 `AP-UNIVERSE-EXPANSION-001` follows the normal merge of reviewed PR #17 at

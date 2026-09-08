@@ -1,38 +1,43 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { expect, it, vi } from "vitest";
 import { Groups } from "./Groups";
-
-it("shows independent capture ages, operator reuse warning and supersession", async () => {
+import fixture from "./__fixtures__/synthetic.json";
+it("shows unranked coverage and independent capture reuse without inventing ranks", async () => {
   vi.stubGlobal(
     "fetch",
     vi.fn(
-      async () =>
+      async (path: string) =>
         new Response(
-          JSON.stringify({
-            groups: [],
-            reasons: [],
-            membership_maintenance: [
-              {
-                role: "hierarchy",
-                capture_date: "2026-09-07",
-                age_days: 3,
-                reuse_status: "REUSABLE",
-                expires_at: "2026-09-21T00:00:00Z",
-                warning_at: "2026-09-18T00:00:00Z",
-                applies_to_snapshot_capture: true,
-              },
-              {
-                role: "themes",
-                capture_date: "2026-09-05",
-                age_days: 5,
-                reuse_status: "REFRESH_DUE",
-                expires_at: "2026-09-12T00:00:00Z",
-                warning_at: "2026-09-10T00:00:00Z",
-                applies_to_snapshot_capture: false,
-              },
-            ],
-          }),
+          JSON.stringify(
+            path.includes("/health")
+              ? {
+                  ...fixture.research_health,
+                  membership_maintenance: [
+                    {
+                      role: "hierarchy",
+                      capture_date: "2026-09-07",
+                      age_days: 3,
+                      reuse_status: "REUSABLE",
+                      expires_at: "2026-09-21T00:00:00Z",
+                      applies_to_snapshot_capture: true,
+                    },
+                  ],
+                }
+              : {
+                  ...fixture.research_groups,
+                  rows: path.includes("include_unranked=true")
+                    ? [
+                        {
+                          ...fixture.research_groups.rows[0],
+                          leadership_rank: null,
+                          reasons: ["INSUFFICIENT_COVERAGE"],
+                        },
+                      ]
+                    : [],
+                },
+          ),
         ),
     ),
   );
@@ -45,19 +50,11 @@ it("shows independent capture ages, operator reuse warning and supersession", as
       <Groups />
     </QueryClientProvider>,
   );
-  expect(
-    await screen.findByText(/Hierarchy capture 2026-09-07/),
-  ).toHaveTextContent("3 calendar days old");
-  expect(screen.getByText(/Themes capture 2026-09-05/)).toHaveTextContent(
-    "REFRESH_DUE",
-  );
-  expect(screen.getByText(/Themes capture 2026-09-05/)).toHaveTextContent(
-    "reuse expires 2026-09-12",
-  );
-  expect(screen.getByText(/Themes capture 2026-09-05/)).toHaveTextContent(
-    "Deepvue has not reconfirmed",
-  );
-  expect(screen.getByText(/Themes capture 2026-09-05/)).toHaveTextContent(
-    "requires rebuilding",
-  );
+  const user = userEvent.setup();
+  expect(await screen.findByText(/Hierarchy 3d old/)).toBeVisible();
+  await user.click(screen.getByLabelText("Include unranked groups"));
+  expect(await screen.findByText("Unranked")).toBeVisible();
+  expect(screen.getByText("insufficient coverage")).toBeVisible();
+  await user.click(screen.getByText("Membership & ranking details"));
+  expect(screen.getByText(/operator-approved dated capture/)).toBeVisible();
 });

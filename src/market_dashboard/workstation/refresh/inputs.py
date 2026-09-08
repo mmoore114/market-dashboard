@@ -2,7 +2,7 @@
 
 import json
 import shutil
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import duckdb
@@ -19,6 +19,11 @@ from market_dashboard.workstation.models import EvaluationV1, InputClockBindingV
 
 from .acquire import acquire_job
 from .operations import digest
+
+
+def decision_calendar(start, action):
+    """Verified future exchange sessions support earnings T+5, not future prices."""
+    return generate_xnys(start, action + timedelta(days=21))
 
 
 def prepare(config, run, window, *, api_key=None):
@@ -93,7 +98,7 @@ def prepare(config, run, window, *, api_key=None):
                 )
             }
         )
-    calendar = generate_xnys(loaded["calendar"].sessions[0], window["action"])
+    calendar = decision_calendar(loaded["calendar"].sessions[0], window["action"])
     loaded["calendar"] = calendar
     previous = root / "last-inputs.json"
     if previous.exists():
