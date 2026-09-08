@@ -17,7 +17,7 @@ from market_dashboard.aperture.contracts import ContractModel
 from market_dashboard.aperture.decision_contracts import DecisionRiskOutputV1
 from market_dashboard.aperture.leadership import fingerprint
 
-from .legacy_registry import ACTIVATION_TYPE_CODES
+from .legacy_registry import CURRENT_GROUP_TYPE_CODES
 
 Digest = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 NodeRef = Annotated[int, Field(ge=0, strict=True)]
@@ -63,11 +63,11 @@ def _reference_type(annotation, reference):
     return annotation
 
 
-TYPE_CODES = dict(ACTIVATION_TYPE_CODES)
+TYPE_CODES = dict(CURRENT_GROUP_TYPE_CODES)
 TYPE_CODES.update(
     {
-        name: len(ACTIVATION_TYPE_CODES) + i
-        for i, name in enumerate(sorted(set(CANONICAL) - set(ACTIVATION_TYPE_CODES)))
+        name: len(CURRENT_GROUP_TYPE_CODES) + i
+        for i, name in enumerate(sorted(set(CANONICAL) - set(CURRENT_GROUP_TYPE_CODES)))
     }
 )
 TYPE_NAMES = {i: name for name, i in TYPE_CODES.items()}

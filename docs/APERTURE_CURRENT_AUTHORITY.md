@@ -2,7 +2,7 @@
 
 Status: **CURRENT PRODUCT AUTHORITY**
 
-Effective: 2026-09-07
+Effective: 2026-09-08
 
 Scope: product identity, terminology, architecture, target Structure/Setup design,
 document precedence, and legacy boundaries
@@ -228,3 +228,15 @@ validity from their own action open and controls; old snapshot expiry is unchang
 User-systemd scheduling and resume/premarket catch-up are installed locally. Linux
 must be running; no unattended-host guarantee is made. Future membership validity,
 provider delays and incomplete earnings remain explicit source/control limits.
+
+## 12. Operator-approved current membership reuse
+
+The owner-authorized PR #17 continuation adds `membership-reuse-policy-v1` and
+`CurrentGroupProvenanceV3`. Verified captures can support CURRENT_COHORT_AT_E
+between captures for 14 calendar days (hierarchy) / 7 (themes), warning 3 / 2 days
+before exclusive UTC expiry. Source age remains anchored to the original capture
+date, never authorization or rebuild time. New captures supersede prospectively.
+The separate hashed policy authorizes reuse; it is not provider reconfirmation.
+Original schedules/receipts and historical selection remain unchanged. Independent
+identity, tradability, earnings and other controls are not extended. See
+[the policy contract and receipt](membership-maintenance-v1.md).

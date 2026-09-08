@@ -31,12 +31,31 @@ for (const width of [1366, 390]) {
       expect(g.rank_change_5).toBeNull();
       expect(g.rank_change_20).toBeNull();
     }
+    if (process.env.APERTURE_MEMBERSHIP_POLICY) {
+      expect(groups.membership_maintenance).toHaveLength(2);
+      expect(
+        groups.membership_maintenance.map((s: { role: string }) => s.role),
+      ).toEqual(["hierarchy", "themes"]);
+      expect(
+        groups.membership_maintenance.every((s: { reuse_status: string }) =>
+          ["REUSABLE", "REFRESH_DUE"].includes(s.reuse_status),
+        ),
+      ).toBe(true);
+    }
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto("/#groups");
     await expect(
       page.getByRole("heading", { name: "Groups", exact: true }),
     ).toBeVisible();
+    if (process.env.APERTURE_MEMBERSHIP_POLICY) {
+      await expect(page.getByText(/Hierarchy capture/)).toContainText(
+        "calendar days old",
+      );
+      await expect(page.getByText(/Themes capture/)).toContainText(
+        "Deepvue has not reconfirmed",
+      );
+    }
     await page.getByLabel("Group level").selectOption("SECTOR");
     await page.locator("details").first().locator("summary").click();
     await expect(page.locator("details").first()).toContainText(

@@ -1,39 +1,26 @@
 # Codex Next Task
 
-Status: CURRENT WORKSTATION AND LOCAL REFRESH DELIVERED — PR #17 REMAINS DRAFT
+Status: MEMBERSHIP MAINTENANCE AND OPERATIONAL STATUS DELIVERED — PR #17 REMAINS DRAFT
 
-Continuation of reviewed `9d83fdc8e515d0d3d8a25e12a736a78265572741` on
-`codex/v2-groups-activation`. The owner authorized routine bounded acquisition,
-reversible publication, rebuild, verified activation and local scheduling.
-See [the completion receipt](current-refresh-v2.md) and
-[current authority](APERTURE_CURRENT_AUTHORITY.md). Do not merge PR #17.
+Owner-authorized continuation from `3f00d497` on `codex/v2-groups-activation`.
+The implementation adds a separate versioned operator reuse policy, 14-day
+hierarchy / 7-day themes limits, 3/2-day warnings, prospective capture registration
+and full read-only status. It preserves the one-session original schedules, all
+source dates and historical membership contracts. See
+[membership maintenance and its completion receipt](membership-maintenance-v1.md).
 
-## Delivered
+The synthetic September 8 close → September 9 action replay passed. Do not claim
+that real September 8 bars or a real after-close refresh have already completed.
+The next eligible real after-close attempt uses the actual calendar, providers
+and independent controls. No daily approval is needed within the published reuse
+interval. Themes warn September 10 and expire September 12 00:00 UTC; a September
+14 action requires a newer verified theme capture (September 8 or later under the
+seven-day limit). Hierarchy warns September 18 and expires September 21 00:00 UTC.
 
-Explicit current-cohort membership analysis keeps T/source/effective/known/E/A
-clocks separate. Historical selection and group rotation remain strict. The real
-75-symbol V2 snapshot has 312 populated Groups and is atomically active, with
-September 4 price evidence, actual September 8 00:31 UTC evaluation and September 8
-action. Its own validity ends at the 13:30 UTC action open. Old snapshots retain
-original expiry and fingerprints.
-
-Run `.venv/bin/python scripts/aperture.py launch`, `refresh`, or `status` from the
-repository. Private configuration selects exact local artifacts. The installed
-persistent user timer dispatches every 15 minutes/startup; the command computes
-actual exchange-close +45-minute due times and handles premarket/resume catch-up.
-Linux must be running; always-on hosting remains a deployment choice.
-
-## Exact remaining source/control requirements
-
-- The FRED availability check returned VIXCLS only through September 3. September 4
-  volatility remains UNKNOWN, with no forward-fill or substitute feed.
-- The reviewed Groups publication is valid for the September 8 action only. For
-  September 9 and later actions, supply a refreshed capture or explicit reviewed
-  validity attestation. The scheduled command refuses silently extending membership.
-- Required bar/reference failures, revised adjusted history and changed instrument
-  classifications retain explicit refusal/recovery boundaries. No universe expansion.
-- Earnings/catalyst coverage remains incomplete. No invented evidence or intraday feed.
-
-Settings, raw captures, original source data, prior snapshots and backups remain
-protected. New private generations, receipts and activation backups stay outside Git.
-Do not repeat full-suite verification or unrelated formatting to resume this handoff.
+Launch/refresh/status remain `.venv/bin/python scripts/aperture.py COMMAND`.
+Register newly verified captures with the explicit policy publication command in
+the receipt. Do not automate authenticated Deepvue access. Linux must be running
+for the local timer; no always-on host or new provider was added. Preserve settings,
+raw captures, original artifacts, backups and credentials. Commit/push only this
+continuation and keep PR #17 draft and unmerged. No repeated full suite or unrelated
+formatting is required.

@@ -61,6 +61,18 @@ Install on a configured Linux machine with:
 systemctl --user list-timers aperture-refresh.timer
 ```
 
+Current membership can be reused under a separately published operator policy:
+14 calendar days for hierarchy and 7 for themes, with warnings 3 and 2 days before
+expiry. Age always starts at the original capture date; reuse is not a Deepvue
+reconfirmation. Status now reports both source ages, last attempt/failure, missing
+inputs, active refresh lock and scheduler dispatch separately from the next
+eligible refresh attempt. It is read-only and handles damaged status metadata
+without hiding the retained snapshot.
+
+See [membership maintenance and policy publication](docs/membership-maintenance-v1.md)
+for defaults, expiry boundaries and the command to register a newly verified
+capture. No daily manual approval is needed within the explicit policy interval.
+
 Private path configuration, source receipts, credentials, current snapshots and
 backups stay outside Git. Membership validity and provider availability remain
 independent requirements; consult the refresh receipt for exact missing inputs.

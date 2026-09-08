@@ -482,6 +482,135 @@
         "title": "CurrentGroupProvenanceV2",
         "type": "object"
       },
+      "CurrentGroupProvenanceV3": {
+        "additionalProperties": false,
+        "description": "Operator reuse of an immutable capture, never provider reconfirmation.",
+        "properties": {
+          "action_session": {
+            "format": "date",
+            "title": "Action Session",
+            "type": "string"
+          },
+          "analysis_basis": {
+            "const": "CURRENT_COHORT_AT_E",
+            "default": "CURRENT_COHORT_AT_E",
+            "title": "Analysis Basis",
+            "type": "string"
+          },
+          "analysis_version": {
+            "const": "current-group-analysis-v3",
+            "default": "current-group-analysis-v3",
+            "title": "Analysis Version",
+            "type": "string"
+          },
+          "bootstrap": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BootstrapContextV1"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "effective_session": {
+            "format": "date",
+            "title": "Effective Session",
+            "type": "string"
+          },
+          "evaluation_timestamp": {
+            "format": "date-time",
+            "title": "Evaluation Timestamp",
+            "type": "string"
+          },
+          "known_at": {
+            "format": "date-time",
+            "title": "Known At",
+            "type": "string"
+          },
+          "known_session": {
+            "format": "date",
+            "title": "Known Session",
+            "type": "string"
+          },
+          "market_as_of_session": {
+            "format": "date",
+            "title": "Market As Of Session",
+            "type": "string"
+          },
+          "max_source_age_days": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 366.0,
+            "title": "Max Source Age Days",
+            "type": "integer"
+          },
+          "reuse_authorized_at": {
+            "format": "date-time",
+            "title": "Reuse Authorized At",
+            "type": "string"
+          },
+          "reuse_policy_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Reuse Policy Sha256",
+            "type": "string"
+          },
+          "reuse_policy_version": {
+            "const": "membership-reuse-policy-v1",
+            "default": "membership-reuse-policy-v1",
+            "title": "Reuse Policy Version",
+            "type": "string"
+          },
+          "snapshot_id": {
+            "minLength": 1,
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "source_as_of_date": {
+            "format": "date",
+            "title": "Source As Of Date",
+            "type": "string"
+          },
+          "source_schedule_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Source Schedule Sha256",
+            "type": "string"
+          },
+          "valid_through": {
+            "format": "date",
+            "title": "Valid Through",
+            "type": "string"
+          },
+          "version": {
+            "minLength": 1,
+            "title": "Version",
+            "type": "string"
+          },
+          "warn_before_days": {
+            "minimum": 1.0,
+            "title": "Warn Before Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "snapshot_id",
+          "version",
+          "source_as_of_date",
+          "effective_session",
+          "known_session",
+          "valid_through",
+          "market_as_of_session",
+          "evaluation_timestamp",
+          "action_session",
+          "known_at",
+          "reuse_policy_sha256",
+          "source_schedule_sha256",
+          "reuse_authorized_at",
+          "max_source_age_days",
+          "warn_before_days"
+        ],
+        "title": "CurrentGroupProvenanceV3",
+        "type": "object"
+      },
       "DatedProvenanceV1": {
         "additionalProperties": false,
         "properties": {
@@ -2060,6 +2189,9 @@
               },
               {
                 "$ref": "#/components/schemas/CurrentGroupProvenanceV2"
+              },
+              {
+                "$ref": "#/components/schemas/CurrentGroupProvenanceV3"
               }
             ],
             "title": "Membership"
@@ -2506,6 +2638,14 @@
               "$ref": "#/components/schemas/GroupEvidenceV1"
             },
             "title": "Groups",
+            "type": "array"
+          },
+          "membership_maintenance": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/MembershipMaintenanceV1"
+            },
+            "title": "Membership Maintenance",
             "type": "array"
           },
           "meta": {
@@ -3084,6 +3224,119 @@
           "minimum_average_dollar_volume_20"
         ],
         "title": "MappingUniverseRules",
+        "type": "object"
+      },
+      "MembershipMaintenanceV1": {
+        "additionalProperties": false,
+        "properties": {
+          "age_days": {
+            "title": "Age Days",
+            "type": "integer"
+          },
+          "applies_to_snapshot_capture": {
+            "default": true,
+            "title": "Applies To Snapshot Capture",
+            "type": "boolean"
+          },
+          "capture_date": {
+            "format": "date",
+            "title": "Capture Date",
+            "type": "string"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "max_age_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Age Days"
+          },
+          "original_valid_through": {
+            "format": "date",
+            "title": "Original Valid Through",
+            "type": "string"
+          },
+          "policy_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Sha256"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "reuse_status": {
+            "title": "Reuse Status",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "hierarchy",
+              "themes"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "warn_before_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warn Before Days"
+          },
+          "warning_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warning At"
+          }
+        },
+        "required": [
+          "role",
+          "capture_date",
+          "age_days",
+          "reuse_status",
+          "original_valid_through"
+        ],
+        "title": "MembershipMaintenanceV1",
         "type": "object"
       },
       "MembershipMode": {

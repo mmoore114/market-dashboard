@@ -395,6 +395,88 @@ export interface components {
       /** Version */
       version: string;
     };
+    /**
+     * CurrentGroupProvenanceV3
+     * @description Operator reuse of an immutable capture, never provider reconfirmation.
+     */
+    CurrentGroupProvenanceV3: {
+      /**
+       * Action Session
+       * Format: date
+       */
+      action_session: string;
+      /**
+       * Analysis Basis
+       * @default CURRENT_COHORT_AT_E
+       * @constant
+       */
+      analysis_basis: "CURRENT_COHORT_AT_E";
+      /**
+       * Analysis Version
+       * @default current-group-analysis-v3
+       * @constant
+       */
+      analysis_version: "current-group-analysis-v3";
+      bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
+      /**
+       * Effective Session
+       * Format: date
+       */
+      effective_session: string;
+      /**
+       * Evaluation Timestamp
+       * Format: date-time
+       */
+      evaluation_timestamp: string;
+      /**
+       * Known At
+       * Format: date-time
+       */
+      known_at: string;
+      /**
+       * Known Session
+       * Format: date
+       */
+      known_session: string;
+      /**
+       * Market As Of Session
+       * Format: date
+       */
+      market_as_of_session: string;
+      /** Max Source Age Days */
+      max_source_age_days: number;
+      /**
+       * Reuse Authorized At
+       * Format: date-time
+       */
+      reuse_authorized_at: string;
+      /** Reuse Policy Sha256 */
+      reuse_policy_sha256: string;
+      /**
+       * Reuse Policy Version
+       * @default membership-reuse-policy-v1
+       * @constant
+       */
+      reuse_policy_version: "membership-reuse-policy-v1";
+      /** Snapshot Id */
+      snapshot_id: string;
+      /**
+       * Source As Of Date
+       * Format: date
+       */
+      source_as_of_date: string;
+      /** Source Schedule Sha256 */
+      source_schedule_sha256: string;
+      /**
+       * Valid Through
+       * Format: date
+       */
+      valid_through: string;
+      /** Version */
+      version: string;
+      /** Warn Before Days */
+      warn_before_days: number;
+    };
     /** DatedProvenanceV1 */
     DatedProvenanceV1: {
       bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
@@ -1039,7 +1121,8 @@ export interface components {
       /** Membership */
       membership:
         | components["schemas"]["DatedProvenanceV1"]
-        | components["schemas"]["CurrentGroupProvenanceV2"];
+        | components["schemas"]["CurrentGroupProvenanceV2"]
+        | components["schemas"]["CurrentGroupProvenanceV3"];
       /** Missing Context Reasons */
       missing_context_reasons: string[];
       /** Outside Universe Count */
@@ -1184,6 +1267,11 @@ export interface components {
     GroupsViewV1: {
       /** Groups */
       groups: components["schemas"]["GroupEvidenceV1"][];
+      /**
+       * Membership Maintenance
+       * @default []
+       */
+      membership_maintenance: components["schemas"]["MembershipMaintenanceV1"][];
       meta: components["schemas"]["ViewMetaV1"];
       /** Reasons */
       reasons: components["schemas"]["ReasonV1"][];
@@ -1368,6 +1456,45 @@ export interface components {
       required_locale: string;
       /** Supported Exchanges */
       supported_exchanges: string[];
+    };
+    /** MembershipMaintenanceV1 */
+    MembershipMaintenanceV1: {
+      /** Age Days */
+      age_days: number;
+      /**
+       * Applies To Snapshot Capture
+       * @default true
+       */
+      applies_to_snapshot_capture: boolean;
+      /**
+       * Capture Date
+       * Format: date
+       */
+      capture_date: string;
+      /** Expires At */
+      expires_at?: string | null;
+      /** Max Age Days */
+      max_age_days?: number | null;
+      /**
+       * Original Valid Through
+       * Format: date
+       */
+      original_valid_through: string;
+      /** Policy Sha256 */
+      policy_sha256?: string | null;
+      /** Reason */
+      reason?: string | null;
+      /** Reuse Status */
+      reuse_status: string;
+      /**
+       * Role
+       * @enum {string}
+       */
+      role: "hierarchy" | "themes";
+      /** Warn Before Days */
+      warn_before_days?: number | null;
+      /** Warning At */
+      warning_at?: string | null;
     };
     /**
      * MembershipMode

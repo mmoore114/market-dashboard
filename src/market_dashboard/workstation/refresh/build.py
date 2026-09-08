@@ -20,7 +20,17 @@ from market_dashboard.workstation.models import (
 from market_dashboard.workstation.snapshot_v2 import WorkstationSnapshotV2
 
 
-def build_current(seed_plan, loaded, *, group_root, now, window, input_hashes, output):
+def build_current(
+    seed_plan,
+    loaded,
+    *,
+    group_root,
+    now,
+    window,
+    input_hashes,
+    output,
+    membership_config=None,
+):
     if now >= window["opening"] or now < window["close"]:
         raise ValueError("PREOPEN_COMPLETED_SESSION_CONTEXT_REQUIRED")
     if seed_plan.as_of_session != window["market"]:
@@ -38,36 +48,48 @@ def build_current(seed_plan, loaded, *, group_root, now, window, input_hashes, o
     loaded["universe"] = loaded["universe"].model_copy(
         update={"snapshots": (current.model_copy(update={"universe": universe}),)}
     )
-    receipt = json.loads((Path(group_root) / "publication-receipt.json").read_text())
-    verify_hashes(receipt["files"])
-    known = datetime.fromisoformat(receipt["published_at"])
-    groups = []
-    bindings = list(seed_plan.evaluation.input_bindings)
-    for role in ("taxonomy", "themes"):
-        path = Path(group_root) / f"{role}-schedule.json"
-        schedule = GroupScheduleV1.model_validate_json(path.read_bytes())
-        for group in schedule.snapshots:
-            p = group.provenance
-            current_p = CurrentGroupProvenanceV2.model_validate(
-                p.model_dump()
-                | {
-                    "market_as_of_session": window["market"],
-                    "evaluation_timestamp": now,
-                    "action_session": window["action"],
-                    "known_at": known,
-                }
-            )
-            groups.append(group.model_copy(update={"provenance": current_p}))
-        bindings.append(
-            InputClockBindingV1(
-                name=role,
-                role="decision_control",
-                effective_date=schedule.snapshots[0].provenance.effective_session,
-                available_at=known,
-                artifact_sha256=receipt["files"][str(path)],
-            )
+    if membership_config is not None:
+        from .membership import authorized_groups
+
+        current_groups, group_bindings, group_hashes = authorized_groups(
+            membership_config, now, window
         )
-    loaded["current_groups"] = GroupScheduleV1(snapshots=tuple(groups))
+        loaded["current_groups"] = current_groups
+        bindings = list(seed_plan.evaluation.input_bindings) + group_bindings
+        input_hashes = {**input_hashes, **group_hashes}
+    else:
+        receipt = json.loads(
+            (Path(group_root) / "publication-receipt.json").read_text()
+        )
+        verify_hashes(receipt["files"])
+        known = datetime.fromisoformat(receipt["published_at"])
+        groups = []
+        bindings = list(seed_plan.evaluation.input_bindings)
+        for role in ("taxonomy", "themes"):
+            path = Path(group_root) / f"{role}-schedule.json"
+            schedule = GroupScheduleV1.model_validate_json(path.read_bytes())
+            for group in schedule.snapshots:
+                p = group.provenance
+                current_p = CurrentGroupProvenanceV2.model_validate(
+                    p.model_dump()
+                    | {
+                        "market_as_of_session": window["market"],
+                        "evaluation_timestamp": now,
+                        "action_session": window["action"],
+                        "known_at": known,
+                    }
+                )
+                groups.append(group.model_copy(update={"provenance": current_p}))
+            bindings.append(
+                InputClockBindingV1(
+                    name=role,
+                    role="decision_control",
+                    effective_date=schedule.snapshots[0].provenance.effective_session,
+                    available_at=known,
+                    artifact_sha256=receipt["files"][str(path)],
+                )
+            )
+        loaded["current_groups"] = GroupScheduleV1(snapshots=tuple(groups))
     evaluation = EvaluationV1(
         market_as_of_session=window["market"],
         evaluation_timestamp=now,

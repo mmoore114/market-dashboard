@@ -186,3 +186,9 @@ ACTIVATION_TYPE_CODES = {
     "StructureInputV2": 88,
     "StructureMeasuresV2": 89,
 }
+
+# Frozen registry of the populated current-cohort snapshot at 3f00d497.
+CURRENT_GROUP_REGISTRY_FINGERPRINT = (
+    "ee0e9b89e1f855263ea98ea5542a37f787bb07d50b1f162c4471b46f28abd206"
+)
+CURRENT_GROUP_TYPE_CODES = {**ACTIVATION_TYPE_CODES, "CurrentGroupProvenanceV2": 90}

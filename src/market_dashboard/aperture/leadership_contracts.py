@@ -1,6 +1,6 @@
 """Opt-in, frozen strength and group-ranking contracts, independent of legacy scores."""
 
-from datetime import date, datetime
+from datetime import UTC, date, datetime, time, timedelta
 from enum import StrEnum
 from typing import Literal
 
@@ -140,6 +140,58 @@ class CurrentGroupProvenanceV2(DatedProvenanceV1):
         return self
 
 
+class CurrentGroupProvenanceV3(CurrentGroupProvenanceV2):
+    """Operator reuse of an immutable capture, never provider reconfirmation."""
+
+    analysis_version: Literal["current-group-analysis-v3"] = "current-group-analysis-v3"
+    reuse_policy_version: Literal["membership-reuse-policy-v1"] = (
+        "membership-reuse-policy-v1"
+    )
+    reuse_policy_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    source_schedule_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    reuse_authorized_at: datetime
+    max_source_age_days: int = Field(gt=0, le=366)
+    warn_before_days: int = Field(ge=1)
+
+    @property
+    def reuse_expires_at(self):
+        return datetime.combine(
+            self.source_as_of_date + timedelta(days=self.max_source_age_days),
+            time(),
+            UTC,
+        )
+
+    @model_validator(mode="after")
+    def current_clocks(self):
+        # Override V2's action <= original valid-through requirement only here.
+        # The inherited source/effective/known/valid-through dates remain unchanged.
+        if (
+            self.bootstrap is not None
+            or any(
+                d.utcoffset() is None
+                for d in (
+                    self.known_at,
+                    self.evaluation_timestamp,
+                    self.reuse_authorized_at,
+                )
+            )
+            or self.warn_before_days >= self.max_source_age_days
+            or not (
+                self.source_as_of_date <= self.known_at.date()
+                and max(self.known_at, self.reuse_authorized_at)
+                <= self.evaluation_timestamp
+                and self.market_as_of_session
+                <= self.evaluation_timestamp.date()
+                <= self.action_session
+                and self.effective_session <= self.action_session
+                and self.evaluation_timestamp < self.reuse_expires_at
+                and self.action_session < self.reuse_expires_at.date()
+            )
+        ):
+            raise ValueError("Invalid current-cohort reuse clocks")
+        return self
+
+
 def group_supports_session(provenance, session):
     if isinstance(provenance, CurrentGroupProvenanceV2):
         return provenance.supports_calculation(session)
@@ -197,7 +249,7 @@ class GroupMemberV1(ContractModel):
 
 class GroupMembershipV1(ContractModel):
     schema_version: Literal["group-membership-v1"] = "group-membership-v1"
-    provenance: DatedProvenanceV1 | CurrentGroupProvenanceV2
+    provenance: DatedProvenanceV1 | CurrentGroupProvenanceV2 | CurrentGroupProvenanceV3
     group_type: GroupType
     group_ids: tuple[str, ...]
     members: tuple[GroupMemberV1, ...]
@@ -308,7 +360,7 @@ class GroupEvidenceV1(ContractModel):
     session_date: date
     group_type: GroupType
     group_id: str
-    membership: DatedProvenanceV1 | CurrentGroupProvenanceV2
+    membership: DatedProvenanceV1 | CurrentGroupProvenanceV2 | CurrentGroupProvenanceV3
     members: tuple[GroupMemberV1, ...]
     total_members: int = Field(ge=0)
     excluded_non_security_count: int = Field(ge=0)

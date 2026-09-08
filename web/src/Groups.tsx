@@ -44,6 +44,29 @@ export function Groups() {
         preserve conflicting parents. Themes may overlap; no theme assignment
         does not imply a confirmed exclusion.
       </p>
+      {query.data.membership_maintenance?.map((source) => (
+        <p key={`${source.role}:${source.capture_date}`}>
+          {source.role === "hierarchy" ? "Hierarchy" : "Themes"} capture{" "}
+          {source.capture_date}
+          {" · "}
+          {source.age_days} calendar days old · {source.reuse_status}
+          {source.expires_at && <> · reuse expires {source.expires_at}</>}
+          {source.warning_at && (
+            <> · refresh warning from {source.warning_at}</>
+          )}
+          {" · "}Operator-approved reuse; Deepvue has not reconfirmed
+          membership.
+          {!source.applies_to_snapshot_capture && (
+            <>
+              {" "}
+              Newer capture available; displayed snapshot requires rebuilding.
+            </>
+          )}
+          {source.reason && (
+            <span style={{ overflowWrap: "anywhere" }}> {source.reason}</span>
+          )}
+        </p>
+      ))}
       <label>
         Group level{" "}
         <select value={kind} onChange={(e) => setKind(e.target.value)}>

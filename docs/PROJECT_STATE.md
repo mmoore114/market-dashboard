@@ -1,6 +1,6 @@
 # Aperture Project State
 
-Updated: 2026-09-07
+Updated: 2026-09-08
 
 Current product authority: `docs/APERTURE_CURRENT_AUTHORITY.md`
 
@@ -144,7 +144,7 @@ owner-authorized continuation corrected current-state timing using
 September 7 hierarchy / September 5 themes known at evaluation and valid for the
 September 8 action. Historical selection and rotation changes remain strict.
 
-A separate real snapshot is active, fingerprint
+At the preceding milestone, a separate real snapshot was activated, fingerprint
 `59a5dca7832288b8b3534fdddb47b97608805409d1c8a31adaad08d111660b83`.
 Evaluation: September 8, 00:31:12.937673 UTC; action September 8; validity through
 its 13:30 UTC open. Size 7,352,531 bytes; 312 Groups, 75 research / 49 trade,
@@ -167,6 +167,36 @@ services stopped; the refresh timer remains enabled as requested.
 ## Next work
 
 The current Workstation is delivered in draft PR #17, which remains unmerged.
-Beyond the September 8 action, refresh needs attested membership validity; do not
-silently extend the retained publication. See [the detailed receipt](current-refresh-v2.md)
+Beyond the September 8 action, the separately published operator reuse policy
+authorizes current-cohort membership within original-source age limits; the
+retained publication itself is not extended. See [the detailed receipt](current-refresh-v2.md)
 and `docs/CODEX_NEXT_TASK.md` for source limits and local operation.
+
+## Membership maintenance and operational status
+
+PR #17 now includes a private, versioned carry-forward authorization: hierarchy
+14 calendar days, themes 7, warning 3/2 days before exclusive expiry. New typed
+current-cohort evidence binds the policy and original schedules while retaining
+the original source/effective/known/valid-through fields. No historical rotation
+is generated. New verified captures supersede prospectively; repeated runs and
+republication do not reset source age. Independent controls still block normally.
+
+Status independently verifies the retained snapshot and reports clocks, expiry,
+usability, attempt outcome/failure, VIX and other missing inputs, capture ages,
+policy expiry, held lock, next eligible attempt and separate timer dispatch. Groups
+shows source age and explicit operator reuse without redesign or charts.
+
+Verification: 45 focused tests, 253 relevant integration tests, 14 frontend tests
+and two real desktop/mobile smoke tests passed. September 8 close → September 9
+action was simulated using synthetic data in a disposable test workspace; it is
+not a real September 8 after-close completion. See
+[the current completion receipt](membership-maintenance-v1.md) for the real policy,
+refresh outcome, scheduler status and exact periodic maintenance requirements.
+
+The maintenance continuation completed a real September 8 pre-open refresh using
+September 4 prices, producing fingerprint
+`ebc6f1d7fad7ce255b6657f66330fe1ada619852e8eba27ef7a89ab0e0939161`.
+Its evaluation is 01:43:41.143924 UTC and expiry remains its own September 8
+13:30 UTC action open. All 312 groups bind the separate reuse policy. The immediate
+repeat was ALREADY_CURRENT, VIX remained UNKNOWN, and the enabled timer was
+resumed. This does not claim real September 8 after-close completion.

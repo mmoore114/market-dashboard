@@ -462,7 +462,23 @@ class ErrorV1(ContractModel):
     fields: tuple[ErrorFieldV1, ...] = ()
 
 
+class MembershipMaintenanceV1(ContractModel):
+    role: Literal["hierarchy", "themes"]
+    capture_date: date
+    age_days: int
+    reuse_status: str
+    expires_at: datetime | None = None
+    warning_at: datetime | None = None
+    max_age_days: int | None = None
+    warn_before_days: int | None = None
+    original_valid_through: date
+    policy_sha256: str | None = None
+    reason: str | None = None
+    applies_to_snapshot_capture: bool = True
+
+
 class GroupsViewV1(ContractModel):
     meta: ViewMetaV1
     groups: tuple[GroupEvidenceV1, ...]
     reasons: tuple[ReasonV1, ...]
+    membership_maintenance: tuple[MembershipMaintenanceV1, ...] = ()

@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from .operations import status
+from .report import operational_status
 from .runner import refresh
 
 
@@ -25,7 +26,7 @@ def main():
     args = parser.parse_args()
     config = json.loads(args.config.read_text())
     if args.command == "status":
-        print(json.dumps(status(config["workspace"], datetime.now(UTC)), indent=2))
+        print(json.dumps(operational_status(config), indent=2))
         return 0
     try:
         result = refresh(config, scheduled=args.scheduled)
@@ -45,6 +46,7 @@ def main():
         return 2
     repo = Path(config["repository"])
     env = os.environ.copy()
+    env["APERTURE_REFRESH_CONFIG"] = str(args.config.resolve())
     env.update(APERTURE_MODE="LOCAL_SNAPSHOT", APERTURE_SNAPSHOT_PATH=current["path"])
     env["PATH"] = str(Path(config["node_bin"])) + os.pathsep + env["PATH"]
     children = []

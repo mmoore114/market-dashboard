@@ -55,7 +55,8 @@ def status(root, now):
     try:
         s = WorkstationSnapshotV2.model_validate_json(path.read_bytes())
         return {
-            "available": s.freshness.state == "FRESH" and now < s.freshness.valid_until,
+            "available": s.freshness.state == "FRESH"
+            and s.generated_at <= now < s.freshness.valid_until,
             "path": str(path),
             "fingerprint": s.logical_fingerprint,
             "market_session": str(s.as_of_session),
@@ -65,6 +66,17 @@ def status(root, now):
             else None,
             "valid_until": s.freshness.valid_until.isoformat(),
             "age_seconds": (now - s.generated_at).total_seconds(),
+            "generated_at": s.generated_at.isoformat(),
+            "volatility": {
+                "market_session": str(s.as_of_session),
+                "close": s.regime.inputs.volatility.close,
+                "availability": "UNKNOWN"
+                if s.regime.inputs.volatility.close is None
+                else "OBSERVED_IN_SNAPSHOT",
+            },
+            "missing_inputs": ["VIX_COMPLETED_SESSION_UNPUBLISHED_VOLATILITY_UNKNOWN"]
+            if s.regime.inputs.volatility.close is None
+            else [],
         }
     except (ValueError, OSError):
         return {"available": False, "reason": "SNAPSHOT_INVALID"}

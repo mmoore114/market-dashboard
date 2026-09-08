@@ -31,11 +31,11 @@ from market_dashboard.workstation.materialization.io import file_hash
 from market_dashboard.workstation.models import VersionsV1
 
 
-def synthetic_plan(tmp_path, n=30, symbols=("AAA", "BBB")):
+def synthetic_plan(tmp_path, n=30, symbols=("AAA", "BBB"), start=date(2024, 1, 1)):
     source_dir = tmp_path / "inputs"
     source_dir.mkdir()
     workspace = tmp_path / "output"
-    sessions = tuple(date(2024, 1, 1) + timedelta(days=i) for i in range(n + 5))
+    sessions = tuple(start + timedelta(days=i) for i in range(n + 5))
     # Explicit fictional daily exchange for test only, not a generated production calendar.
     closes = tuple(datetime.combine(d, time(20), tzinfo=UTC) for d in sessions)
     t = sessions[n - 1]

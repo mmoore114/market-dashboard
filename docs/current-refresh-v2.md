@@ -147,3 +147,13 @@ boundary. These are explicit source/control limits, not missing launch commands.
 Settings, raw captures, original source data, old snapshots, engine comparison
 artifacts and retained backups remain unchanged. New snapshots, logs, receipts,
 configuration and scheduler paths remain private and outside Git.
+
+## Membership maintenance continuation
+
+The later owner-authorized continuation from `3f00d497` replaces the daily
+attestation requirement above with a separately published, bounded operator reuse
+policy. It preserves this original receipt and its source schedules. See
+[membership maintenance V1](membership-maintenance-v1.md) for the 14/7-day limits,
+3/2-day warnings, original-date age accounting, complete read-only operational
+status and the distinction between the verified next-session simulation and real
+refresh execution. No historical membership or old snapshot was relabeled.

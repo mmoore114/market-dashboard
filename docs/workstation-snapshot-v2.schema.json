@@ -449,7 +449,8 @@
                 "88": "#/$defs/NormalizedStructureInputV2",
                 "89": "#/$defs/NormalizedStructureMeasuresV2",
                 "9": "#/$defs/NormalizedDecisionRiskOutputV1",
-                "90": "#/$defs/NormalizedCurrentGroupProvenanceV2"
+                "90": "#/$defs/NormalizedCurrentGroupProvenanceV2",
+                "91": "#/$defs/NormalizedCurrentGroupProvenanceV3"
               },
               "propertyName": "model_type"
             },
@@ -468,6 +469,9 @@
               },
               {
                 "$ref": "#/$defs/NormalizedCurrentGroupProvenanceV2"
+              },
+              {
+                "$ref": "#/$defs/NormalizedCurrentGroupProvenanceV3"
               },
               {
                 "$ref": "#/$defs/NormalizedDatedProvenanceV1"
@@ -1279,6 +1283,114 @@
           "fields"
         ],
         "title": "NormalizedCurrentGroupProvenanceV2",
+        "type": "object"
+      },
+      "NormalizedCurrentGroupProvenanceV3": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 19,
+            "minItems": 19,
+            "prefixItems": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "const": "CURRENT_COHORT_AT_E",
+                "type": "string"
+              },
+              {
+                "const": "current-group-analysis-v3",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "const": "membership-reuse-policy-v1",
+                "type": "string"
+              },
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "exclusiveMinimum": 0,
+                "maximum": 366,
+                "type": "integer"
+              },
+              {
+                "minimum": 1,
+                "type": "integer"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 91,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedCurrentGroupProvenanceV3",
         "type": "object"
       },
       "NormalizedDatedProvenanceV1": {
@@ -8448,10 +8560,11 @@
             "type": "integer"
           },
           "registry_fingerprint": {
-            "default": "ee0e9b89e1f855263ea98ea5542a37f787bb07d50b1f162c4471b46f28abd206",
+            "default": "852d8761d6a5a24ec4484b62043e2ebc4570fffdbae63de3b3c6fd1fce99b607",
             "enum": [
-              "ee0e9b89e1f855263ea98ea5542a37f787bb07d50b1f162c4471b46f28abd206",
+              "852d8761d6a5a24ec4484b62043e2ebc4570fffdbae63de3b3c6fd1fce99b607",
               "53d77137cff3f89e1cff2a3ecba2a51bf0855bb0b9f170aeb62b76eeb493fa49",
+              "ee0e9b89e1f855263ea98ea5542a37f787bb07d50b1f162c4471b46f28abd206",
               "454a474905e65a3c1b74af17161ca5a839c0ef5709c4fdb6544abf2d4341d291",
               "8a0c2a762f0ec293fa107ebc87fde5881559606a5808ecf361ce0c381772a148"
             ],
@@ -8822,6 +8935,30 @@
         "evaluation_timestamp",
         "action_session",
         "known_at"
+      ]
+    },
+    "CurrentGroupProvenanceV3": {
+      "code": 91,
+      "fields": [
+        "snapshot_id",
+        "version",
+        "source_as_of_date",
+        "effective_session",
+        "known_session",
+        "valid_through",
+        "bootstrap",
+        "analysis_basis",
+        "analysis_version",
+        "market_as_of_session",
+        "evaluation_timestamp",
+        "action_session",
+        "known_at",
+        "reuse_policy_version",
+        "reuse_policy_sha256",
+        "source_schedule_sha256",
+        "reuse_authorized_at",
+        "max_source_age_days",
+        "warn_before_days"
       ]
     },
     "DatedProvenanceV1": {
@@ -10067,5 +10204,5 @@
       ]
     }
   },
-  "registry_fingerprint": "ee0e9b89e1f855263ea98ea5542a37f787bb07d50b1f162c4471b46f28abd206"
+  "registry_fingerprint": "852d8761d6a5a24ec4484b62043e2ebc4570fffdbae63de3b3c6fd1fce99b607"
 }
