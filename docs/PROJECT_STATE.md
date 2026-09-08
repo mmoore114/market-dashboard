@@ -61,7 +61,7 @@ can be relaunched from the retained local snapshot.
 ## Engine alignment status
 
 `AP-ENGINE-ALIGNMENT-001` is implemented and verified on the V2 branch. Runtime V1
-remains reproducible and is still the default materializer selection. V2 is an
+remains reproducible through explicit selection. New selections default to V2, an
 explicit coherent `structure-engine-v2` / `setup-engine-v2` pair; no production
 source data or existing snapshot was relabeled.
 
@@ -118,8 +118,33 @@ preserved at `docs/history/PROJECT_STATE-through-current-bootstrap-v1.md`.
 Historical task receipts and implementation documents remain available under
 `docs/`; consult them only when routed by a current task or when auditing provenance.
 
+## V2 defaults and Groups activation
+
+Reviewed PRs #15 and #16 were merged with merge commits and branches retained.
+`AP-V2-GROUPS-ACTIVATION-001` makes new version selections use the reviewed V2 pair.
+Original V1 and comparison snapshots still decode with unchanged fingerprints.
+
+A separate local database and Parquet publication now contains September 7
+hierarchy and September 5 themes, plus typed membership schedules effective
+September 8 only. The production source database was not changed. Research
+coverage is 75/75 for all four hierarchy fields and 58/75 for themes (114
+memberships); trade coverage is 49/49 for hierarchy and 40/49 for themes (84
+memberships). Unassigned themes remain unknown. Four conflicting child labels
+remain separate per-symbol paths, with no stocks removed to repair a hierarchy.
+
+Groups supports all five levels, path identities, dated provenance, complete
+member lists, and existing leadership/RS evidence and eligibility reasons. No new
+ranking formula was introduced. Available catalogs have 11 sectors, 25 groups,
+75 industry paths, 170 sub-industry paths and 31 themes. Source labels remain
+73 industries and 164 sub-industries; path counts differ because parents conflict.
+
+The original snapshots still have empty Groups. A new populated real snapshot
+is blocked by market inputs preceding the September 8 membership boundary; the
+expired September 4 snapshot has not been extended. Desktop/mobile populated
+Groups smoke checks used explicitly synthetic fixtures. See
+[completion record](v2-groups-activation.md) for checks and exact fresh-input needs.
+
 ## Next work
 
-Engine alignment is complete; no additional engine changes, refresh, production
-switch, or merge is authorized merely by this status file. See
-`docs/CODEX_NEXT_TASK.md` for the completed assignment and delivery boundary.
+Finish the fresh-input handoff in `docs/CODEX_NEXT_TASK.md`; do not infer provider
+acquisition or permission to merge the new activation PR from this state file.

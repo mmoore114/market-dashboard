@@ -2,11 +2,13 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./browser",
-  testMatch: process.env.APERTURE_ENGINE_COMPARISON
-    ? "comparison.spec.ts"
-    : process.env.APERTURE_REAL_SNAPSHOT
-      ? "bootstrap.spec.ts"
-      : "workstation.spec.ts",
+  testMatch: process.env.APERTURE_GROUPS_SMOKE
+    ? "groups.spec.ts"
+    : process.env.APERTURE_ENGINE_COMPARISON
+      ? "comparison.spec.ts"
+      : process.env.APERTURE_REAL_SNAPSHOT
+        ? "bootstrap.spec.ts"
+        : "workstation.spec.ts",
   workers: 1,
   use: { baseURL: "http://127.0.0.1:5173", reducedMotion: "reduce" },
   webServer: [

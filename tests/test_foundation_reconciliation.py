@@ -149,7 +149,7 @@ def plan(tmp_path, monkeypatch):
         as_of_session=d,
         action_session=date(2026, 7, 27),
         freshness_deadline=datetime(2026, 7, 28, tzinfo=UTC),
-        versions=VersionsV1(security_master="synthetic"),
+        versions=VersionsV1.v1(security_master="synthetic"),
     )
     receipt = {
         "plan_fingerprint": plan_fingerprint(materialization),

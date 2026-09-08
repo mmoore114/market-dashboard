@@ -207,7 +207,7 @@ def synthetic_plan(tmp_path, n=30, symbols=("AAA", "BBB")):
         as_of_session=t,
         action_session=sessions[n],
         freshness_deadline=closes[n],
-        versions=VersionsV1(security_master="synthetic-master-v1"),
+        versions=VersionsV1.v1(security_master="synthetic-master-v1"),
     )
     return plan
 

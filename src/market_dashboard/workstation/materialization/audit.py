@@ -1,6 +1,8 @@
 """Readiness checks never repair, infer a publication, or call a provider."""
 
+import json
 from datetime import UTC, datetime
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -486,33 +488,57 @@ def inspect(plan):
                 str(e) if isinstance(e, Refusal) else "UNIVERSE_SCHEDULE_INVALID",
             )
 
-    for name, kind in (("taxonomy", "SUB_INDUSTRY"), ("themes", "THEME")):
+    for name, kinds in (
+        ("taxonomy", {"SECTOR", "GROUP", "INDUSTRY", "SUB_INDUSTRY"}),
+        ("themes", {"THEME"}),
+    ):
         groups = loaded.get(name)
         if groups and calendar:
             try:
-                validate_schedule(
-                    groups.snapshots, calendar.sessions, plan.as_of_session
-                )
+                for kind in kinds:
+                    level_schedule = tuple(
+                        g for g in groups.snapshots if g.group_type == kind
+                    )
+                    if level_schedule:
+                        validate_schedule(
+                            level_schedule, calendar.sessions, plan.as_of_session
+                        )
                 for g in groups.snapshots:
                     if (
-                        g.group_type != kind
+                        g.group_type not in kinds
                         or g.identity_version != plan.versions.security_master
                     ):
                         raise Refusal("GROUP_IDENTITY_VERSION_MISMATCH")
-                    if kind == "SUB_INDUSTRY" and len(
+                    if g.group_type != "THEME" and len(
                         {m.source_symbol for m in g.members}
                     ) != len(g.members):
                         raise Refusal("CONTRADICTORY_STRUCTURAL_MEMBERSHIP")
+                    from market_dashboard.aperture.leadership_adapters import (
+                        exact_disposition,
+                        identity_member,
+                    )
+
+                    disposition_path = (
+                        Path(__file__).resolve().parents[4]
+                        / "config/deepvue_identity_disposition_v1.json"
+                    )
+                    disposition = exact_disposition(
+                        json.loads(disposition_path.read_text())
+                    )
                     for m in g.members:
-                        # Standardized published security memberships only. Non-security
-                        # rows need the canonical disposition adapter before this boundary.
-                        if (
-                            m.non_security
-                            or not boundary
-                            or boundary.convert(ReferenceTicker(m.source_symbol)).symbol
-                            is None
-                            or m.market_data_symbol != m.source_symbol
-                        ):
+                        # Retain all source rows, including unresolved identities and
+                        # exact non-security dispositions. They remain explicit in Groups.
+                        expected = (
+                            identity_member(
+                                m.source_symbol,
+                                m.group_id,
+                                boundary,
+                                disposition,
+                            )
+                            if boundary
+                            else None
+                        )
+                        if expected != m:
                             raise Refusal("UNRECONCILED_GROUP_MEMBER")
             except Exception as e:  # noqa: BLE001 — sanitize the external I/O/replay boundary
                 hard(

@@ -89,8 +89,9 @@ source provenance, exact version selection, and explicit interpretations:
 
 The current runtime `structure-engine-v1` uses an EMA10/SMA20/SMA50 stack and a
 different predicate/transition model. It remains reproducible V1 output alongside
-the explicitly selected V2 implementation. The original snapshot and default V1
-materialization selection are preserved; no production default was switched.
+the explicitly selected V2 implementation. Existing snapshots retain their explicit engine identities. Under owner-authorized
+`AP-V2-GROUPS-ACTIVATION-001`, newly constructed version selections default to the
+reviewed coherent V2 pair and fingerprints. Explicit V1 generation remains available.
 
 ## 6. Settled Setup decisions
 
@@ -198,3 +199,23 @@ If a future decision changes this authority, update this file and its effective
 date, record the reason, identify affected runtime versions, and preserve the prior
 implementation history. Never resolve a conflict by silently choosing the oldest,
 longest, or most detailed document.
+
+
+## 11. V2 activation and dated Groups publication
+
+`AP-V2-GROUPS-ACTIVATION-001` activates the reviewed pair for new selections without
+changing formulas, thresholds or 60/40 lifetimes. Retained V1 and V2 snapshots
+remain readable with original fingerprints and freshness clocks.
+
+Verified Deepvue hierarchy (September 7) and themes (September 5) are separately
+published to a private local database/Parquet workspace. Production source inputs
+remain unchanged. Sector, Group, Industry and Sub-Industry use full source parent
+paths as group identities; conflicting labels are not canonicalized. Themes remain
+many-to-many. Missing and unresolved identities remain explicit. Existing
+Leadership V1 aggregation and eligibility gates are unchanged.
+
+Membership first applies September 8, with a conservative one-session validity
+boundary. These are current captures, not historical memberships. No populated
+real snapshot was built: retained market evidence predates that boundary. See
+[activation completion](v2-groups-activation.md) for exact input requirements,
+cohort coverage, publication recovery, and verification results.

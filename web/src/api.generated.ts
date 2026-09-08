@@ -1113,7 +1113,7 @@ export interface components {
      * GroupType
      * @enum {string}
      */
-    GroupType: "SECTOR" | "INDUSTRY" | "SUB_INDUSTRY" | "THEME";
+    GroupType: "SECTOR" | "GROUP" | "INDUSTRY" | "SUB_INDUSTRY" | "THEME";
     /** GroupsViewV1 */
     GroupsViewV1: {
       /** Groups */
@@ -3099,13 +3099,13 @@ export interface components {
       security_master: string;
       /**
        * Setup
-       * @default setup-engine-v1
+       * @default setup-engine-v2
        * @enum {string}
        */
       setup: "setup-engine-v1" | "setup-engine-v2";
       /**
        * Setup Fingerprint
-       * @default 823647ca53b5c4623fef7f00beb294a18b5a8e8166d398ef8290b534cdcbfc38
+       * @default 0f2acac1a4fa4546467db39098d33383212f0149f8bb9af1c660088e7f229aa2
        * @enum {string}
        */
       setup_fingerprint:
@@ -3113,13 +3113,13 @@ export interface components {
         | "0f2acac1a4fa4546467db39098d33383212f0149f8bb9af1c660088e7f229aa2";
       /**
        * Structure
-       * @default structure-engine-v1
+       * @default structure-engine-v2
        * @enum {string}
        */
       structure: "structure-engine-v1" | "structure-engine-v2";
       /**
        * Structure Fingerprint
-       * @default b0faf4774c772c0f4d09120f8eafd311853c59d751fe5bc7649a9a1b380bcf0d
+       * @default b9c2ae96d1cf00ef23168af4ca188f41101f3823dc5e827216ca77b02897d071
        * @enum {string}
        */
       structure_fingerprint:

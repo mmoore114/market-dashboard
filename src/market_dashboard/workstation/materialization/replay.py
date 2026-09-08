@@ -116,8 +116,14 @@ def replay(plan, loaded):
         bootstrap.mapping_members,
     ):
         raise Refusal("BOOTSTRAP_MEMBERSHIP_COUNTS_MISMATCH")
+    # Select independently by level; a taxonomy publication includes four levels.
+    from market_dashboard.aperture.leadership_contracts import GroupType
+
     group_schedules = tuple(
-        loaded[n].snapshots for n in ("taxonomy", "themes") if n in loaded
+        tuple(g for g in loaded[n].snapshots if g.group_type == kind)
+        for n in ("taxonomy", "themes")
+        if n in loaded
+        for kind in GroupType
     )
     structure_source = StructureSourceV1(
         **source.model_dump(exclude={"schema_version", "calendar_id"})

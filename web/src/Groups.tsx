@@ -1,8 +1,22 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { get, type Schemas } from "./api";
 import { ErrorPanel, StatePanel } from "./ui";
 
+function displayPath(id: string) {
+  try {
+    const path: unknown = JSON.parse(id);
+    if (Array.isArray(path))
+      return path.map((v) => v ?? "Unknown parent").join(" / ");
+  } catch {
+    /* Older catalogs use plain labels. */
+  }
+  return id;
+}
+
 export function Groups() {
+  const [kind, setKind] = useState("ALL");
+  const [search, setSearch] = useState("");
   const query = useQuery({
     queryKey: ["groups"],
     queryFn: () => get<Schemas["GroupsViewV1"]>("/groups"),
@@ -25,18 +39,74 @@ export function Groups() {
           {r.explanation} <code>{r.code}</code>
         </p>
       ))}
-      {query.data.groups.map((g) => (
-        <details key={`${g.group_type}:${g.group_id}`}>
-          <summary>
-            {g.group_id} · {g.group_type}
-          </summary>
-          <p>
-            Members {g.total_members}; valid RS {g.valid_RS_comp_count};
-            coverage {g.coverage}
-          </p>
-          <p>{g.missing_context_reasons.join(", ")}</p>
-        </details>
-      ))}
+      <p>
+        Membership is a dated capture, not historical coverage. Hierarchy paths
+        preserve conflicting parents. Themes may overlap; no theme assignment
+        does not imply a confirmed exclusion.
+      </p>
+      <label>
+        Group level{" "}
+        <select value={kind} onChange={(e) => setKind(e.target.value)}>
+          <option value="ALL">All levels</option>
+          {["SECTOR", "GROUP", "INDUSTRY", "SUB_INDUSTRY", "THEME"].map((k) => (
+            <option key={k}>{k}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Find group{" "}
+        <input value={search} onChange={(e) => setSearch(e.target.value)} />
+      </label>
+      {query.data.groups
+        .filter(
+          (g) =>
+            (kind === "ALL" || g.group_type === kind) &&
+            displayPath(g.group_id)
+              .toLowerCase()
+              .includes(search.toLowerCase()),
+        )
+        .map((g) => (
+          <details key={`${g.group_type}:${g.group_id}`}>
+            <summary>
+              {displayPath(g.group_id)} · {g.group_type}
+            </summary>
+            <p>
+              Members {g.total_members}; valid RS {g.valid_RS_comp_count};
+              coverage {g.coverage}
+            </p>
+            <p>
+              Source {g.membership.source_as_of_date}; effective{" "}
+              {g.membership.effective_session}; known{" "}
+              {g.membership.known_session}; valid through{" "}
+              {g.membership.valid_through}.
+            </p>
+            <p>
+              Median RS {g.median_RS_comp ?? "Unavailable"}; leadership rank{" "}
+              {g.leadership_rank ?? "Unavailable"}; rotation rank{" "}
+              {g.group_rotation_rank ?? "Unavailable"}.
+            </p>
+            <p>
+              Outside research cohort {g.outside_universe_count}; excluded
+              non-securities {g.excluded_non_security_count}.
+            </p>
+            <p>
+              {[
+                ...g.leadership_rank_reasons,
+                ...g.rotation_rank_reasons,
+                ...g.missing_context_reasons,
+              ].join(", ")}
+            </p>
+            <ul>
+              {g.members.map((m) => (
+                <li key={m.source_symbol}>
+                  {m.source_symbol}
+                  {" · "}
+                  {m.identity_reason}
+                </li>
+              ))}
+            </ul>
+          </details>
+        ))}
     </section>
   );
 }

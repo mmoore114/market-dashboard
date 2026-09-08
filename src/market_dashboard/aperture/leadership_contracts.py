@@ -125,6 +125,7 @@ class ResearchUniverseV1(ContractModel):
 
 class GroupType(StrEnum):
     SECTOR = "SECTOR"
+    GROUP = "GROUP"
     INDUSTRY = "INDUSTRY"
     SUB_INDUSTRY = "SUB_INDUSTRY"
     THEME = "THEME"

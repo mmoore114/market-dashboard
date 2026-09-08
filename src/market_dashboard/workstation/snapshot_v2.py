@@ -57,9 +57,11 @@ from .legacy_registry import LEGACY_REGISTRY_FINGERPRINT, LEGACY_TYPE_CODES
 
 
 class SharedContextV2(ContractModel):
-    registry_fingerprint: Literal[REGISTRY_FINGERPRINT, LEGACY_REGISTRY_FINGERPRINT] = (
-        REGISTRY_FINGERPRINT
-    )
+    registry_fingerprint: Literal[
+        REGISTRY_FINGERPRINT,
+        LEGACY_REGISTRY_FINGERPRINT,
+        "8a0c2a762f0ec293fa107ebc87fde5881559606a5808ecf361ce0c381772a148",
+    ] = REGISTRY_FINGERPRINT
     source_ref: NodeRef
     universe_ref: NodeRef
     leadership_ref: NodeRef | None
