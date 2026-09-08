@@ -198,6 +198,7 @@ def refresh(config, *, scheduled=False, now=None):
                 input_hashes=hashes,
                 output=run / "snapshot.json",
                 membership_config=membership_config,
+                checkpoint_root=root / "replay-checkpoints" if coverage_sha else None,
             )
             save(
                 run / "build-receipt.json",

@@ -6,11 +6,16 @@ and its typed integrity checks; neither engine evidence nor validations are drop
 
 import gzip
 import hashlib
+import io
 import json
+import os
 import re
+import tempfile
 from pathlib import Path
 
 from market_dashboard.workstation.snapshot_v2 import WorkstationSnapshotV2
+
+from .streaming import read_stream, snapshot_chunks
 
 MAX_TRANSPORT_BYTES = 32 * 1024**2
 FIXED_BYTES = 24 * 1024**2
@@ -52,13 +57,22 @@ def read_snapshot(path):
     ):
         raise ValueError("ARCHIVE_DECODE_BOUND")
     payload, _ = archive_payload(path, header)
-    with gzip.open(payload, "rb") as stream:
-        raw = stream.read(size + 1)
-    if len(raw) != size or hashlib.sha256(raw).hexdigest() != header.get(
-        "uncompressed_sha256"
-    ):
-        raise ValueError("ARCHIVE_CANONICAL_HASH_MISMATCH")
-    snapshot = WorkstationSnapshotV2.model_validate_json(raw)
+    # Verify bounded decompression to disk before any typed loading. The second
+    # pass decodes a single graph row, not a full JSON byte buffer/dictionary.
+    with tempfile.TemporaryFile() as canonical:
+        digest = hashlib.sha256()
+        actual = 0
+        with gzip.open(payload, "rb") as stream:
+            while chunk := stream.read(min(65536, size + 1 - actual)):
+                actual += len(chunk)
+                if actual > size:
+                    raise ValueError("ARCHIVE_CANONICAL_HASH_MISMATCH")
+                digest.update(chunk)
+                canonical.write(chunk)
+        if actual != size or digest.hexdigest() != header.get("uncompressed_sha256"):
+            raise ValueError("ARCHIVE_CANONICAL_HASH_MISMATCH")
+        canonical.seek(0)
+        snapshot = read_stream(io.TextIOWrapper(canonical, encoding="utf-8"))
     if len(
         snapshot.record_index
     ) != count or snapshot.logical_fingerprint != header.get("logical_fingerprint"):
@@ -78,36 +92,58 @@ def write_snapshot(path, snapshot):
     path = Path(path)
     if path.exists():
         raise ValueError("SNAPSHOT_TARGET_EXISTS")
-    raw = snapshot.model_dump_json().encode()
-    if len(raw) <= FIXED_BYTES:
-        with path.open("xb") as stream:
-            stream.write(raw)
-        return {
-            "transport_bytes": len(raw),
-            "uncompressed_bytes": len(raw),
-            "transport": "json",
-        }
     count = len(snapshot.record_index)
-    if len(raw) > min(MAX_DECODE_BYTES, FIXED_BYTES + count * BYTES_PER_RECORD):
-        raise ValueError("ARCHIVE_DECODE_BOUND")
-    compressed = gzip.compress(raw, compresslevel=6, mtime=0)
-    if len(compressed) > MAX_TRANSPORT_BYTES:
-        raise ValueError("ARCHIVE_TRANSPORT_BOUND")
-    sha = hashlib.sha256(compressed).hexdigest()
-    name = sha + ".snapshot.json.gz"
-    atomic_replace(path.parent / name, compressed)
+    limit = min(MAX_DECODE_BYTES, FIXED_BYTES + count * BYTES_PER_RECORD)
+    with tempfile.TemporaryFile() as canonical:
+        digest = hashlib.sha256()
+        size = 0
+        for chunk in snapshot_chunks(snapshot):
+            size += len(chunk)
+            if size > limit:
+                raise ValueError("ARCHIVE_DECODE_BOUND")
+            digest.update(chunk)
+            canonical.write(chunk)
+        canonical.seek(0)
+        if size <= FIXED_BYTES:
+            with path.open("xb") as stream:
+                while chunk := canonical.read(65536):
+                    stream.write(chunk)
+                stream.flush()
+                os.fsync(stream.fileno())
+            return {
+                "transport_bytes": size,
+                "uncompressed_bytes": size,
+                "transport": "json",
+            }
+        with tempfile.TemporaryFile() as compressed:
+            with gzip.GzipFile(
+                fileobj=compressed, mode="wb", compresslevel=6, mtime=0
+            ) as stream:
+                while chunk := canonical.read(65536):
+                    stream.write(chunk)
+            transport_size = compressed.tell()
+            if transport_size > MAX_TRANSPORT_BYTES:
+                raise ValueError("ARCHIVE_TRANSPORT_BOUND")
+            compressed.seek(0)
+            compressed_digest = hashlib.sha256()
+            while chunk := compressed.read(65536):
+                compressed_digest.update(chunk)
+            name = compressed_digest.hexdigest() + ".snapshot.json.gz"
+            compressed.seek(0)
+            # Compressed transport is independently limited to 32 MiB.
+            atomic_replace(path.parent / name, compressed.read())
     envelope = {
         "schema_version": ARCHIVE_VERSION,
         "payload": name,
         "record_count": count,
         "logical_fingerprint": snapshot.logical_fingerprint,
-        "uncompressed_bytes": len(raw),
-        "uncompressed_sha256": hashlib.sha256(raw).hexdigest(),
+        "uncompressed_bytes": size,
+        "uncompressed_sha256": digest.hexdigest(),
     }
     atomic_replace(path, (json.dumps(envelope, indent=2) + "\n").encode())
     return {
-        "transport_bytes": path.stat().st_size + len(compressed),
-        "uncompressed_bytes": len(raw),
+        "transport_bytes": path.stat().st_size + transport_size,
+        "uncompressed_bytes": size,
         "transport": ARCHIVE_VERSION,
     }
 

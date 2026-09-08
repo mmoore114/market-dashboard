@@ -49,7 +49,7 @@ def field_digests(snapshot):
     return result
 
 
-def replay(plan, loaded, *, optimize_current=True):
+def replay(plan, loaded, *, optimize_current=True, checkpoint_root=None):
     started = time.perf_counter()
     # Validate before dispatch: labels alone cannot select a different engine.
     from market_dashboard.workstation.models import VersionsV1
@@ -166,6 +166,20 @@ def replay(plan, loaded, *, optimize_current=True):
         source=source,
         volatility_identity=loaded["manifest"].volatility_identity,
     )
+    checkpoint = None
+    if checkpoint_root is not None:
+        if not current_only:
+            raise Refusal("CHECKPOINT_CURRENT_ONLY_REQUIRED")
+        from .checkpoint import ReplayCheckpoint
+
+        checkpoint = ReplayCheckpoint(
+            checkpoint_root,
+            versions=plan.versions,
+            source=structure_source,
+            calendar=calendar,
+            as_of=plan.as_of_session,
+            corporate_actions=corporate_actions,
+        )
     for symbol_number, symbol in enumerate(all_symbols, 1):
         history = histories[symbol]
         if bootstrap:
@@ -174,20 +188,27 @@ def replay(plan, loaded, *, optimize_current=True):
             history, _ = sparse_history(
                 histories[symbol], symbol, calendar, plan.as_of_session
             )
-        structures = structure_adapter(
-            history, source=structure_source, as_of=plan.as_of_session
-        )
-        if not structures:
-            raise Refusal("RESEARCH_HISTORY_UNAVAILABLE")
-        setups = setup_engine(
-            setup_adapter(
-                history,
-                source=structure_source,
-                corporate_actions=corporate_actions,
-                structure=structures,
-                as_of=plan.as_of_session,
+        key = checkpoint.identity(symbol, history) if checkpoint else None
+        recovered = checkpoint.load(key) if checkpoint else None
+        if recovered is not None:
+            structures, setups = (recovered[0],), (recovered[1],)
+        else:
+            structures = structure_adapter(
+                history, source=structure_source, as_of=plan.as_of_session
             )
-        )
+            if not structures:
+                raise Refusal("RESEARCH_HISTORY_UNAVAILABLE")
+            setups = setup_engine(
+                setup_adapter(
+                    history,
+                    source=structure_source,
+                    corporate_actions=corporate_actions,
+                    structure=structures,
+                    as_of=plan.as_of_session,
+                )
+            )
+            if checkpoint:
+                checkpoint.save(key, structures[-1], setups[-1])
         pairs = (
             zip(structures[-1:], setups[-1:])
             if current_only
@@ -218,11 +239,25 @@ def replay(plan, loaded, *, optimize_current=True):
                         "complete": symbol_number,
                         "total": len(all_symbols),
                         "elapsed_seconds": round(time.perf_counter() - started, 2),
+                        "checkpoint_reused": checkpoint.reused if checkpoint else 0,
+                        "peak_rss_kib": resource.getrusage(
+                            resource.RUSAGE_SELF
+                        ).ru_maxrss,
                     }
                 ),
                 flush=True,
             )
 
+    del histories, history
+    print(
+        __import__("json").dumps(
+            {
+                "stage": "replay_complete",
+                "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+            }
+        ),
+        flush=True,
+    )
     closes = prepared_regime.closes
     indices = {d: i for i, d in enumerate(calendar)}
     group_history, regime, leadership = {}, None, None
@@ -358,6 +393,15 @@ def replay(plan, loaded, *, optimize_current=True):
                     else None,
                 )
 
+    print(
+        __import__("json").dumps(
+            {
+                "stage": "snapshot_assembly",
+                "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+            }
+        ),
+        flush=True,
+    )
     # Use an attested evaluation clock for reproducibility; real wall time is only
     # a live-availability decision, never an input into engine state/fingerprints.
     fresh = plan.freshness_deadline >= completed_at and all(
@@ -368,6 +412,11 @@ def replay(plan, loaded, *, optimize_current=True):
     )
     fresh = fresh and datetime.now(UTC) <= plan.freshness_deadline
     snapshot = materialize_v2(
+        disk_evidence=(
+            __import__("pathlib").Path(checkpoint_root).parent
+            if checkpoint_root is not None
+            else plan.schema_version == "coverage-materialization-plan-v1"
+        ),
         snapshot_id="local-" + plan_fingerprint(plan),
         generated_at=datetime.now(UTC),
         evaluation=plan.evaluation,
@@ -400,18 +449,16 @@ def replay(plan, loaded, *, optimize_current=True):
         versions=plan.versions,
         records=records(),
     )
-    raw = snapshot.model_dump_json().encode()
-    sizes = {
-        name: len(__import__("json").dumps(value, separators=(",", ":")).encode())
-        for name, value in snapshot.model_dump(mode="json").items()
-    }
-    if len(raw) > plan.max_output_bytes:
+    from market_dashboard.workstation.streaming import snapshot_sizes
+
+    output_bytes, sizes = snapshot_sizes(snapshot)
+    if output_bytes > plan.max_output_bytes:
         error = Refusal("MATERIALIZER_SIZE_LIMIT")
         error.component_bytes = sizes
-        error.output_bytes = len(raw)
+        error.output_bytes = output_bytes
         raise error
     diagnostics = {
-        "output_bytes": len(raw),
+        "output_bytes": output_bytes,
         "component_bytes": sizes,
         "replay_seconds": time.perf_counter() - started,
         "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,

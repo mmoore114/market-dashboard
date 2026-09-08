@@ -362,14 +362,9 @@ def prepare(config, run, window, *, api_key=None):
     ]:
         p = run / f"{name}.parquet"
         frame.to_parquet(p, index=False)
-        readback = pd.read_parquet(p).astype(object)
-        expected = frame.reset_index(drop=True).astype(object)
-        pd.testing.assert_frame_equal(
-            readback.where(pd.notna(readback), None),
-            expected.where(pd.notna(expected), None),
-            check_dtype=False,
-            check_exact=True,
-        )
+        from .readback import verify_frame
+
+        verify_frame(p, frame)
         paths[name] = str(p)
         hashes[str(p)] = digest(p)
     population_path = run / "population.json"

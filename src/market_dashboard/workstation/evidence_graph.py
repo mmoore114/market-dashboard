@@ -138,7 +138,23 @@ def node_digest(value):
 class EvidenceBuilder:
     """Invocation-local interning; identity cache never outlives its source models."""
 
-    def __init__(self):
+    def __init__(self, *, disk=False):
+        self._spool = None
+        self._database = None
+        if disk:
+            import sqlite3
+            import tempfile
+            from pathlib import Path
+
+            self._spool = tempfile.TemporaryDirectory(
+                prefix="aperture-evidence-",
+                dir=disk if isinstance(disk, (str, Path)) else None,
+            )
+            self._database = sqlite3.connect(self._spool.name + "/nodes.sqlite")
+            self._database.execute("PRAGMA cache_size=-4096")
+            self._database.execute(
+                "CREATE TABLE nodes (digest TEXT PRIMARY KEY, kind TEXT, payload TEXT)"
+            )
         self.nodes = {}
         self.objects = {}
 
@@ -159,17 +175,45 @@ class EvidenceBuilder:
         value = HASH_MODELS[name](model_type=name, fields=tuple(values.values()))
         digest = node_digest(value)
         node = value
-        if digest in self.nodes and self.nodes[digest] != node:
-            raise ValueError("Evidence digest collision")
-        self.nodes[digest] = node
+        if self._database is not None:
+            payload = node.model_dump_json()
+            prior = self._database.execute(
+                "SELECT payload FROM nodes WHERE digest=?", (digest,)
+            ).fetchone()
+            if prior is not None and prior[0] != payload:
+                raise ValueError("Evidence digest collision")
+            if prior is None:
+                self._database.execute(
+                    "INSERT INTO nodes VALUES (?, ?, ?)", (digest, name, payload)
+                )
+        else:
+            if digest in self.nodes and self.nodes[digest] != node:
+                raise ValueError("Evidence digest collision")
+            self.nodes[digest] = node
         self.objects[id(model)] = (model, digest)
         return digest
 
     def finish(self):
-        addresses = {key: i for i, key in enumerate(sorted(self.nodes))}
+        keys = (
+            (
+                row[0]
+                for row in self._database.execute(
+                    "SELECT digest FROM nodes ORDER BY digest"
+                )
+            )
+            if self._database is not None
+            else sorted(self.nodes)
+        )
+        addresses = {key: i for i, key in enumerate(keys)}
         nodes = []
         for digest in addresses:
-            value = self.nodes[digest]
+            if self._database is not None:
+                kind, payload = self._database.execute(
+                    "SELECT kind, payload FROM nodes WHERE digest=?", (digest,)
+                ).fetchone()
+                value = HASH_MODELS[kind].model_validate_json(payload)
+            else:
+                value = self.nodes.pop(digest)
             name = value.model_type
             fields = {
                 key: map_references(
@@ -185,6 +229,10 @@ class EvidenceBuilder:
                     ),
                 )
             )
+        if self._database is not None:
+            self._database.close()
+            self._database = None
+            self._spool.cleanup()
         return addresses, tuple(nodes)
 
     def _value(self, value):

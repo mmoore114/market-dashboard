@@ -161,3 +161,39 @@ a suspended host. See the completion receipt for observed deployment and timing.
 
 Sources: [Massive adjusted market summaries](https://massive.com/docs/rest/stocks/aggregates/daily-market-summary),
 [Massive split events](https://massive.com/docs/rest/stocks/corporate-actions/splits).
+
+## Crash recovery and memory bounds
+
+A progress counter is not a replay checkpoint. Expanded current-only replay now
+writes immutable per-symbol Structure/Setup shards before reporting progress.
+Shards bind the observed history and schema, source, calendar, as-of session,
+corporate actions, selected engine versions and implementation digest. Payload
+hashes and the closed typed engine contracts are verified on reuse. Incompatible
+inputs select a different shard; a corrupt matching shard fails closed. Historical
+replay is not silently reduced to final-state shards. Evaluation-time membership,
+Leadership, Regime, decision gates and snapshot freshness are rebuilt with their
+actual clocks; cached price-engine output never extends an action deadline.
+
+Expanded evidence normalization uses a temporary SQLite index with a bounded page
+cache. Hashed nodes are converted one at a time to the existing normalized V2
+index. Canonical fingerprinting and archive writing traverse evidence rows without
+creating a whole-snapshot dictionary or JSON string. Archive reading verifies the
+bounded decompressed bytes on disk, then parses and validates individual graph
+rows. Every node hash, reference, type, cycle, population, provenance, gate and
+logical fingerprint check remains required. Existing JSON and archive version
+identities and size limits are unchanged. The final normalized and decoded typed
+graphs still occupy memory; the real population must pass measured construction
+and API loading before deployment.
+
+Run long recovery work in a user-systemd service outside the editor scope, with
+durable stdout/stderr, memory accounting, a finite timeout and a memory ceiling
+selected from available laptop headroom. Stop the existing refresh dispatcher,
+confirm its service is inactive, and acquire both old and recovery workspace
+locks. Restore the prior timer state on every exit, including failures. Preserve
+prior snapshots, input publications, checkpoints and deployment backups. System
+swap and host configuration are separate operator decisions.
+
+Input Parquet readback compares every row and field in fixed-size batches with
+exact numeric equality, avoiding simultaneous full object-dtype frames. Recovery
+spill storage must be on the disk-backed workspace when the host mounts `/tmp`
+as tmpfs; the expanded replay uses the checkpoint workspace for normalization.

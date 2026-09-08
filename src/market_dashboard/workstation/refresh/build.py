@@ -31,6 +31,7 @@ def build_current(
     input_hashes,
     output,
     membership_config=None,
+    checkpoint_root=None,
 ):
     if now >= window["opening"] or now < window["close"]:
         raise ValueError("PREOPEN_COMPLETED_SESSION_CONTEXT_REQUIRED")
@@ -127,7 +128,7 @@ def build_current(
         versions=VersionsV1(security_master=seed_plan.versions.security_master),
         manifest_fingerprint=fingerprint(manifest.model_dump(mode="json")),
     )
-    snapshot, diagnostics = replay(plan, loaded)
+    snapshot, diagnostics = replay(plan, loaded, checkpoint_root=checkpoint_root)
     decoded = snapshot
     if (
         decoded.freshness.state != "FRESH"
@@ -137,6 +138,10 @@ def build_current(
     verify_hashes(input_hashes)
     output = Path(output)
     diagnostics.update(write_snapshot(output, snapshot))
+    del decoded, snapshot
+    import gc
+
+    gc.collect()
     decoded = read_snapshot(output)
     (output.parent / "plan.json").write_text(plan.model_dump_json(indent=2))
     (output.parent / "manifest.json").write_text(manifest.model_dump_json(indent=2))

@@ -43,6 +43,8 @@ from market_dashboard.workstation.models import (
     VersionsV1,
 )
 
+from .streaming import snapshot_digest
+
 
 class CompactRecordV2(ContractModel):
     symbol: str
@@ -496,14 +498,7 @@ class WorkstationSnapshotV2(ContractModel):
         if counts != self.funnel.model_dump():
             raise ValueError("Funnel contradicts canonical decisions")
         reader.finish()
-        if (
-            fingerprint(
-                self.model_dump(
-                    mode="json", exclude={"generated_at", "logical_fingerprint"}
-                )
-            )
-            != self.logical_fingerprint
-        ):
+        if snapshot_digest(self) != self.logical_fingerprint:
             raise ValueError("Snapshot logical fingerprint mismatch")
         self._objects = MappingProxyType(reader.decoded)
         self._records = tuple(records)
@@ -585,10 +580,11 @@ def materialize_v2(
     rules,
     calendar,
     versions,
+    disk_evidence=False,
     **metadata,
 ):
     """Pure lossless projection; all canonical model fields enter the typed graph."""
-    builder = EvidenceBuilder()
+    builder = EvidenceBuilder(disk=disk_evidence)
     refs = {
         "source_ref": builder.add(source),
         "universe_ref": builder.add(universe),
@@ -618,7 +614,23 @@ def materialize_v2(
         # Retain common input identities but release per-row input objects. A
         # streaming producer need not hold thousands of expanded V1 outputs.
         builder.objects = dict(shared_cache)
+    import json
+    import resource
+
+    if disk_evidence:
+        print(
+            json.dumps(
+                {
+                    "stage": "evidence_normalized",
+                    "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+                }
+            ),
+            flush=True,
+        )
     addresses, evidence = builder.finish()
+    builder.objects.clear()
+    shared_cache.clear()
+    del builder
     refs = {
         k: (
             tuple(addresses[x] for x in v)
@@ -648,9 +660,18 @@ def materialize_v2(
     draft = WorkstationSnapshotV2.model_construct(
         **values, logical_fingerprint="0" * 64
     )
-    values["logical_fingerprint"] = fingerprint(
-        draft.model_dump(mode="json", exclude={"generated_at", "logical_fingerprint"})
-    )
+    values["logical_fingerprint"] = snapshot_digest(draft)
+    if disk_evidence:
+        print(
+            json.dumps(
+                {
+                    "stage": "snapshot_validation",
+                    "nodes": len(evidence),
+                    "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+                }
+            ),
+            flush=True,
+        )
     return WorkstationSnapshotV2.model_validate(values)
 
 
