@@ -448,7 +448,8 @@
                 "87": "#/$defs/NormalizedStructureEvidenceV2",
                 "88": "#/$defs/NormalizedStructureInputV2",
                 "89": "#/$defs/NormalizedStructureMeasuresV2",
-                "9": "#/$defs/NormalizedDecisionRiskOutputV1"
+                "9": "#/$defs/NormalizedDecisionRiskOutputV1",
+                "90": "#/$defs/NormalizedCurrentGroupProvenanceV2"
               },
               "propertyName": "model_type"
             },
@@ -464,6 +465,9 @@
               },
               {
                 "$ref": "#/$defs/NormalizedBreadthSleeveV1"
+              },
+              {
+                "$ref": "#/$defs/NormalizedCurrentGroupProvenanceV2"
               },
               {
                 "$ref": "#/$defs/NormalizedDatedProvenanceV1"
@@ -1192,6 +1196,89 @@
           "fields"
         ],
         "title": "NormalizedBreadthSleeveV1",
+        "type": "object"
+      },
+      "NormalizedCurrentGroupProvenanceV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 13,
+            "minItems": 13,
+            "prefixItems": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "const": "CURRENT_COHORT_AT_E",
+                "type": "string"
+              },
+              {
+                "const": "current-group-analysis-v2",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "format": "date-time",
+                "type": "string"
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 90,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedCurrentGroupProvenanceV2",
         "type": "object"
       },
       "NormalizedDatedProvenanceV1": {
@@ -8361,8 +8448,9 @@
             "type": "integer"
           },
           "registry_fingerprint": {
-            "default": "53d77137cff3f89e1cff2a3ecba2a51bf0855bb0b9f170aeb62b76eeb493fa49",
+            "default": "ee0e9b89e1f855263ea98ea5542a37f787bb07d50b1f162c4471b46f28abd206",
             "enum": [
+              "ee0e9b89e1f855263ea98ea5542a37f787bb07d50b1f162c4471b46f28abd206",
               "53d77137cff3f89e1cff2a3ecba2a51bf0855bb0b9f170aeb62b76eeb493fa49",
               "454a474905e65a3c1b74af17161ca5a839c0ef5709c4fdb6544abf2d4341d291",
               "8a0c2a762f0ec293fa107ebc87fde5881559606a5808ecf361ce0c381772a148"
@@ -8716,6 +8804,24 @@
         "price50_gate",
         "equal_sma20_count",
         "equal_sma50_count"
+      ]
+    },
+    "CurrentGroupProvenanceV2": {
+      "code": 90,
+      "fields": [
+        "snapshot_id",
+        "version",
+        "source_as_of_date",
+        "effective_session",
+        "known_session",
+        "valid_through",
+        "bootstrap",
+        "analysis_basis",
+        "analysis_version",
+        "market_as_of_session",
+        "evaluation_timestamp",
+        "action_session",
+        "known_at"
       ]
     },
     "DatedProvenanceV1": {
@@ -9961,5 +10067,5 @@
       ]
     }
   },
-  "registry_fingerprint": "53d77137cff3f89e1cff2a3ecba2a51bf0855bb0b9f170aeb62b76eeb493fa49"
+  "registry_fingerprint": "ee0e9b89e1f855263ea98ea5542a37f787bb07d50b1f162c4471b46f28abd206"
 }

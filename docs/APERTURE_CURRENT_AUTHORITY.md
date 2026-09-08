@@ -214,8 +214,17 @@ paths as group identities; conflicting labels are not canonicalized. Themes rema
 many-to-many. Missing and unresolved identities remain explicit. Existing
 Leadership V1 aggregation and eligibility gates are unchanged.
 
-Membership first applies September 8, with a conservative one-session validity
-boundary. These are current captures, not historical memberships. No populated
-real snapshot was built: retained market evidence predates that boundary. See
-[activation completion](v2-groups-activation.md) for exact input requirements,
-cohort coverage, publication recovery, and verification results.
+Historical membership first applies September 8 under its retained publication.
+The owner-authorized continuation now permits explicitly versioned
+`CURRENT_COHORT_AT_E` Groups to analyze completed-session price evidence using
+membership known by evaluation and valid for the action session. This corrects the
+prior historical-only restriction for current-state analysis. It does not backdate
+membership or historical rotation. See [the current refresh contract and receipt](current-refresh-v2.md).
+
+The verified real snapshot has 312 Groups. A supported locked daily refresh command
+uses pinned XNYS closes/opens, bounded existing provider acquisition, recoverable
+local publication and verified atomic activation. New pre-open evaluations derive
+validity from their own action open and controls; old snapshot expiry is unchanged.
+User-systemd scheduling and resume/premarket catch-up are installed locally. Linux
+must be running; no unattended-host guarantee is made. Future membership validity,
+provider delays and incomplete earnings remain explicit source/control limits.

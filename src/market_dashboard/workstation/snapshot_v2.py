@@ -20,6 +20,7 @@ from market_dashboard.aperture.leadership_contracts import (
     LeadershipOutputV1,
     ResearchUniverseV1,
     StrengthSourceV1,
+    group_supports_session,
 )
 from market_dashboard.aperture.regime import calendar_hash
 from market_dashboard.aperture.regime_contracts import RegimeOutputV1
@@ -53,12 +54,18 @@ class CompactRecordV2(ContractModel):
     output_ref: NodeRef
 
 
-from .legacy_registry import LEGACY_REGISTRY_FINGERPRINT, LEGACY_TYPE_CODES
+from .legacy_registry import (
+    ACTIVATION_REGISTRY_FINGERPRINT,
+    ACTIVATION_TYPE_CODES,
+    LEGACY_REGISTRY_FINGERPRINT,
+    LEGACY_TYPE_CODES,
+)
 
 
 class SharedContextV2(ContractModel):
     registry_fingerprint: Literal[
         REGISTRY_FINGERPRINT,
+        ACTIVATION_REGISTRY_FINGERPRINT,
         LEGACY_REGISTRY_FINGERPRINT,
         "8a0c2a762f0ec293fa107ebc87fde5881559606a5808ecf361ce0c381772a148",
     ] = REGISTRY_FINGERPRINT
@@ -115,6 +122,11 @@ class WorkstationSnapshotV2(ContractModel):
 
     @model_validator(mode="after")
     def integrity(self):
+        if self.shared.registry_fingerprint != REGISTRY_FINGERPRINT and any(
+            n.value.model_type not in ACTIVATION_TYPE_CODES.values()
+            for n in self.evidence
+        ):
+            raise ValueError("Retained registry cannot contain current-cohort evidence")
         if self.shared.registry_fingerprint == LEGACY_REGISTRY_FINGERPRINT and (
             self.shared.versions.structure != "structure-engine-v1"
             or any(
@@ -188,10 +200,21 @@ class WorkstationSnapshotV2(ContractModel):
         if group_keys != sorted(set(group_keys)):
             raise ValueError("Duplicate or unordered shared group key")
         for g in groups:
-            if (
-                g.session_date != t
-                or not g.membership.effective_session <= t <= g.membership.valid_through
+            from market_dashboard.aperture.leadership_contracts import (
+                CurrentGroupProvenanceV2,
+            )
+
+            if isinstance(g.membership, CurrentGroupProvenanceV2) and (
+                self.evaluation is None
+                or (
+                    g.membership.market_as_of_session,
+                    g.membership.evaluation_timestamp,
+                    g.membership.action_session,
+                )
+                != (t, self.evaluation.evaluation_timestamp, self.action_session)
             ):
+                raise ValueError("Current-group snapshot clock mismatch")
+            if g.session_date != t or not group_supports_session(g.membership, t):
                 raise ValueError("Group session/effective interval mismatch")
             if g.membership.effective_session not in positions:
                 raise ValueError("Group calendar mismatch")

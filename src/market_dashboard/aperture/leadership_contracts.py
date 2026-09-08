@@ -106,6 +106,46 @@ class DatedProvenanceV1(ContractModel):
         return self
 
 
+class CurrentGroupProvenanceV2(DatedProvenanceV1):
+    """Current-cohort analysis only; never a historical membership attestation."""
+
+    analysis_basis: Literal["CURRENT_COHORT_AT_E"] = "CURRENT_COHORT_AT_E"
+    analysis_version: Literal["current-group-analysis-v2"] = "current-group-analysis-v2"
+    market_as_of_session: date
+    evaluation_timestamp: datetime
+    action_session: date
+    known_at: datetime
+
+    def supports_calculation(self, session):
+        return session == self.market_as_of_session
+
+    @model_validator(mode="after")
+    def current_clocks(self):
+        if (
+            self.bootstrap is not None
+            or any(
+                d.utcoffset() is None
+                for d in (self.known_at, self.evaluation_timestamp)
+            )
+            or not (
+                self.source_as_of_date <= self.known_at.date()
+                and self.known_at <= self.evaluation_timestamp
+                and self.market_as_of_session
+                <= self.evaluation_timestamp.date()
+                <= self.action_session
+                and self.effective_session <= self.action_session <= self.valid_through
+            )
+        ):
+            raise ValueError("Invalid current-cohort group clocks")
+        return self
+
+
+def group_supports_session(provenance, session):
+    if isinstance(provenance, CurrentGroupProvenanceV2):
+        return provenance.supports_calculation(session)
+    return provenance.effective_session <= session <= provenance.valid_through
+
+
 class ResearchUniverseV1(ContractModel):
     schema_version: Literal["research-universe-input-v1"] = "research-universe-input-v1"
     provenance: DatedProvenanceV1
@@ -157,7 +197,7 @@ class GroupMemberV1(ContractModel):
 
 class GroupMembershipV1(ContractModel):
     schema_version: Literal["group-membership-v1"] = "group-membership-v1"
-    provenance: DatedProvenanceV1
+    provenance: DatedProvenanceV1 | CurrentGroupProvenanceV2
     group_type: GroupType
     group_ids: tuple[str, ...]
     members: tuple[GroupMemberV1, ...]
@@ -268,7 +308,7 @@ class GroupEvidenceV1(ContractModel):
     session_date: date
     group_type: GroupType
     group_id: str
-    membership: DatedProvenanceV1
+    membership: DatedProvenanceV1 | CurrentGroupProvenanceV2
     members: tuple[GroupMemberV1, ...]
     total_members: int = Field(ge=0)
     excluded_non_security_count: int = Field(ge=0)
@@ -304,6 +344,24 @@ class GroupEvidenceV1(ContractModel):
     leadership_rank_reasons: tuple[str, ...]
     rotation_rank_reasons: tuple[str, ...]
     missing_context_reasons: tuple[str, ...]
+
+    @model_validator(mode="after")
+    def current_history(self):
+        if isinstance(self.membership, CurrentGroupProvenanceV2) and (
+            any(
+                v is not None
+                for v in (
+                    self.rank_change_5,
+                    self.rank_change_20,
+                    self.rotation_rank_change_5,
+                    self.rotation_rank_change_20,
+                )
+            )
+            or self.top_quintile_streak
+            or self.rotation_top_quintile_streak
+        ):
+            raise ValueError("Current-cohort group history is unavailable")
+        return self
 
 
 class LeadershipOutputV1(ContractModel):

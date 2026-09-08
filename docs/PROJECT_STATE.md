@@ -48,13 +48,13 @@ can be relaunched from the retained local snapshot.
 
 ## Known product gaps
 
-- The current snapshot does not contain published group membership, so Groups
-  presents explicit missing evidence.
+- The current snapshot contains 312 current-cohort Groups; historical membership
+  and historical group rotation remain unavailable before their actual effective dates.
 - Deepvue sub-industry and theme captures are verified bootstrap sources but remain
   local and are not runtime dependencies.
 - Earnings/catalyst coverage is incomplete.
 - The initial population is bounded, not the full U.S. equity research universe.
-- Book, Journal, benchmark learning, and routine daily refresh remain future work.
+- Book, Journal and benchmark learning remain future work.
 - The current UI needs user-driven workflow and visual refinement.
 - Aperture intentionally does not include charts; Deepvue handles chart review.
 
@@ -138,13 +138,35 @@ ranking formula was introduced. Available catalogs have 11 sectors, 25 groups,
 75 industry paths, 170 sub-industry paths and 31 themes. Source labels remain
 73 industries and 164 sub-industries; path counts differ because parents conflict.
 
-The original snapshots still have empty Groups. A new populated real snapshot
-is blocked by market inputs preceding the September 8 membership boundary; the
-expired September 4 snapshot has not been extended. Desktop/mobile populated
-Groups smoke checks used explicitly synthetic fixtures. See
-[completion record](v2-groups-activation.md) for checks and exact fresh-input needs.
+The original snapshots still have empty Groups and unchanged fingerprints. The
+owner-authorized continuation corrected current-state timing using
+`CurrentGroupProvenanceV2`: completed September 4 prices can be analyzed using
+September 7 hierarchy / September 5 themes known at evaluation and valid for the
+September 8 action. Historical selection and rotation changes remain strict.
+
+A separate real snapshot is active, fingerprint
+`59a5dca7832288b8b3534fdddb47b97608805409d1c8a31adaad08d111660b83`.
+Evaluation: September 8, 00:31:12.937673 UTC; action September 8; validity through
+its 13:30 UTC open. Size 7,352,531 bytes; 312 Groups, 75 research / 49 trade,
+funnel 63 NONE / 12 WATCH / 0 TRADE / 0 ACT. Some RS evidence is available for 104
+groups; one passes existing leadership-rank gates. The checked FRED source lacks
+September 4 VIX, which stays null/UNKNOWN. No price freshness was fabricated.
+
+One launch/refresh/status command, exclusive locking, bounded cached provider
+acquisition, private recoverable publication, immutable candidates, verified atomic
+activation and reload are implemented. The installed user-systemd timer dispatches
+every 15 minutes and at startup, using pinned exchange close plus a 45-minute buffer.
+It catches up when Linux resumes; it cannot run while Linux is stopped/suspended.
+
+Verification: 25 focused tests; 359 integration tests with four optional artifact
+skips; 13 frontend components; two real desktop/mobile Workstation smoke tests.
+Type/build/lint/schema checks passed. Repeated refresh returned ALREADY_CURRENT;
+a controlled failed refresh preserved the usable real snapshot. Temporary browser
+services stopped; the refresh timer remains enabled as requested.
 
 ## Next work
 
-Finish the fresh-input handoff in `docs/CODEX_NEXT_TASK.md`; do not infer provider
-acquisition or permission to merge the new activation PR from this state file.
+The current Workstation is delivered in draft PR #17, which remains unmerged.
+Beyond the September 8 action, refresh needs attested membership validity; do not
+silently extend the retained publication. See [the detailed receipt](current-refresh-v2.md)
+and `docs/CODEX_NEXT_TASK.md` for source limits and local operation.

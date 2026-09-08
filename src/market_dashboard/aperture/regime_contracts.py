@@ -11,6 +11,7 @@ from market_dashboard.aperture.leadership_contracts import (
     LeadershipOutputV1,
     ResearchUniverseV1,
     StrengthSourceV1,
+    group_supports_session,
 )
 from market_dashboard.aperture.structure_contracts import StructureEvidenceV1
 from market_dashboard.aperture.structure_v2 import (
@@ -183,9 +184,7 @@ class RegimeInputV1(ContractModel):
             keys = [(g.group_type, g.group_id) for g in c.groups]
             if len(keys) != len(set(keys)) or any(
                 g.session_date != self.session_date
-                or not g.membership.effective_session
-                <= self.session_date
-                <= g.membership.valid_through
+                or not group_supports_session(g.membership, self.session_date)
                 for g in c.groups
             ):
                 raise ValueError("Duplicate or incorrectly dated group evidence")

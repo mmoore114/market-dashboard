@@ -332,6 +332,69 @@ export interface components {
       | "FACTOR_EXPLAINED_SPLIT"
       | "SUSPECTED_SPLIT"
       | "UNKNOWN";
+    /**
+     * CurrentGroupProvenanceV2
+     * @description Current-cohort analysis only; never a historical membership attestation.
+     */
+    CurrentGroupProvenanceV2: {
+      /**
+       * Action Session
+       * Format: date
+       */
+      action_session: string;
+      /**
+       * Analysis Basis
+       * @default CURRENT_COHORT_AT_E
+       * @constant
+       */
+      analysis_basis: "CURRENT_COHORT_AT_E";
+      /**
+       * Analysis Version
+       * @default current-group-analysis-v2
+       * @constant
+       */
+      analysis_version: "current-group-analysis-v2";
+      bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
+      /**
+       * Effective Session
+       * Format: date
+       */
+      effective_session: string;
+      /**
+       * Evaluation Timestamp
+       * Format: date-time
+       */
+      evaluation_timestamp: string;
+      /**
+       * Known At
+       * Format: date-time
+       */
+      known_at: string;
+      /**
+       * Known Session
+       * Format: date
+       */
+      known_session: string;
+      /**
+       * Market As Of Session
+       * Format: date
+       */
+      market_as_of_session: string;
+      /** Snapshot Id */
+      snapshot_id: string;
+      /**
+       * Source As Of Date
+       * Format: date
+       */
+      source_as_of_date: string;
+      /**
+       * Valid Through
+       * Format: date
+       */
+      valid_through: string;
+      /** Version */
+      version: string;
+    };
     /** DatedProvenanceV1 */
     DatedProvenanceV1: {
       bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
@@ -973,7 +1036,10 @@ export interface components {
       median_rotation_delta: number | null;
       /** Members */
       members: components["schemas"]["GroupMemberV1"][];
-      membership: components["schemas"]["DatedProvenanceV1"];
+      /** Membership */
+      membership:
+        | components["schemas"]["DatedProvenanceV1"]
+        | components["schemas"]["CurrentGroupProvenanceV2"];
       /** Missing Context Reasons */
       missing_context_reasons: string[];
       /** Outside Universe Count */

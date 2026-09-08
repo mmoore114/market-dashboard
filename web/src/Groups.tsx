@@ -80,6 +80,16 @@ export function Groups() {
               {g.membership.known_session}; valid through{" "}
               {g.membership.valid_through}.
             </p>
+            {"analysis_basis" in g.membership && (
+              <p>
+                CURRENT COHORT · market evidence{" "}
+                {g.membership.market_as_of_session}; membership known at{" "}
+                {g.membership.known_at}; evaluated{" "}
+                {g.membership.evaluation_timestamp}; action{" "}
+                {g.membership.action_session}. Historical rotation changes
+                unavailable.
+              </p>
+            )}
             <p>
               Median RS {g.median_RS_comp ?? "Unavailable"}; leadership rank{" "}
               {g.leadership_rank ?? "Unavailable"}; rotation rank{" "}

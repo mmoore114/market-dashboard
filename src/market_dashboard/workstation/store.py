@@ -28,6 +28,8 @@ class SnapshotStore:
         self.now = now or (lambda: datetime.now(UTC))
         self.snapshot = None
         self.failure = None
+        self.path = path if mode == "LOCAL_SNAPSHOT" else None
+        self._file_signature = None
         try:
             if mode not in ("FIXTURE", "LOCAL_SNAPSHOT"):
                 raise SnapshotUnavailable(
@@ -45,6 +47,7 @@ class SnapshotStore:
                 self.snapshot = fixture
             else:
                 self.snapshot = self._load(path)
+                self._file_signature = self._signature()
         except SnapshotUnavailable as error:
             self.failure = error
 
@@ -129,7 +132,30 @@ class SnapshotStore:
                 "SNAPSHOT_INVALID", "The local snapshot could not be safely validated."
             ) from None
 
+    def _signature(self):
+        if not self.path:
+            return None
+        stat = Path(self.path).stat()
+        return stat.st_ino, stat.st_mtime_ns, stat.st_size
+
+    def _reload(self):
+        if self.mode != "LOCAL_SNAPSHOT" or not self.path:
+            return
+        try:
+            signature = self._signature()
+            if signature != self._file_signature:
+                candidate = self._load(self.path)
+                self.snapshot, self.failure = candidate, None
+                self._file_signature = signature
+        except OSError:
+            self.failure = SnapshotUnavailable(
+                "SNAPSHOT_UNAVAILABLE", "Activated snapshot file is unavailable."
+            )
+        except SnapshotUnavailable as error:
+            self.failure = error
+
     def require(self):
+        self._reload()
         if self.failure:
             raise self.failure
         s = self.snapshot
@@ -150,12 +176,12 @@ class SnapshotStore:
         return s
 
     def meta(self):
-        s = self.snapshot
         error = None
         try:
             self.require()
         except SnapshotUnavailable as caught:
             error = caught
+        s = self.snapshot
         return ViewMetaV1(
             evaluation=s.evaluation if s else None,
             mode=self.mode,

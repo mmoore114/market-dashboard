@@ -14,6 +14,7 @@ from market_dashboard.aperture.leadership_contracts import (
     RankedReturnV1,
     SetupMemberCountV1,
     StrengthEvidenceV1,
+    group_supports_session,
 )
 
 
@@ -171,11 +172,7 @@ def aggregate_groups(strength, memberships, session):
         )
     output = []
     for snapshot in memberships:
-        if (
-            not snapshot.provenance.effective_session
-            <= session
-            <= snapshot.provenance.valid_through
-        ):
+        if not group_supports_session(snapshot.provenance, session):
             raise ValueError("Membership not valid as of session")
         for group_id in sorted(snapshot.group_ids):
             members = tuple(
@@ -342,6 +339,10 @@ def aggregate_groups(strength, memberships, session):
 def with_history(groups, prior, session_indices):
     result = []
     for g in groups:
+        from .leadership_contracts import CurrentGroupProvenanceV2
+
+        if isinstance(g.membership, CurrentGroupProvenanceV2):
+            raise TypeError("Current-cohort groups cannot imply historical rotation")
         key = (g.group_type, g.group_id)
         history = prior.get(key, {})
         idx = session_indices[g.session_date]
@@ -407,6 +408,10 @@ def validate_schedule(snapshots, calendar, as_of):
 
 
 def select_snapshot(snapshots, session):
+    from .leadership_contracts import CurrentGroupProvenanceV2
+
+    if any(isinstance(s.provenance, CurrentGroupProvenanceV2) for s in snapshots):
+        raise ValueError("Current-cohort membership cannot enter historical selection")
     selected = [s for s in snapshots if s.provenance.effective_session <= session]
     if not selected:
         return None

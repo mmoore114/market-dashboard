@@ -22,22 +22,48 @@ Streamlit is retained only for legacy diagnostics and administration.
 
 ## Current status
 
-The first real bounded `LOCAL_SNAPSHOT` is implemented and browser-verified on
-branch `codex/current-bootstrap-v1` at commit
-`401e1b0afd6ad2a4678af4f1040014b5c9b568e9`.
+The real V2 Workstation now includes 312 Groups with explicitly labeled current-
+cohort analysis: 11 sectors, 25 groups, 75 industry paths, 170 sub-industry paths,
+and 31 themes. The last completed price session remains visible independently of
+membership capture dates and evaluation time. Historical membership and historical
+group rotation are not inferred from current captures.
 
-Snapshot decision context:
+The verified current snapshot contains 75 research and 49 trade members, with
+63 NONE / 12 WATCH / 0 TRADE / 0 ACT. Missing VIX/earnings evidence stays explicit.
+See [daily refresh and its completion receipt](docs/current-refresh-v2.md).
 
-- market evidence through September 4, 2026;
-- evaluated September 6, 2026 in New York;
-- first action/population session September 8, 2026;
-- 75 research members, 49 strict-trade members, and 25 market-mapping members;
-- 66 `NONE`, 9 `WATCH`, 0 `TRADE`, and 0 `ACT`;
-- current-cohort bootstrap, not pre-bootstrap historical membership evidence.
+## Launch and refresh
 
-Groups currently reports missing published membership. Deepvue taxonomy and theme
-captures exist as verified local bootstrap sources but are not runtime dependencies
-and were not consumed by this snapshot.
+From the installed repository, with private configuration at
+`${XDG_CONFIG_HOME:-$HOME/.config}/aperture/refresh.json`:
+
+```bash
+.venv/bin/python scripts/aperture.py launch
+.venv/bin/python scripts/aperture.py refresh
+.venv/bin/python scripts/aperture.py status
+```
+
+`launch` catches up when necessary, then starts the local Workstation at
+`http://127.0.0.1:5173`; Ctrl-C stops both services. `refresh` acquires only required
+bounded inputs, verifies a new snapshot and activates it atomically. Failed refreshes
+preserve the last successful artifact and report its age/usability. An ongoing
+exchange session is never treated as completed. Old snapshots keep their expiry.
+
+The supported user-systemd timer checks every 15 minutes and on Linux startup,
+with persistent catch-up. The command derives its actual due time from pinned
+XNYS close plus a 45-minute availability buffer, including early closes and DST.
+The laptop cannot refresh while ChromeOS suspends Linux or Linux is stopped;
+catch-up runs after resume. Always-on operation requires an always-on host.
+Install on a configured Linux machine with:
+
+```bash
+.venv/bin/python scripts/install_aperture_timer.py
+systemctl --user list-timers aperture-refresh.timer
+```
+
+Private path configuration, source receipts, credentials, current snapshots and
+backups stay outside Git. Membership validity and provider availability remain
+independent requirements; consult the refresh receipt for exact missing inputs.
 
 ## Read this first
 

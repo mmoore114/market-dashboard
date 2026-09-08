@@ -390,6 +390,98 @@
         "title": "CorporateActionQA",
         "type": "string"
       },
+      "CurrentGroupProvenanceV2": {
+        "additionalProperties": false,
+        "description": "Current-cohort analysis only; never a historical membership attestation.",
+        "properties": {
+          "action_session": {
+            "format": "date",
+            "title": "Action Session",
+            "type": "string"
+          },
+          "analysis_basis": {
+            "const": "CURRENT_COHORT_AT_E",
+            "default": "CURRENT_COHORT_AT_E",
+            "title": "Analysis Basis",
+            "type": "string"
+          },
+          "analysis_version": {
+            "const": "current-group-analysis-v2",
+            "default": "current-group-analysis-v2",
+            "title": "Analysis Version",
+            "type": "string"
+          },
+          "bootstrap": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BootstrapContextV1"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "effective_session": {
+            "format": "date",
+            "title": "Effective Session",
+            "type": "string"
+          },
+          "evaluation_timestamp": {
+            "format": "date-time",
+            "title": "Evaluation Timestamp",
+            "type": "string"
+          },
+          "known_at": {
+            "format": "date-time",
+            "title": "Known At",
+            "type": "string"
+          },
+          "known_session": {
+            "format": "date",
+            "title": "Known Session",
+            "type": "string"
+          },
+          "market_as_of_session": {
+            "format": "date",
+            "title": "Market As Of Session",
+            "type": "string"
+          },
+          "snapshot_id": {
+            "minLength": 1,
+            "title": "Snapshot Id",
+            "type": "string"
+          },
+          "source_as_of_date": {
+            "format": "date",
+            "title": "Source As Of Date",
+            "type": "string"
+          },
+          "valid_through": {
+            "format": "date",
+            "title": "Valid Through",
+            "type": "string"
+          },
+          "version": {
+            "minLength": 1,
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "snapshot_id",
+          "version",
+          "source_as_of_date",
+          "effective_session",
+          "known_session",
+          "valid_through",
+          "market_as_of_session",
+          "evaluation_timestamp",
+          "action_session",
+          "known_at"
+        ],
+        "title": "CurrentGroupProvenanceV2",
+        "type": "object"
+      },
       "DatedProvenanceV1": {
         "additionalProperties": false,
         "properties": {
@@ -1962,7 +2054,15 @@
             "type": "array"
           },
           "membership": {
-            "$ref": "#/components/schemas/DatedProvenanceV1"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DatedProvenanceV1"
+              },
+              {
+                "$ref": "#/components/schemas/CurrentGroupProvenanceV2"
+              }
+            ],
+            "title": "Membership"
           },
           "missing_context_reasons": {
             "items": {
