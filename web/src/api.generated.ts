@@ -1561,6 +1561,7 @@ export interface components {
         | components["schemas"]["NormalizedReasonV1"]
         | components["schemas"]["NormalizedRegimeGateV1"]
         | components["schemas"]["NormalizedRegimeInputV1"]
+        | components["schemas"]["NormalizedRegimeInputV2"]
         | components["schemas"]["NormalizedRegimeMemoryV1"]
         | components["schemas"]["NormalizedRegimeMultipliers"]
         | components["schemas"]["NormalizedRegimeOutputV1"]
@@ -3294,6 +3295,28 @@ export interface components {
        */
       model_type: "39";
     };
+    /** NormalizedRegimeInputV2 */
+    NormalizedRegimeInputV2: {
+      /** Fields */
+      fields: [
+        "market-regime-input-v2",
+        string,
+        number,
+        string,
+        number,
+        number[],
+        number[],
+        number[],
+        number,
+        number | null,
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "101";
+    };
     /** NormalizedRegimeMemoryV1 */
     NormalizedRegimeMemoryV1: {
       /** Fields */
@@ -4472,6 +4495,39 @@ export interface components {
       universe: components["schemas"]["ResearchUniverseV1"];
       volatility: components["schemas"]["VolatilityInputV1"];
     };
+    /**
+     * RegimeInputV2
+     * @description Industry authority; secondary path ambiguity stays in shared evidence.
+     *
+     *     Inherited alignment still validates every group identity/date and all shared
+     *     source, calendar, universe and symbol evidence. Industry overlap is invalid.
+     */
+    RegimeInputV2: {
+      /** Breadth */
+      breadth: components["schemas"]["PriceFeaturesV1"][];
+      /** Calendar Fingerprint */
+      calendar_fingerprint: string;
+      /** Indexes */
+      indexes: components["schemas"]["IndexInputV1"][];
+      leadership?: components["schemas"]["LeadershipOutputV1"] | null;
+      /**
+       * Schema Version
+       * @default market-regime-input-v2
+       * @constant
+       */
+      schema_version: "market-regime-input-v2";
+      /**
+       * Session Date
+       * Format: date
+       */
+      session_date: string;
+      source: components["schemas"]["StrengthSourceV1"];
+      structure?: components["schemas"]["StructureBreadthContextV1"] | null;
+      /** Style */
+      style: components["schemas"]["StyleInputV1"][];
+      universe: components["schemas"]["ResearchUniverseV1"];
+      volatility: components["schemas"]["VolatilityInputV1"];
+    };
     /** RegimeMemoryV1 */
     RegimeMemoryV1: {
       /** Candidate */
@@ -4591,7 +4647,10 @@ export interface components {
       feature_version: "market-regime-features-v1";
       /** Green Sleeves */
       green_sleeves: number;
-      inputs: components["schemas"]["RegimeInputV1"];
+      /** Inputs */
+      inputs:
+        | components["schemas"]["RegimeInputV1"]
+        | components["schemas"]["RegimeInputV2"];
       memory: components["schemas"]["RegimeMemoryV1"];
       /** Override Reasons */
       override_reasons: string[];

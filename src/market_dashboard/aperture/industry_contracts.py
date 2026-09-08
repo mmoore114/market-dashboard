@@ -12,7 +12,13 @@ from .decision_contracts import (
 )
 from .industry_policy import DECISION_RULES, REGIME_RULES
 from .leadership_contracts import GroupEvidenceV1
-from .regime_contracts import FractionV1, RegimeOutputV1, SleevesV1, SleeveV1
+from .regime_contracts import (
+    FractionV1,
+    RegimeInputV1,
+    RegimeOutputV1,
+    SleevesV1,
+    SleeveV1,
+)
 
 
 class InternalsSleeveV2(SleeveV1):
@@ -29,6 +35,29 @@ class SleevesV2(SleevesV1):
     internals: InternalsSleeveV2
 
 
+class RegimeInputV2(RegimeInputV1):
+    """Industry authority; secondary path ambiguity stays in shared evidence.
+
+    Inherited alignment still validates every group identity/date and all shared
+    source, calendar, universe and symbol evidence. Industry overlap is invalid.
+    """
+
+    schema_version: Literal["market-regime-input-v2"] = "market-regime-input-v2"
+
+    def validate_taxonomy_membership(self):
+        members = [
+            ("market", m.market_data_symbol)
+            if m.market_data_symbol
+            else ("source", m.source_symbol)
+            for g in self.leadership.groups
+            if g.group_type == "INDUSTRY"
+            for m in g.members
+            if not m.non_security
+        ]
+        if len(members) != len(set(members)):
+            raise ValueError("Overlapping industry security membership")
+
+
 class RegimeOutputV2(RegimeOutputV1):
     schema_version: Literal["market-regime-output-v2"] = "market-regime-output-v2"
     engine_version: Literal["market-regime-v2"] = "market-regime-v2"
@@ -36,6 +65,8 @@ class RegimeOutputV2(RegimeOutputV1):
         "market-regime-thresholds-v2"
     )
     rules_fingerprint: Literal[REGIME_RULES] = REGIME_RULES
+    # The union preserves already serialized V2 outputs with the original input.
+    inputs: RegimeInputV1 | RegimeInputV2
     sleeves: SleevesV2
 
 

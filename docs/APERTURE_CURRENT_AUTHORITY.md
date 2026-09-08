@@ -287,3 +287,14 @@ written Decision V1 policy applies setup errors globally. V2 retains that veto
 pending an explicit error-scope policy decision. No error is suppressed.
 See the [alignment contract](product-alignment-001.md) for the complete trace,
 threshold interpretation, compatibility boundary and remaining decision.
+
+
+## 15. Versioned secondary taxonomy validation
+
+`AP-PREINTEGRATION-001` adds `market-regime-input-v2` for new industry-policy
+materialization. Secondary subindustry ambiguity remains disclosed without vetoing
+valid industry evidence; shared source/date/universe/calendar/version checks and
+industry membership integrity remain enforced. V1 retains its original overlap
+rejection, and existing V2 outputs with V1 inputs retain their meaning and registry.
+No INDUSTRY threshold, current-setup selection or global EP-veto policy changes.
+See [the pre-integration review](preintegration-review-001.md).

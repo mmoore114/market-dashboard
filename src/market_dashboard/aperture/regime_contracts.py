@@ -188,16 +188,18 @@ class RegimeInputV1(ContractModel):
                 for g in c.groups
             ):
                 raise ValueError("Duplicate or incorrectly dated group evidence")
-            sub_members = [
-                m.source_symbol
-                for g in c.groups
-                if g.group_type == "SUB_INDUSTRY"
-                for m in g.members
-                if not m.non_security
-            ]
-            if len(sub_members) != len(set(sub_members)):
-                raise ValueError("Overlapping sub-industry security membership")
+            self.validate_taxonomy_membership()
         return self
+
+
+    def validate_taxonomy_membership(self):
+        members = [
+            m.source_symbol for g in self.leadership.groups
+            if g.group_type == "SUB_INDUSTRY"
+            for m in g.members if not m.non_security
+        ]
+        if len(members) != len(set(members)):
+            raise ValueError("Overlapping sub-industry security membership")
 
 
 class PredicateV1(ContractModel):

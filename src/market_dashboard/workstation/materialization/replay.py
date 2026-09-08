@@ -26,6 +26,7 @@ from market_dashboard.aperture.leadership_adapters import engine_context
 from market_dashboard.aperture.leadership_contracts import LeadershipOutputV1
 from market_dashboard.aperture.regime import calendar_hash, evaluate_regime
 from market_dashboard.aperture.regime_adapters import PreparedRegimeBars
+from market_dashboard.aperture.regime_contracts import RegimeInputV1
 from market_dashboard.aperture.setup import evaluate_setups
 from market_dashboard.aperture.structure_contracts import StructureSourceV1
 from market_dashboard.features.leadership_features import strength_input
@@ -55,6 +56,7 @@ def replay(plan, loaded, *, optimize_current=True, checkpoint_root=None):
     from market_dashboard.workstation.models import VersionsV1
 
     VersionsV1.model_validate(plan.versions.model_dump())
+    regime_input_model = RegimeInputV1
     regime_engine, decision_engine, input_model = (
         evaluate_regime,
         evaluate_decision,
@@ -65,7 +67,12 @@ def replay(plan, loaded, *, optimize_current=True, checkpoint_root=None):
             evaluate_industry_decision,
             evaluate_industry_regime,
         )
-        from market_dashboard.aperture.industry_contracts import DecisionInputV2
+        from market_dashboard.aperture.industry_contracts import (
+            DecisionInputV2,
+            RegimeInputV2,
+        )
+
+        regime_input_model = RegimeInputV2
 
         regime_engine, decision_engine, input_model = (
             evaluate_industry_regime,
@@ -336,6 +343,7 @@ def replay(plan, loaded, *, optimize_current=True, checkpoint_root=None):
             )
         inp = prepared_regime.at(
             session,
+            input_model=regime_input_model,
             universe=dated,
             leadership=leadership,
             structure=tuple(final_structures.values())

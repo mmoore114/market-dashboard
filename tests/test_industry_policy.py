@@ -219,6 +219,142 @@ def test_offline_materializer_dispatches_new_policy_and_validates_it(tmp_path):
     )
     store = SnapshotStore("LOCAL_SNAPSHOT", path=plan.output)
     assert store.snapshot.versions.decision_risk == "decision-risk-v2"
+    assert store.snapshot.regime.inputs.schema_version == "market-regime-input-v2"
+    from fastapi.testclient import TestClient
+
+    from api.main import create_app
+    from market_dashboard.aperture.decision_contracts import SizingProposalV1
+    from market_dashboard.workstation.snapshot_v2 import sizing_input
+
+    record = store.snapshot.records[0]
+    symbol, direction = record.output.decision.symbol, record.output.decision.direction
+    sized = sizing_input(
+        store.snapshot,
+        symbol,
+        direction,
+        SizingProposalV1(
+            account_equity=None, available_buying_power=None, entry=None, stop=None
+        ),
+    )
+    assert sized.regime == record.output.regime
+    assert sized.earnings == record.output.earnings
+    # The offline materializer uses historical synthetic dates. Serve an explicitly
+    # labeled fixture of those exact outputs; never extend a LOCAL_SNAPSHOT clock.
+    from market_dashboard.workstation.snapshot_v2 import snapshot_digest
+
+    fixture = store.snapshot.model_copy(update={"mode": "FIXTURE"})
+    fixture = WorkstationSnapshotV2.model_validate(
+        {**fixture.model_dump(), "logical_fingerprint": snapshot_digest(fixture)}
+    )
+    client = TestClient(create_app(SnapshotStore(fixture=fixture)))
+    detail = client.get(f"/api/v2/symbols/{symbol}")
+    assert detail.status_code == 200, detail.text
+    assert detail.json()["records"][0]["review"]["policy_version"] == "decision-risk-v2"
+    response = client.post(
+        "/api/v1/sizer",
+        json={
+            "symbol": symbol,
+            "direction": direction,
+            "account_equity": None,
+            "available_buying_power": None,
+            "entry": None,
+            "stop": None,
+        },
+    )
+    assert response.status_code == 200, response.text
+
     assert all(
         r.output.engine_version == "decision-risk-v2" for r in store.snapshot.records
     )
+
+
+def test_versioned_regime_input_keeps_secondary_conflicts_and_shared_integrity(
+    baseline,
+):
+    from copy import deepcopy
+
+    from market_dashboard.aperture.industry_contracts import RegimeInputV2
+    from market_dashboard.aperture.regime_contracts import RegimeInputV1
+    from market_dashboard.workstation.research import review
+
+    data = baseline.regime.inputs.model_dump(mode="json")
+    groups = data["leadership"]["groups"]
+    sub = next(g for g in groups if g["group_type"] == "SUB_INDUSTRY")
+    # Repeated leaf under distinct parents, with disjoint symbols, is valid even V1.
+    subs = [g for g in groups if g["group_type"] == "SUB_INDUSTRY"]
+    for index, g in enumerate(subs):
+        g["group_id"] = f"Parent {index} / Shared leaf"
+        for member in g["members"]:
+            member["group_id"] = g["group_id"]
+    RegimeInputV1.model_validate(data)
+    duplicate = deepcopy(sub)
+    duplicate["group_id"] = "Other parent / Shared leaf"
+    for member in duplicate["members"]:
+        member["group_id"] = duplicate["group_id"]
+    groups.append(duplicate)
+    with pytest.raises(ValueError, match="Overlapping sub-industry"):
+        RegimeInputV1.model_validate(data)
+    data["schema_version"] = "market-regime-input-v2"
+    inp = RegimeInputV2.model_validate(data)
+    from market_dashboard.aperture.regime import evaluate_regime
+
+    with pytest.raises(ValueError, match="V1 input contract"):
+        evaluate_regime(inp, calendar=baseline.calendar)
+    result = evaluate_industry_regime(inp, calendar=baseline.calendar)
+    expected = evaluate_industry_regime(
+        baseline.regime.inputs, calendar=baseline.calendar
+    )
+    assert result.sleeves == expected.sleeves
+    symbol = sub["members"][0]["market_data_symbol"]
+    old = next(
+        r.output.inputs for r in baseline.records if r.output.decision.symbol == symbol
+    )
+    decision_data = inputs_v2(old, result).model_dump(mode="json")
+    decision_data["leadership"] = data["leadership"]
+    out = evaluate_industry_decision(
+        DecisionInputV2.model_validate(decision_data), calendar=baseline.calendar
+    )
+    assert out.group.industry is not None
+    assert len([g for g in review(out).memberships if g.level == "SUB_INDUSTRY"]) == 2
+    assert (
+        out.group.status
+        == industry_gate(symbol, baseline.regime.inputs.leadership).status
+    )
+    for field, value, message in [
+        ("calendar_fingerprint", "0" * 64, "calendar"),
+        ("session_date", "2001-01-01", "session"),
+        ("rules_fingerprint", "0" * 64, "version"),
+    ]:
+        bad = deepcopy(data)
+        bad["leadership"][field] = value
+        with pytest.raises(ValueError, match=message):
+            RegimeInputV2.model_validate(bad)
+    for mutation in ("date", "duplicate", "industry"):
+        bad = deepcopy(data)
+        if mutation == "date":
+            bad["leadership"]["groups"][-1]["session_date"] = "2001-01-01"
+        elif mutation == "duplicate":
+            bad["leadership"]["groups"].append(deepcopy(bad["leadership"]["groups"][0]))
+        else:
+            g = deepcopy(next(g for g in groups if g["group_type"] == "INDUSTRY"))
+            g["group_id"] = "Conflicting industry"
+            for m in g["members"]:
+                m["group_id"] = g["group_id"]
+            bad["leadership"]["groups"].append(g)
+        with pytest.raises(ValueError, match="group evidence|Overlapping industry"):
+            RegimeInputV2.model_validate(bad)
+
+
+def test_declared_industry_thresholds_match_consumed_policies():
+    from market_dashboard.aperture.industry_policy import POLICY
+    from market_dashboard.aperture.leadership import POLICY as aggregation
+    from market_dashboard.aperture.regime_policy import THRESHOLDS as internals
+
+    assert POLICY.minimum_group_members == aggregation.minimum_group_members == 5
+    assert (
+        POLICY.minimum_coverage
+        == aggregation.minimum_coverage
+        == internals.minimum_coverage
+        == 0.60
+    )
+    assert POLICY.minimum_internals_groups == internals.minimum_groups == 5

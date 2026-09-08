@@ -6,6 +6,21 @@ Current product authority: `docs/APERTURE_CURRENT_AUTHORITY.md`
 
 Working prototype baseline: `401e1b0afd6ad2a4678af4f1040014b5c9b568e9`
 
+## Pre-integration review — fixes on draft PR #20
+
+`AP-PREINTEGRATION-001` reviews the unchanged #18/#19 heads and delivered #20
+`6b7a071`. The versioned Regime input now allows secondary subindustry ambiguity
+without weakening shared integrity checks; V1 behavior and old graph addresses
+remain preserved. Setup filtering uses lightweight selection and one group-member
+lookup per request. Historical median setup filtering improved from 13.98 s to
+0.179 s with identical results and about 1.02 GiB peak RSS. No captured security
+has conflicting subindustry assignments; the contract issue is an edge case.
+
+See [the review and integration sequence](preintegration-review-001.md). Production
+remains pinned to `7de9858`, scheduler stopped, old snapshot expired. No acquisition,
+real price-engine replay, production rebuild, merge or deployment ran. Low storage and
+unproven cross-version checkpoint reuse must be addressed before a real refresh.
+
 ## Industry alignment — validated for draft review
 
 `AP-PRODUCT-ALIGNMENT-001` continues from shutdown commit `000a356` on

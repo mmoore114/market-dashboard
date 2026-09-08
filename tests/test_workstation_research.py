@@ -349,3 +349,50 @@ def test_current_setup_filter_matches_displayed_family(snapshot):
     for family in ("EP", "RANGE", "CONTRACTION", "TREND_PULLBACK"):
         result = research.tape_view(snapshot, store.meta(), setup=family)
         assert all(r.current_setup.setup.family == family for r in result.rows)
+
+
+def test_setup_filter_uses_lightweight_selection_with_exact_review_parity(
+    snapshot, monkeypatch
+):
+    from math import ceil
+
+    store = SnapshotStore(fixture=snapshot)
+    originals = {
+        id(r.output): research.review(r.output).current_setup for r in snapshot.records
+    }
+    for r in snapshot.records:
+        assert research.current_setup(r.output) == originals[id(r.output)]
+    group = next(g for g in snapshot.groups if g.group_type == "INDUSTRY")
+    members = {m.market_data_symbol for m in group.members}
+    for selected_group in (None, group.group_id):
+        for direction in (None, "LONG", "SHORT"):
+            for family in ("EP", "RANGE", "CONTRACTION", "TREND_PULLBACK"):
+                expected = sorted(
+                    r.output.decision.symbol
+                    for r in snapshot.records
+                    if (not direction or r.output.decision.direction == direction)
+                    and (not selected_group or r.output.decision.symbol in members)
+                    and originals[id(r.output)].setup is not None
+                    and originals[id(r.output)].setup.family == family
+                )
+                actual = []
+                for page in range(1, max(1, ceil(len(expected) / 2)) + 1):
+                    result = research.tape_view(
+                        snapshot,
+                        store.meta(),
+                        setup=family,
+                        direction=direction,
+                        group=selected_group,
+                        page=page,
+                        page_size=2,
+                    )
+                    assert result.total == len(expected)
+                    actual.extend(r.symbol for r in result.rows)
+                assert actual == expected
+
+    def no_review(_):
+        raise AssertionError("Filtering must not construct a full review")
+
+    monkeypatch.setattr(research, "review", no_review)
+    # A page past the end performs filtering but no row/detail construction.
+    assert not research.tape_view(snapshot, store.meta(), setup="RANGE", page=1000).rows

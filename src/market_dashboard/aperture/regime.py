@@ -195,6 +195,8 @@ def calendar_hash(calendar, session):
 
 
 def evaluate_regime(inputs, *, calendar, previous=None):
+    if inputs.schema_version != "market-regime-input-v1":
+        raise ValueError("V1 regime requires V1 input contract")
     return _evaluate_regime(inputs, calendar=calendar, previous=previous)
 
 

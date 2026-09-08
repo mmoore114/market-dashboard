@@ -2606,6 +2606,7 @@
                 "1": "#/components/schemas/NormalizedBootstrapContextV1",
                 "10": "#/components/schemas/NormalizedDetectionV1",
                 "100": "#/components/schemas/NormalizedSleevesV2",
+                "101": "#/components/schemas/NormalizedRegimeInputV2",
                 "11": "#/components/schemas/NormalizedEarningsEvidenceV1",
                 "12": "#/components/schemas/NormalizedEventCoverageV1",
                 "13": "#/components/schemas/NormalizedEventEvidenceV1",
@@ -2850,6 +2851,9 @@
               },
               {
                 "$ref": "#/components/schemas/NormalizedRegimeInputV1"
+              },
+              {
+                "$ref": "#/components/schemas/NormalizedRegimeInputV2"
               },
               {
                 "$ref": "#/components/schemas/NormalizedRegimeMemoryV1"
@@ -8988,6 +8992,97 @@
         "title": "NormalizedRegimeInputV1",
         "type": "object"
       },
+      "NormalizedRegimeInputV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 11,
+            "minItems": 11,
+            "prefixItems": [
+              {
+                "const": "market-regime-input-v2",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "items": {
+                  "minimum": 0.0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "minimum": 0.0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "minimum": 0.0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0.0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0.0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 101,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedRegimeInputV2",
+        "type": "object"
+      },
       "NormalizedRegimeMemoryV1": {
         "additionalProperties": false,
         "properties": {
@@ -14141,6 +14236,90 @@
         "title": "RegimeInputV1",
         "type": "object"
       },
+      "RegimeInputV2": {
+        "additionalProperties": false,
+        "description": "Industry authority; secondary path ambiguity stays in shared evidence.\n\nInherited alignment still validates every group identity/date and all shared\nsource, calendar, universe and symbol evidence. Industry overlap is invalid.",
+        "properties": {
+          "breadth": {
+            "items": {
+              "$ref": "#/components/schemas/PriceFeaturesV1"
+            },
+            "title": "Breadth",
+            "type": "array"
+          },
+          "calendar_fingerprint": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Calendar Fingerprint",
+            "type": "string"
+          },
+          "indexes": {
+            "items": {
+              "$ref": "#/components/schemas/IndexInputV1"
+            },
+            "title": "Indexes",
+            "type": "array"
+          },
+          "leadership": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LeadershipOutputV1"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "schema_version": {
+            "const": "market-regime-input-v2",
+            "default": "market-regime-input-v2",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "session_date": {
+            "format": "date",
+            "title": "Session Date",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/StrengthSourceV1"
+          },
+          "structure": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructureBreadthContextV1"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "style": {
+            "items": {
+              "$ref": "#/components/schemas/StyleInputV1"
+            },
+            "title": "Style",
+            "type": "array"
+          },
+          "universe": {
+            "$ref": "#/components/schemas/ResearchUniverseV1"
+          },
+          "volatility": {
+            "$ref": "#/components/schemas/VolatilityInputV1"
+          }
+        },
+        "required": [
+          "session_date",
+          "source",
+          "calendar_fingerprint",
+          "universe",
+          "indexes",
+          "breadth",
+          "style",
+          "volatility"
+        ],
+        "title": "RegimeInputV2",
+        "type": "object"
+      },
       "RegimeMemoryV1": {
         "additionalProperties": false,
         "properties": {
@@ -14475,7 +14654,15 @@
             "type": "integer"
           },
           "inputs": {
-            "$ref": "#/components/schemas/RegimeInputV1"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RegimeInputV1"
+              },
+              {
+                "$ref": "#/components/schemas/RegimeInputV2"
+              }
+            ],
+            "title": "Inputs"
           },
           "memory": {
             "$ref": "#/components/schemas/RegimeMemoryV1"

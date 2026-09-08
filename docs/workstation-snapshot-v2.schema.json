@@ -486,6 +486,7 @@
                 "1": "#/$defs/NormalizedBootstrapContextV1",
                 "10": "#/$defs/NormalizedDetectionV1",
                 "100": "#/$defs/NormalizedSleevesV2",
+                "101": "#/$defs/NormalizedRegimeInputV2",
                 "11": "#/$defs/NormalizedEarningsEvidenceV1",
                 "12": "#/$defs/NormalizedEventCoverageV1",
                 "13": "#/$defs/NormalizedEventEvidenceV1",
@@ -730,6 +731,9 @@
               },
               {
                 "$ref": "#/$defs/NormalizedRegimeInputV1"
+              },
+              {
+                "$ref": "#/$defs/NormalizedRegimeInputV2"
               },
               {
                 "$ref": "#/$defs/NormalizedRegimeMemoryV1"
@@ -4834,6 +4838,97 @@
           "fields"
         ],
         "title": "NormalizedRegimeInputV1",
+        "type": "object"
+      },
+      "NormalizedRegimeInputV2": {
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "maxItems": 11,
+            "minItems": 11,
+            "prefixItems": [
+              {
+                "const": "market-regime-input-v2",
+                "type": "string"
+              },
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "items": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            ],
+            "title": "Fields",
+            "type": "array"
+          },
+          "model_type": {
+            "const": 101,
+            "title": "Model Type",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "model_type",
+          "fields"
+        ],
+        "title": "NormalizedRegimeInputV2",
         "type": "object"
       },
       "NormalizedRegimeMemoryV1": {
@@ -9593,8 +9688,9 @@
             "type": "integer"
           },
           "registry_fingerprint": {
-            "default": "608ed44770ed092b61f14b568f84986e4f7ccc8885f03e370229cac43edb150a",
+            "default": "aa39ca9881de49bca917e9713f3f91cd8f0e79c1783f12f3cedfa00c219b6541",
             "enum": [
+              "aa39ca9881de49bca917e9713f3f91cd8f0e79c1783f12f3cedfa00c219b6541",
               "608ed44770ed092b61f14b568f84986e4f7ccc8885f03e370229cac43edb150a",
               "2f38c1bc3ae5b3b1350d0e97932fa961334af5c2a53335be6a1051f86a19faae",
               "852d8761d6a5a24ec4484b62043e2ebc4570fffdbae63de3b3c6fd1fce99b607",
@@ -10601,6 +10697,22 @@
         "leadership"
       ]
     },
+    "RegimeInputV2": {
+      "code": 101,
+      "fields": [
+        "schema_version",
+        "session_date",
+        "source",
+        "calendar_fingerprint",
+        "universe",
+        "indexes",
+        "breadth",
+        "style",
+        "volatility",
+        "structure",
+        "leadership"
+      ]
+    },
     "RegimeMemoryV1": {
       "code": 40,
       "fields": [
@@ -11422,5 +11534,5 @@
       ]
     }
   },
-  "registry_fingerprint": "608ed44770ed092b61f14b568f84986e4f7ccc8885f03e370229cac43edb150a"
+  "registry_fingerprint": "aa39ca9881de49bca917e9713f3f91cd8f0e79c1783f12f3cedfa00c219b6541"
 }

@@ -5,14 +5,22 @@ from datetime import date
 import pandas as pd
 
 from market_dashboard.aperture.leadership import validate_calendar
-from market_dashboard.aperture.leadership_adapters import research_universe, exact_disposition
+from market_dashboard.aperture.leadership_adapters import (
+    exact_disposition,
+    research_universe,  # noqa: F401 - retained public adapter export
+)
 from market_dashboard.aperture.regime import calendar_hash
 from market_dashboard.aperture.regime_contracts import (
-    IndexInputV1, PriceFeaturesV1, StyleInputV1, VolatilityInputV1,
-    RegimeInputV1, StructureBreadthContextV1, SpotVolatilityIdentityV1,
+    IndexInputV1,
+    PriceFeaturesV1,
+    RegimeInputV1,
+    SpotVolatilityIdentityV1,
+    StructureBreadthContextV1,
+    StyleInputV1,
+    VolatilityInputV1,
 )
 from market_dashboard.features.leadership_features import prepare_closes
-from market_dashboard.features.regime_features import close_at, sma, simple_return
+from market_dashboard.features.regime_features import close_at, simple_return, sma
 
 
 def spot_identity(*, disposition_config, source_symbol, data_vendor, dataset_id, equivalence_evidence):
@@ -46,7 +54,7 @@ def prepare_spot_closes(frame, calendar, session, identity):
 
 
 def regime_input_from_bars(bars, spot_bars, *, session, calendar, source, universe,
-                           volatility_identity, structure=None, leadership=None):
+                           volatility_identity, structure=None, leadership=None, input_model=RegimeInputV1):
     """Metadata arguments attest columns absent from legacy bars; supplied columns must agree.
 
     ETFs enter through exact MarketDataSymbol validation. VIX never enters that
@@ -60,7 +68,7 @@ def regime_input_from_bars(bars, spot_bars, *, session, calendar, source, univer
     spot = prepare_spot_closes(spot_bars,calendar,session,volatility_identity)
     return _regime_from_prepared(closes, spot, session=session, calendar=calendar,
         source=source, universe=universe, volatility_identity=volatility_identity,
-        structure=structure, leadership=leadership)
+        structure=structure, leadership=leadership, input_model=input_model)
 
 
 class PreparedRegimeBars:
@@ -73,24 +81,24 @@ class PreparedRegimeBars:
         self.closes = prepare_closes(bars, self.calendar, as_of, source)
         self.spot = prepare_spot_closes(spot_bars, self.calendar, as_of, volatility_identity)
 
-    def at(self, session, *, universe, structure=None, leadership=None):
+    def at(self, session, *, universe, structure=None, leadership=None, input_model=RegimeInputV1):
         if session not in self.calendar or session > self.as_of:
             raise ValueError("Prepared replay session outside verified range")
         return _regime_from_prepared(self.closes, self.spot, session=session,
             calendar=self.calendar, source=self.source, universe=universe,
             volatility_identity=self.volatility_identity, structure=structure,
-            leadership=leadership)
+            leadership=leadership, input_model=input_model)
 
 
 def _regime_from_prepared(closes, spot, *, session, calendar, source, universe,
-                          volatility_identity, structure=None, leadership=None):
+                          volatility_identity, structure=None, leadership=None, input_model=RegimeInputV1):
     index = calendar.index(session)
     def price_features(symbol):
-        return dict(symbol=symbol,close=close_at(closes,symbol,calendar,index),
-                    sma20=sma(closes,symbol,calendar,index,20),sma50=sma(closes,symbol,calendar,index,50))
+        return {'symbol': symbol,'close': close_at(closes,symbol,calendar,index),
+                    'sma20': sma(closes,symbol,calendar,index,20),'sma50': sma(closes,symbol,calendar,index,50)}
     structure_context = None if structure is None else StructureBreadthContextV1(
         session_date=session,source=source,universe=universe,evidence=tuple(structure))
-    return RegimeInputV1(session_date=session,source=source,universe=universe,
+    return input_model(session_date=session,source=source,universe=universe,
         calendar_fingerprint=calendar_hash(calendar,session),
         indexes=tuple(IndexInputV1(**price_features(s),sma20_5_ago=sma(closes,s,calendar,index-5,20)) for s in ('SPY','QQQ','IWM')),
         breadth=tuple(PriceFeaturesV1(**price_features(s)) for s in sorted(universe.symbols)),

@@ -67,6 +67,8 @@ from .legacy_registry import (
     COVERAGE_TYPE_CODES,
     CURRENT_GROUP_REGISTRY_FINGERPRINT,
     CURRENT_GROUP_TYPE_CODES,
+    INDUSTRY_REGISTRY_FINGERPRINT,
+    INDUSTRY_TYPE_CODES,
     LEGACY_REGISTRY_FINGERPRINT,
     LEGACY_TYPE_CODES,
     MEMBERSHIP_REGISTRY_FINGERPRINT,
@@ -77,6 +79,7 @@ from .legacy_registry import (
 class SharedContextV2(ContractModel):
     registry_fingerprint: Literal[
         REGISTRY_FINGERPRINT,
+        INDUSTRY_REGISTRY_FINGERPRINT,
         COVERAGE_REGISTRY_FINGERPRINT,
         MEMBERSHIP_REGISTRY_FINGERPRINT,
         ACTIVATION_REGISTRY_FINGERPRINT,
@@ -138,7 +141,9 @@ class WorkstationSnapshotV2(ContractModel):
     @model_validator(mode="after")
     def integrity(self):
         retained_types = (
-            COVERAGE_TYPE_CODES
+            INDUSTRY_TYPE_CODES
+            if self.shared.registry_fingerprint == INDUSTRY_REGISTRY_FINGERPRINT
+            else COVERAGE_TYPE_CODES
             if self.shared.registry_fingerprint == COVERAGE_REGISTRY_FINGERPRINT
             else MEMBERSHIP_TYPE_CODES
             if self.shared.registry_fingerprint == MEMBERSHIP_REGISTRY_FINGERPRINT

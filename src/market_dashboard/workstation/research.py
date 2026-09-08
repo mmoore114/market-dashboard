@@ -159,6 +159,69 @@ def scoped_errors(output, family, direction):
     return tuple(sorted(local)), tuple(sorted(set(output.errors) - local))
 
 
+def setup_review(out):
+    """Setup-only evidence shared by display filtering and full detail."""
+    active = []
+    notes = []
+    engine = out.inputs.setups
+    actions = {s.setup_id: s for s in out.decision.setups}
+    for evidence in engine.setups if engine else ():
+        i = evidence.instance
+        if i.status in TERMINAL or i.direction != out.decision.direction:
+            continue
+        local, unrelated = scoped_errors(engine, i.family, i.direction)
+        action = actions.get(i.setup_id)
+        eligible = (
+            i.status in ("NEAR_TRIGGER", "TRIGGERED")
+            and evidence.evaluated
+            and not i.replay_required
+            and not local
+        )
+        legacy = (
+            eligible
+            and action is not None
+            and not action.setup_eligible
+            and any(r.code == "SETUP_ENGINE_ERRORS" for r in action.reasons)
+            and bool(unrelated)
+        )
+        qualification = (
+            "Local setup conditions met"
+            if eligible
+            else "Local setup conditions not met"
+        )
+        if legacy:
+            qualification = "Local conditions met; retained global veto"
+            notes.append(
+                "The retained decision applied errors from another setup family/direction globally. This view attributes them to their actual scope; it does not rewrite the stored decision or authorize ACT."
+            )
+        active.append(
+            SetupReviewV1(
+                setup_id=i.setup_id,
+                family=i.family,
+                direction=i.direction,
+                status=i.status,
+                evaluated=evidence.evaluated,
+                replay_required=i.replay_required,
+                trigger=i.geometry.reference_price if i.geometry else None,
+                invalidation=evidence.invalidation_level,
+                local_errors=local,
+                unrelated_errors=unrelated,
+                qualification=qualification,
+            )
+        )
+    return active, notes
+
+
+def current_setup(out):
+    active, _ = setup_review(out)
+    return select_current_setup(
+        out.inputs.setups,
+        out.decision.direction,
+        out.inputs.features.session_date,
+        active,
+    )
+
+
 def review(out):
     blocks = []
 
@@ -231,54 +294,8 @@ def review(out):
         if name == "STRENGTH":
             detail = "Neither the established-strength branch nor the complete rotation branch passes."
         add(category, title, detail, codes, g.rung)
-    active = []
-    notes = []
+    active, notes = setup_review(out)
     engine = out.inputs.setups
-    actions = {s.setup_id: s for s in out.decision.setups}
-    for evidence in engine.setups if engine else ():
-        i = evidence.instance
-        if i.status in TERMINAL or i.direction != out.decision.direction:
-            continue
-        local, unrelated = scoped_errors(engine, i.family, i.direction)
-        action = actions.get(i.setup_id)
-        eligible = (
-            i.status in ("NEAR_TRIGGER", "TRIGGERED")
-            and evidence.evaluated
-            and not i.replay_required
-            and not local
-        )
-        legacy = (
-            eligible
-            and action is not None
-            and not action.setup_eligible
-            and any(r.code == "SETUP_ENGINE_ERRORS" for r in action.reasons)
-            and bool(unrelated)
-        )
-        qualification = (
-            "Local setup conditions met"
-            if eligible
-            else "Local setup conditions not met"
-        )
-        if legacy:
-            qualification = "Local conditions met; retained global veto"
-            notes.append(
-                "The retained decision applied errors from another setup family/direction globally. This view attributes them to their actual scope; it does not rewrite the stored decision or authorize ACT."
-            )
-        active.append(
-            SetupReviewV1(
-                setup_id=i.setup_id,
-                family=i.family,
-                direction=i.direction,
-                status=i.status,
-                evaluated=evidence.evaluated,
-                replay_required=i.replay_required,
-                trigger=i.geometry.reference_price if i.geometry else None,
-                invalidation=evidence.invalidation_level,
-                local_errors=local,
-                unrelated_errors=unrelated,
-                qualification=qualification,
-            )
-        )
     setup_gate = gates.get("SETUP")
     if setup_gate and not setup_gate.passed:
         if any("retained global veto" in s.qualification for s in active):
@@ -580,6 +597,16 @@ def tape_view(
     sort="symbol",
     descending=False,
 ):
+    group_symbols = (
+        {
+            m.market_data_symbol
+            for g in snapshot.groups
+            if g.group_id == group
+            for m in g.members
+        }
+        if group
+        else None
+    )
     records = []
     for r in snapshot.records:
         o = r.output
@@ -591,14 +618,10 @@ def tape_view(
             o.inputs.structure is None or o.inputs.structure.state != structure
         ):
             continue
-        if group and not any(
-            g.group_id == group
-            and any(m.market_data_symbol == o.decision.symbol for m in g.members)
-            for g in snapshot.groups
-        ):
+        if group_symbols is not None and o.decision.symbol not in group_symbols:
             continue
         if setup:
-            selected = review(o).current_setup.setup
+            selected = current_setup(o).setup
             if selected is None or selected.family != setup:
                 continue
         if min_rs_comp is not None and (

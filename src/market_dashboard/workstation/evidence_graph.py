@@ -18,7 +18,7 @@ from market_dashboard.aperture.decision_contracts import DecisionRiskOutputV1
 from market_dashboard.aperture.industry_contracts import DecisionRiskOutputV2
 from market_dashboard.aperture.leadership import fingerprint
 
-from .legacy_registry import COVERAGE_TYPE_CODES
+from .legacy_registry import INDUSTRY_TYPE_CODES
 
 Digest = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 NodeRef = Annotated[int, Field(ge=0, strict=True)]
@@ -65,11 +65,11 @@ def _reference_type(annotation, reference):
     return annotation
 
 
-TYPE_CODES = dict(COVERAGE_TYPE_CODES)
+TYPE_CODES = dict(INDUSTRY_TYPE_CODES)
 TYPE_CODES.update(
     {
-        name: len(COVERAGE_TYPE_CODES) + i
-        for i, name in enumerate(sorted(set(CANONICAL) - set(COVERAGE_TYPE_CODES)))
+        name: len(INDUSTRY_TYPE_CODES) + i
+        for i, name in enumerate(sorted(set(CANONICAL) - set(INDUSTRY_TYPE_CODES)))
     }
 )
 TYPE_NAMES = {i: name for name, i in TYPE_CODES.items()}
