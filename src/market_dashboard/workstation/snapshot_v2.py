@@ -43,6 +43,8 @@ from market_dashboard.workstation.models import (
     VersionsV1,
 )
 
+from .streaming import snapshot_digest
+
 
 class CompactRecordV2(ContractModel):
     symbol: str
@@ -61,12 +63,15 @@ from .legacy_registry import (
     CURRENT_GROUP_TYPE_CODES,
     LEGACY_REGISTRY_FINGERPRINT,
     LEGACY_TYPE_CODES,
+    MEMBERSHIP_REGISTRY_FINGERPRINT,
+    MEMBERSHIP_TYPE_CODES,
 )
 
 
 class SharedContextV2(ContractModel):
     registry_fingerprint: Literal[
         REGISTRY_FINGERPRINT,
+        MEMBERSHIP_REGISTRY_FINGERPRINT,
         ACTIVATION_REGISTRY_FINGERPRINT,
         CURRENT_GROUP_REGISTRY_FINGERPRINT,
         LEGACY_REGISTRY_FINGERPRINT,
@@ -126,7 +131,9 @@ class WorkstationSnapshotV2(ContractModel):
     @model_validator(mode="after")
     def integrity(self):
         retained_types = (
-            CURRENT_GROUP_TYPE_CODES
+            MEMBERSHIP_TYPE_CODES
+            if self.shared.registry_fingerprint == MEMBERSHIP_REGISTRY_FINGERPRINT
+            else CURRENT_GROUP_TYPE_CODES
             if self.shared.registry_fingerprint == CURRENT_GROUP_REGISTRY_FINGERPRINT
             else ACTIVATION_TYPE_CODES
         )
@@ -181,6 +188,21 @@ class WorkstationSnapshotV2(ContractModel):
         action_prefix = calendar_hash(calendar, self.action_session)
         p = universe.provenance
         if p.bootstrap:
+            from market_dashboard.aperture.leadership_contracts import CoverageContextV1
+
+            if isinstance(p.bootstrap, CoverageContextV1):
+                bindings = (
+                    {b.name: b for b in self.evaluation.input_bindings}
+                    if self.evaluation
+                    else {}
+                )
+                coverage_binding = bindings.get("universe_coverage")
+                if (
+                    coverage_binding is None
+                    or coverage_binding.artifact_sha256
+                    != p.bootstrap.coverage_manifest_sha256
+                ):
+                    raise ValueError("Expanded coverage evidence binding mismatch")
             if not self.evaluation or self.evaluation.bootstrap != p.bootstrap:
                 raise ValueError("Bootstrap provenance missing or contradictory")
             if p.bootstrap.market_as_of_session != t:
@@ -476,14 +498,7 @@ class WorkstationSnapshotV2(ContractModel):
         if counts != self.funnel.model_dump():
             raise ValueError("Funnel contradicts canonical decisions")
         reader.finish()
-        if (
-            fingerprint(
-                self.model_dump(
-                    mode="json", exclude={"generated_at", "logical_fingerprint"}
-                )
-            )
-            != self.logical_fingerprint
-        ):
+        if snapshot_digest(self) != self.logical_fingerprint:
             raise ValueError("Snapshot logical fingerprint mismatch")
         self._objects = MappingProxyType(reader.decoded)
         self._records = tuple(records)
@@ -565,10 +580,11 @@ def materialize_v2(
     rules,
     calendar,
     versions,
+    disk_evidence=False,
     **metadata,
 ):
     """Pure lossless projection; all canonical model fields enter the typed graph."""
-    builder = EvidenceBuilder()
+    builder = EvidenceBuilder(disk=disk_evidence)
     refs = {
         "source_ref": builder.add(source),
         "universe_ref": builder.add(universe),
@@ -598,7 +614,31 @@ def materialize_v2(
         # Retain common input identities but release per-row input objects. A
         # streaming producer need not hold thousands of expanded V1 outputs.
         builder.objects = dict(shared_cache)
+    import json
+    import resource
+
+    if disk_evidence:
+        print(
+            json.dumps(
+                {
+                    "stage": "evidence_normalized",
+                    "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+                }
+            ),
+            flush=True,
+        )
+    # Identity caches are needed only while accepting canonical objects.
+    # Drop them before allocating the final normalized table.
+    builder.objects.clear()
+    shared_cache.clear()
+    # The last yielded record also owns its complete local Setup graph.
+    if pending:
+        del r
+    import gc
+
+    gc.collect()
     addresses, evidence = builder.finish()
+    del builder
     refs = {
         k: (
             tuple(addresses[x] for x in v)
@@ -628,9 +668,18 @@ def materialize_v2(
     draft = WorkstationSnapshotV2.model_construct(
         **values, logical_fingerprint="0" * 64
     )
-    values["logical_fingerprint"] = fingerprint(
-        draft.model_dump(mode="json", exclude={"generated_at", "logical_fingerprint"})
-    )
+    values["logical_fingerprint"] = snapshot_digest(draft)
+    if disk_evidence:
+        print(
+            json.dumps(
+                {
+                    "stage": "snapshot_validation",
+                    "nodes": len(evidence),
+                    "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+                }
+            ),
+            flush=True,
+        )
     return WorkstationSnapshotV2.model_validate(values)
 
 

@@ -73,6 +73,24 @@ for (const width of [1366, 390]) {
         .getByRole("link", { name: route, exact: false })
         .click();
       await expect(page.locator("main h1")).toBeVisible();
+      if (route === "tape") {
+        await page.getByRole("button", { name: "AAPL", exact: true }).click();
+        await expect(page.getByRole("dialog")).toBeVisible();
+        await expect(
+          page.getByRole("heading", { name: "Decision checklist" }),
+        ).toBeVisible();
+        if (process.env.APERTURE_SMOKE_EVIDENCE_DIR)
+          await page.screenshot({
+            path: `${process.env.APERTURE_SMOKE_EVIDENCE_DIR}/detail-${width}.png`,
+            fullPage: true,
+          });
+        await page.keyboard.press("Escape");
+      }
+      if (process.env.APERTURE_SMOKE_EVIDENCE_DIR)
+        await page.screenshot({
+          path: `${process.env.APERTURE_SMOKE_EVIDENCE_DIR}/${route}-${width}.png`,
+          fullPage: true,
+        });
     }
     const rules = await (
       await request.get("http://127.0.0.1:8000/api/v1/rules")
@@ -80,7 +98,7 @@ for (const width of [1366, 390]) {
     expect(rules.versions.structure).toBe("structure-engine-v2");
     expect(rules.versions.setup).toBe("setup-engine-v2");
     const detail = await request.get(
-      "http://127.0.0.1:8000/api/v1/symbols/AAPL",
+      "http://127.0.0.1:8000/api/v2/symbols/AAPL",
     );
     expect(detail.ok()).toBe(true);
     expect(errors).toEqual([]);

@@ -53,6 +53,7 @@ def refresh(config, *, scheduled=False, now=None):
                 attempt_finished_at=clock().isoformat(),
                 attempt_outcome=result["state"],
                 membership_policy_sha256=policy_sha,
+                coverage_manifest_sha256=config.get("coverage_manifest_sha256"),
                 failure_reason=result.get("missing_inputs")
                 if result["state"] == "BLOCKED"
                 else None,
@@ -73,6 +74,9 @@ def refresh(config, *, scheduled=False, now=None):
             },
         )
         try:
+            from .runtime import verify_runtime
+
+            verify_runtime(config)
             if membership_config:
                 resolve_policy(config, now, window)  # Before any provider acquisition.
             else:
@@ -94,6 +98,11 @@ def refresh(config, *, scheduled=False, now=None):
                             "MEMBERSHIP_VALIDITY_REQUIRED_FOR_ACTION_"
                             + str(window["action"])
                         )
+            coverage_sha = config.get("coverage_manifest_sha256")
+            if config.get("coverage_manifest"):
+                from market_dashboard.data.expansion.coverage import load_coverage
+
+                load_coverage(config["coverage_manifest"], coverage_sha)
             prepared = config.get("prepared_candidate")
             if (
                 not membership_config
@@ -130,6 +139,8 @@ def refresh(config, *, scheduled=False, now=None):
                 previous.get("available")
                 and previous["market_session"] == str(window["market"])
                 and previous_state.get("membership_policy_sha256") == policy_sha
+                and previous_state.get("coverage_manifest_sha256")
+                == config.get("coverage_manifest_sha256")
                 and due
                 and now < datetime.fromisoformat(due)
             ):
@@ -154,6 +165,7 @@ def refresh(config, *, scheduled=False, now=None):
                 if name not in ("database", "population")
             }
             identity["membership_policy"] = policy_sha
+            identity["coverage_manifest"] = coverage_sha
             old_inputs = root / "last-inputs.json"
             unchanged = (
                 old_inputs.exists()
@@ -186,6 +198,7 @@ def refresh(config, *, scheduled=False, now=None):
                 input_hashes=hashes,
                 output=run / "snapshot.json",
                 membership_config=membership_config,
+                checkpoint_root=root / "replay-checkpoints" if coverage_sha else None,
             )
             save(
                 run / "build-receipt.json",
@@ -195,6 +208,9 @@ def refresh(config, *, scheduled=False, now=None):
                     "missing_inputs": missing,
                 },
             )
+            # Construction already verified the candidate. Activation independently
+            # verifies it again; do not retain another full decoded graph or frames.
+            del snapshot, loaded, seed
             successful = activate(
                 run / "snapshot.json", root, expected_hash=digest(run / "snapshot.json")
             )

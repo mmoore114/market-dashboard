@@ -26,7 +26,11 @@ export function Detail({
   const query = useQuery({
     queryKey: ["symbol", symbol],
     queryFn: () =>
-      get<Schemas["SymbolDetailV1"]>(`/symbols/${encodeURIComponent(symbol)}`),
+      get<Schemas["SymbolDetailV2"]>(
+        `/symbols/${encodeURIComponent(symbol)}`,
+        undefined,
+        "v2",
+      ),
   });
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement | null;

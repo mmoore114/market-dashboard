@@ -228,6 +228,9 @@ def test_current_group_full_replay_roundtrip(tmp_path):
         )
     )
     s, _ = replay(plan, loaded)
+    reference, _ = replay(plan, loaded, optimize_current=False)
+    assert s.regime == reference.regime
+    assert s.records == reference.records
     decoded = WorkstationSnapshotV2.model_validate_json(s.model_dump_json())
     assert decoded.groups[0].membership == gp
     assert decoded.groups[0].rank_change_5 is None

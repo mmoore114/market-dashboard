@@ -30,8 +30,11 @@ def sparse_history(bars, symbol, calendar, as_of):
 
 
 def verify_sparse_population(bars, context, calendar):
+    histories = dict(tuple(bars.groupby("ticker", sort=False)))
     coverage = [
-        sparse_history(bars, symbol, calendar, context.market_as_of_session)[1]
+        sparse_history(
+            histories[symbol], symbol, calendar, context.market_as_of_session
+        )[1]
         for symbol, _ in context.first_observations
     ]
     if (

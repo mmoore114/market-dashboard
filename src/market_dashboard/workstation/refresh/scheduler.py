@@ -11,6 +11,11 @@ def units(config_path):
     repo = Path(config["repository"]).resolve()
     if any(c in str(repo) + str(config_path) for c in ("%", "\n", '"')):
         raise ValueError("UNSAFE_SYSTEMD_PATH")
+    timeout = config.get(
+        "refresh_timeout_minutes", 90 if config.get("coverage_manifest") else 30
+    )
+    if type(timeout) is not int or not 1 <= timeout <= 120:
+        raise ValueError("INVALID_BOUNDED_REFRESH_TIMEOUT")
     service = f'''[Unit]
 Description=Aperture verified after-close refresh
 
@@ -18,7 +23,7 @@ Description=Aperture verified after-close refresh
 Type=oneshot
 WorkingDirectory={repo}
 ExecStart="{repo}/.venv/bin/python" -m market_dashboard.workstation.refresh refresh --config "{config_path}" --scheduled
-TimeoutStartSec=30min
+TimeoutStartSec={timeout}min
 UMask=0077
 '''
     timer = """[Unit]

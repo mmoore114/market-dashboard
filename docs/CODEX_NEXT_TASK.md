@@ -1,26 +1,19 @@
 # Codex Next Task
 
-Status: MEMBERSHIP MAINTENANCE AND OPERATIONAL STATUS DELIVERED — PR #17 REMAINS DRAFT
+Status: IMPLEMENTED / REVIEW PENDING — AP-UNIVERSE-EXPANSION-001
 
-Owner-authorized continuation from `3f00d497` on `codex/v2-groups-activation`.
-The implementation adds a separate versioned operator reuse policy, 14-day
-hierarchy / 7-day themes limits, 3/2-day warnings, prospective capture registration
-and full read-only status. It preserves the one-session original schedules, all
-source dates and historical membership contracts. See
-[membership maintenance and its completion receipt](membership-maintenance-v1.md).
+Reviewed PR #17 was merged with history preserved at
+`3a1499e2d22a7321c55dc4e03b4dba382d590aad`. Expansion is staged on
+`codex/universe-expansion-v1` in an isolated worktree. Recovery completed and the
+enabled scheduler now uses the verified detached release at `7de9858`; the main
+checkout, previous snapshots and configuration backups remain preserved. Draft
+PR #18 is open and unmerged. See the [completion receipt](universe-expansion-v1-receipt.md)
+for the measured build/API/browser result and the remaining UNKNOWN VIX input.
 
-The synthetic September 8 close → September 9 action replay passed. Do not claim
-that real September 8 bars or a real after-close refresh have already completed.
-The next eligible real after-close attempt uses the actual calendar, providers
-and independent controls. No daily approval is needed within the published reuse
-interval. Themes warn September 10 and expire September 12 00:00 UTC; a September
-14 action requires a newer verified theme capture (September 8 or later under the
-seven-day limit). Hierarchy warns September 18 and expires September 21 00:00 UTC.
-
-Launch/refresh/status remain `.venv/bin/python scripts/aperture.py COMMAND`.
-Register newly verified captures with the explicit policy publication command in
-the receipt. Do not automate authenticated Deepvue access. Linux must be running
-for the local timer; no always-on host or new provider was added. Preserve settings,
-raw captures, original artifacts, backups and credentials. Commit/push only this
-continuation and keep PR #17 draft and unmerged. No repeated full suite or unrelated
-formatting is required.
+The owner authorizes expansion from the verified Deepvue capture union, required
+existing-provider acquisition, recoverable publication, and a separately verified
+V2 snapshot. Preserve current universe thresholds, exact identity boundaries,
+unknown assignments, source dates, membership reuse policy, incomplete histories,
+independent controls and original artifacts. Record a bounded acquisition estimate
+before requests. Use resumable batches and a versioned coverage manifest instead
+of the old 75-stock cap. Commit/push and open a new draft PR; do not merge it.

@@ -157,6 +157,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v2/evidence": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Evidence Page */
+    get: operations["evidence_page_api_v2_evidence_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v2/symbols/{symbol}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Symbol Detail V2 */
+    get: operations["symbol_detail_v2_api_v2_symbols__symbol__get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -333,6 +367,76 @@ export interface components {
       | "SUSPECTED_SPLIT"
       | "UNKNOWN";
     /**
+     * CoverageContextV1
+     * @description Current calculation over an explicitly published expanded population.
+     */
+    CoverageContextV1: {
+      /**
+       * Action Session
+       * Format: date
+       */
+      action_session: string;
+      /**
+       * Calculation Mode
+       * @default CURRENT_STATE_BOOTSTRAP
+       * @constant
+       */
+      calculation_mode: "CURRENT_STATE_BOOTSTRAP";
+      /**
+       * Calculation Start
+       * Format: date
+       */
+      calculation_start: string;
+      /** Coverage Manifest Sha256 */
+      coverage_manifest_sha256: string;
+      /** Covered Population */
+      covered_population: number;
+      /**
+       * Evaluation Timestamp
+       * Format: date-time
+       */
+      evaluation_timestamp: string;
+      /** First Observations */
+      first_observations: [string, string][];
+      /**
+       * Historical Membership Status
+       * @default UNKNOWN_BEFORE_BOOTSTRAP
+       * @constant
+       */
+      historical_membership_status: "UNKNOWN_BEFORE_BOOTSTRAP";
+      /** Mapping Members */
+      mapping_members: number;
+      /**
+       * Market As Of Session
+       * Format: date
+       */
+      market_as_of_session: string;
+      /** Missing Observations */
+      missing_observations: number;
+      /** Not Yet Observed */
+      not_yet_observed: number;
+      /**
+       * Population Scope
+       * @default published expanded covered population
+       * @constant
+       */
+      population_scope: "published expanded covered population";
+      /**
+       * Rank Basis
+       * @default CURRENT_COHORT_AT_E
+       * @constant
+       */
+      rank_basis: "CURRENT_COHORT_AT_E";
+      /** Strict Trade Members */
+      strict_trade_members: number;
+      /**
+       * Version
+       * @default coverage-current-state-v1
+       * @constant
+       */
+      version: "coverage-current-state-v1";
+    };
+    /**
      * CurrentGroupProvenanceV2
      * @description Current-cohort analysis only; never a historical membership attestation.
      */
@@ -354,7 +458,11 @@ export interface components {
        * @constant
        */
       analysis_version: "current-group-analysis-v2";
-      bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
+      /** Bootstrap */
+      bootstrap?:
+        | components["schemas"]["CoverageContextV1"]
+        | components["schemas"]["BootstrapContextV1"]
+        | null;
       /**
        * Effective Session
        * Format: date
@@ -417,7 +525,11 @@ export interface components {
        * @constant
        */
       analysis_version: "current-group-analysis-v3";
-      bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
+      /** Bootstrap */
+      bootstrap?:
+        | components["schemas"]["CoverageContextV1"]
+        | components["schemas"]["BootstrapContextV1"]
+        | null;
       /**
        * Effective Session
        * Format: date
@@ -479,7 +591,11 @@ export interface components {
     };
     /** DatedProvenanceV1 */
     DatedProvenanceV1: {
-      bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
+      /** Bootstrap */
+      bootstrap?:
+        | components["schemas"]["CoverageContextV1"]
+        | components["schemas"]["BootstrapContextV1"]
+        | null;
       /**
        * Effective Session
        * Format: date
@@ -616,6 +732,109 @@ export interface components {
         | components["schemas"]["StructureEvidenceV2"]
         | null;
       universe: components["schemas"]["UniverseDecisionInputV1"];
+    };
+    /** DecisionInputViewV2 */
+    DecisionInputViewV2: {
+      /**
+       * Action Session
+       * Format: date
+       */
+      action_session: string;
+      /**
+       * Completed At
+       * Format: date-time
+       */
+      completed_at: string;
+      direction: components["schemas"]["Direction"];
+      event_coverage?: components["schemas"]["EventCoverageV1"] | null;
+      /**
+       * Events
+       * @default []
+       */
+      events: components["schemas"]["EventInputV1"][];
+      features: components["schemas"]["DecisionFeaturesV1"];
+      leadership_ref: components["schemas"]["EvidenceRefV2"] | null;
+      regime_ref: components["schemas"]["EvidenceRefV2"] | null;
+      rules: components["schemas"]["ApertureRules"];
+      /**
+       * Schema Version
+       * @default decision-input-view-v2
+       * @constant
+       */
+      schema_version: "decision-input-view-v2";
+      /** Setups */
+      setups:
+        | components["schemas"]["SetupOutputV1"]
+        | components["schemas"]["SetupOutputV2"]
+        | null;
+      sizing: components["schemas"]["SizingProposalV1"];
+      /** Structure */
+      structure:
+        | components["schemas"]["StructureEvidenceV1"]
+        | components["schemas"]["StructureEvidenceV2"]
+        | null;
+      universe: components["schemas"]["UniverseDecisionInputV1"];
+    };
+    /** DecisionOutputViewV2 */
+    DecisionOutputViewV2: {
+      /** Action Calendar Fingerprint */
+      action_calendar_fingerprint: string;
+      /** Aperture Rules Fingerprint */
+      aperture_rules_fingerprint: string;
+      /** Calendar Fingerprint */
+      calendar_fingerprint: string;
+      /** Calendar Id */
+      calendar_id: string;
+      decision: components["schemas"]["DecisionEvidenceV1"];
+      earnings: components["schemas"]["EarningsEvidenceV1"];
+      /**
+       * Engine Version
+       * @default decision-risk-v1
+       * @constant
+       */
+      engine_version: "decision-risk-v1";
+      extension: components["schemas"]["ExtensionEvidenceV1"];
+      /**
+       * Feature Version
+       * @default decision-risk-features-v1
+       * @constant
+       */
+      feature_version: "decision-risk-features-v1";
+      /**
+       * Formula Version
+       * @default decision-risk-formulas-v1
+       * @constant
+       */
+      formula_version: "decision-risk-formulas-v1";
+      group: components["schemas"]["GroupGateV1"];
+      inputs: components["schemas"]["DecisionInputViewV2"];
+      regime: components["schemas"]["RegimeGateV1"];
+      /**
+       * Research Status
+       * @default experimental_uncalibrated
+       * @constant
+       */
+      research_status: "experimental_uncalibrated";
+      /**
+       * Rules Fingerprint
+       * @default 59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8
+       * @constant
+       */
+      rules_fingerprint: "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8";
+      /**
+       * Schema Version
+       * @default decision-output-view-v2
+       * @constant
+       */
+      schema_version: "decision-output-view-v2";
+      sizing: components["schemas"]["SizingResultV1"];
+      strength: components["schemas"]["StrengthGateV1"];
+      /**
+       * Threshold Version
+       * @default decision-risk-thresholds-v1
+       * @constant
+       */
+      threshold_version: "decision-risk-thresholds-v1";
     };
     /** DecisionRiskOutputV1 */
     DecisionRiskOutputV1: {
@@ -833,7 +1052,11 @@ export interface components {
        * Format: date
        */
       action_session: string;
-      bootstrap?: components["schemas"]["BootstrapContextV1"] | null;
+      /** Bootstrap */
+      bootstrap?:
+        | components["schemas"]["CoverageContextV1"]
+        | components["schemas"]["BootstrapContextV1"]
+        | null;
       comparison?: components["schemas"]["EngineComparisonV1"] | null;
       /**
        * Evaluation Timestamp
@@ -971,6 +1194,129 @@ export interface components {
      * @enum {string}
      */
     EventTiming: "BEFORE_OPEN" | "AFTER_CLOSE" | "DURING_SESSION" | "UNKNOWN";
+    /** EvidenceNodeV2 */
+    EvidenceNodeV2: {
+      /** Id */
+      id: string;
+      /** Value */
+      value:
+        | components["schemas"]["NormalizedApertureRules"]
+        | components["schemas"]["NormalizedBootstrapContextV1"]
+        | components["schemas"]["NormalizedBoundedBand"]
+        | components["schemas"]["NormalizedBreadthSleeveV1"]
+        | components["schemas"]["NormalizedCoverageContextV1"]
+        | components["schemas"]["NormalizedCurrentGroupProvenanceV2"]
+        | components["schemas"]["NormalizedCurrentGroupProvenanceV3"]
+        | components["schemas"]["NormalizedDatedProvenanceV1"]
+        | components["schemas"]["NormalizedDecisionEvidenceV1"]
+        | components["schemas"]["NormalizedDecisionFeaturesV1"]
+        | components["schemas"]["NormalizedDecisionGateV1"]
+        | components["schemas"]["NormalizedDecisionInputV1"]
+        | components["schemas"]["NormalizedDecisionRiskOutputV1"]
+        | components["schemas"]["NormalizedDetectionV1"]
+        | components["schemas"]["NormalizedEarningsEvidenceV1"]
+        | components["schemas"]["NormalizedEventCoverageV1"]
+        | components["schemas"]["NormalizedEventEvidenceV1"]
+        | components["schemas"]["NormalizedEventInputV1"]
+        | components["schemas"]["NormalizedExtensionEvidenceV1"]
+        | components["schemas"]["NormalizedExtensionInputV1"]
+        | components["schemas"]["NormalizedExtensionRules"]
+        | components["schemas"]["NormalizedFractionV1"]
+        | components["schemas"]["NormalizedGeometryV1"]
+        | components["schemas"]["NormalizedGroupEvidenceV1"]
+        | components["schemas"]["NormalizedGroupGateV1"]
+        | components["schemas"]["NormalizedGroupMemberV1"]
+        | components["schemas"]["NormalizedIndexInputV1"]
+        | components["schemas"]["NormalizedIndexSleeveV1"]
+        | components["schemas"]["NormalizedIndexVoteV1"]
+        | components["schemas"]["NormalizedInternalsSleeveV1"]
+        | components["schemas"]["NormalizedLeadershipOutputV1"]
+        | components["schemas"]["NormalizedLegacyStrengthContextV1"]
+        | components["schemas"]["NormalizedMappingUniverseRules"]
+        | components["schemas"]["NormalizedMetricV1"]
+        | components["schemas"]["NormalizedMovingAverageV1"]
+        | components["schemas"]["NormalizedPredicateV1"]
+        | components["schemas"]["NormalizedPriceFeaturesV1"]
+        | components["schemas"]["NormalizedPriceWindowV1"]
+        | components["schemas"]["NormalizedRankedReturnV1"]
+        | components["schemas"]["NormalizedRawReturnV1"]
+        | components["schemas"]["NormalizedReasonV1"]
+        | components["schemas"]["NormalizedRegimeGateV1"]
+        | components["schemas"]["NormalizedRegimeInputV1"]
+        | components["schemas"]["NormalizedRegimeMemoryV1"]
+        | components["schemas"]["NormalizedRegimeMultipliers"]
+        | components["schemas"]["NormalizedRegimeOutputV1"]
+        | components["schemas"]["NormalizedResearchUniverseRules"]
+        | components["schemas"]["NormalizedResearchUniverseV1"]
+        | components["schemas"]["NormalizedResidualV1"]
+        | components["schemas"]["NormalizedRetentionThresholds"]
+        | components["schemas"]["NormalizedRiskRules"]
+        | components["schemas"]["NormalizedRuleV1"]
+        | components["schemas"]["NormalizedSetupActionEvidenceV1"]
+        | components["schemas"]["NormalizedSetupEvidenceV1"]
+        | components["schemas"]["NormalizedSetupInputV1"]
+        | components["schemas"]["NormalizedSetupInputV2"]
+        | components["schemas"]["NormalizedSetupInstanceV1"]
+        | components["schemas"]["NormalizedSetupMemberCountV1"]
+        | components["schemas"]["NormalizedSetupOutputV1"]
+        | components["schemas"]["NormalizedSetupOutputV2"]
+        | components["schemas"]["NormalizedSetupStrengthContextV1"]
+        | components["schemas"]["NormalizedSizeAmountsV1"]
+        | components["schemas"]["NormalizedSizingInputV1"]
+        | components["schemas"]["NormalizedSizingProposalV1"]
+        | components["schemas"]["NormalizedSizingResultV1"]
+        | components["schemas"]["NormalizedSleevesV1"]
+        | components["schemas"]["NormalizedSpotVolatilityIdentityV1"]
+        | components["schemas"]["NormalizedStrengthContextV1"]
+        | components["schemas"]["NormalizedStrengthEvidenceV1"]
+        | components["schemas"]["NormalizedStrengthGateV1"]
+        | components["schemas"]["NormalizedStrengthInputV1"]
+        | components["schemas"]["NormalizedStrengthSourceV1"]
+        | components["schemas"]["NormalizedStructureBreadthContextV1"]
+        | components["schemas"]["NormalizedStructureConditionsV1"]
+        | components["schemas"]["NormalizedStructureConditionsV2"]
+        | components["schemas"]["NormalizedStructureContextV1"]
+        | components["schemas"]["NormalizedStructureEvidenceV1"]
+        | components["schemas"]["NormalizedStructureEvidenceV2"]
+        | components["schemas"]["NormalizedStructureInputV1"]
+        | components["schemas"]["NormalizedStructureInputV2"]
+        | components["schemas"]["NormalizedStructureMeasuresV1"]
+        | components["schemas"]["NormalizedStructureMeasuresV2"]
+        | components["schemas"]["NormalizedStructureSourceV1"]
+        | components["schemas"]["NormalizedStyleInputV1"]
+        | components["schemas"]["NormalizedStyleSleeveV1"]
+        | components["schemas"]["NormalizedThresholdResultV1"]
+        | components["schemas"]["NormalizedTradeThresholds"]
+        | components["schemas"]["NormalizedTradeUniverseRules"]
+        | components["schemas"]["NormalizedUniverseDecisionInputV1"]
+        | components["schemas"]["NormalizedUniverseMembership"]
+        | components["schemas"]["NormalizedUniverseMemberships"]
+        | components["schemas"]["NormalizedVolatilityInputV1"]
+        | components["schemas"]["NormalizedVolatilitySleeveV1"];
+    };
+    /** EvidencePageV2 */
+    EvidencePageV2: {
+      meta: components["schemas"]["ViewMetaV1"];
+      /** Nodes */
+      nodes: components["schemas"]["EvidenceNodeV2"][];
+      /** Offset */
+      offset: number;
+      /**
+       * Schema Version
+       * @default evidence-page-v2
+       * @constant
+       */
+      schema_version: "evidence-page-v2";
+      /** Total */
+      total: number;
+    };
+    /** EvidenceRefV2 */
+    EvidenceRefV2: {
+      /** Id */
+      id: string;
+      /** Index */
+      index: number;
+    };
     /** ExtensionEvidenceV1 */
     ExtensionEvidenceV1: {
       bands: components["schemas"]["ExtensionRules"];
@@ -1521,6 +1867,1764 @@ export interface components {
       prior_distances: number[] | null;
       /** Value */
       value: number | null;
+    };
+    /** NormalizedApertureRules */
+    NormalizedApertureRules: {
+      /** Fields */
+      fields: [
+        string,
+        string,
+        "hypothesis",
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        number,
+        number,
+        number,
+        number,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "0";
+    };
+    /** NormalizedBootstrapContextV1 */
+    NormalizedBootstrapContextV1: {
+      /** Fields */
+      fields: [
+        "current-state-bootstrap-v1",
+        "CURRENT_STATE_BOOTSTRAP",
+        "UNKNOWN_BEFORE_BOOTSTRAP",
+        "bounded initial covered population",
+        "CURRENT_COHORT_AT_E",
+        string,
+        string,
+        string,
+        string,
+        [string, string][],
+        number,
+        number,
+        number,
+        number,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "1";
+    };
+    /** NormalizedBoundedBand */
+    NormalizedBoundedBand: {
+      /** Fields */
+      fields: [number, number];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "2";
+    };
+    /** NormalizedBreadthSleeveV1 */
+    NormalizedBreadthSleeveV1: {
+      /** Fields */
+      fields: [
+        components["schemas"]["State"],
+        (-1 | 0 | 1) | null,
+        string[],
+        number[],
+        number,
+        number,
+        number,
+        boolean,
+        boolean,
+        number,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "3";
+    };
+    /** NormalizedCoverageContextV1 */
+    NormalizedCoverageContextV1: {
+      /** Fields */
+      fields: [
+        "coverage-current-state-v1",
+        "CURRENT_STATE_BOOTSTRAP",
+        "UNKNOWN_BEFORE_BOOTSTRAP",
+        "published expanded covered population",
+        "CURRENT_COHORT_AT_E",
+        string,
+        string,
+        string,
+        string,
+        [string, string][],
+        number,
+        number,
+        number,
+        number,
+        number,
+        string,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "92";
+    };
+    /** NormalizedCurrentGroupProvenanceV2 */
+    NormalizedCurrentGroupProvenanceV2: {
+      /** Fields */
+      fields: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        number | null,
+        "CURRENT_COHORT_AT_E",
+        "current-group-analysis-v2",
+        string,
+        string,
+        string,
+        string,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "90";
+    };
+    /** NormalizedCurrentGroupProvenanceV3 */
+    NormalizedCurrentGroupProvenanceV3: {
+      /** Fields */
+      fields: [
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+        number | null,
+        "CURRENT_COHORT_AT_E",
+        "current-group-analysis-v3",
+        string,
+        string,
+        string,
+        string,
+        "membership-reuse-policy-v1",
+        string,
+        string,
+        string,
+        number,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "91";
+    };
+    /** NormalizedDatedProvenanceV1 */
+    NormalizedDatedProvenanceV1: {
+      /** Fields */
+      fields: [string, string, string, string, string, string, number | null];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "4";
+    };
+    /** NormalizedDecisionEvidenceV1 */
+    NormalizedDecisionEvidenceV1: {
+      /** Fields */
+      fields: [
+        string,
+        "decision-risk-formulas-v1",
+        "decision-risk-thresholds-v1",
+        "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8",
+        components["schemas"]["Direction"],
+        components["schemas"]["DecisionState"],
+        number[],
+        number[],
+        string[],
+        string[],
+        number[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "5";
+    };
+    /** NormalizedDecisionFeaturesV1 */
+    NormalizedDecisionFeaturesV1: {
+      /** Fields */
+      fields: [
+        string,
+        "decision-risk-features-v1",
+        string,
+        number,
+        string,
+        number | null,
+        number | null,
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "6";
+    };
+    /** NormalizedDecisionGateV1 */
+    NormalizedDecisionGateV1: {
+      /** Fields */
+      fields: [
+        string,
+        components["schemas"]["DecisionState"],
+        boolean,
+        number[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "7";
+    };
+    /** NormalizedDecisionInputV1 */
+    NormalizedDecisionInputV1: {
+      /** Fields */
+      fields: [
+        "decision-risk-input-v1",
+        number,
+        components["schemas"]["Direction"],
+        string,
+        string,
+        number,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number[],
+        number | null,
+        number,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "8";
+    };
+    /** NormalizedDecisionRiskOutputV1 */
+    NormalizedDecisionRiskOutputV1: {
+      /** Fields */
+      fields: [
+        "decision-risk-formulas-v1",
+        "decision-risk-thresholds-v1",
+        "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8",
+        "decision-risk-output-v1",
+        "decision-risk-v1",
+        "decision-risk-features-v1",
+        "experimental_uncalibrated",
+        number,
+        string,
+        string,
+        string,
+        string,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "9";
+    };
+    /** NormalizedDetectionV1 */
+    NormalizedDetectionV1: {
+      /** Fields */
+      fields: [
+        components["schemas"]["Family"],
+        components["schemas"]["Direction"],
+        number | null,
+        number[],
+        number[],
+        string[],
+        string[],
+        string | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "10";
+    };
+    /** NormalizedEarningsEvidenceV1 */
+    NormalizedEarningsEvidenceV1: {
+      /** Fields */
+      fields: [
+        string,
+        "decision-risk-formulas-v1",
+        "decision-risk-thresholds-v1",
+        "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8",
+        string,
+        string,
+        components["schemas"]["Eligibility"],
+        number | null,
+        boolean,
+        string | null,
+        number[],
+        string | null,
+        string | null,
+        number | null,
+        number[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "11";
+    };
+    /** NormalizedEventCoverageV1 */
+    NormalizedEventCoverageV1: {
+      /** Fields */
+      fields: [
+        string,
+        string | null,
+        string | null,
+        string | null,
+        string | null,
+        "decision-event-coverage-v1",
+        "EARNINGS",
+        string,
+        string,
+        "COMPLETE" | "INCOMPLETE" | "UNKNOWN",
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "12";
+    };
+    /** NormalizedEventEvidenceV1 */
+    NormalizedEventEvidenceV1: {
+      /** Fields */
+      fields: [
+        "decision-risk-formulas-v1",
+        "decision-risk-thresholds-v1",
+        "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8",
+        number,
+        number | null,
+        boolean,
+        components["schemas"]["Eligibility"],
+        number[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "13";
+    };
+    /** NormalizedEventInputV1 */
+    NormalizedEventInputV1: {
+      /** Fields */
+      fields: [
+        string,
+        string | null,
+        string | null,
+        string | null,
+        string | null,
+        "decision-event-input-v1",
+        "EARNINGS",
+        string,
+        string | null,
+        components["schemas"]["EventTiming"],
+        components["schemas"]["Confidence"],
+        components["schemas"]["EventStatus"],
+        string | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "14";
+    };
+    /** NormalizedExtensionEvidenceV1 */
+    NormalizedExtensionEvidenceV1: {
+      /** Fields */
+      fields: [
+        "decision-risk-formulas-v1",
+        "decision-risk-thresholds-v1",
+        "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8",
+        number,
+        number | null,
+        components["schemas"]["ExtensionState"],
+        boolean,
+        number,
+        number[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "15";
+    };
+    /** NormalizedExtensionInputV1 */
+    NormalizedExtensionInputV1: {
+      /** Fields */
+      fields: [number, components["schemas"]["Direction"]];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "16";
+    };
+    /** NormalizedExtensionRules */
+    NormalizedExtensionRules: {
+      /** Fields */
+      fields: ["sma_50", number, number, number, number, number, number];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "17";
+    };
+    /** NormalizedFractionV1 */
+    NormalizedFractionV1: {
+      /** Fields */
+      fields: [number, number, number, number | null, number];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "18";
+    };
+    /** NormalizedGeometryV1 */
+    NormalizedGeometryV1: {
+      /** Fields */
+      fields: [
+        string,
+        components["schemas"]["ReferenceKind"],
+        number,
+        number,
+        number,
+        number,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "19";
+    };
+    /** NormalizedGroupEvidenceV1 */
+    NormalizedGroupEvidenceV1: {
+      /** Fields */
+      fields: [
+        "group-evidence-v1",
+        string,
+        components["schemas"]["GroupType"],
+        string,
+        number,
+        number[],
+        number,
+        number,
+        number,
+        number,
+        number,
+        number | null,
+        number | null,
+        number,
+        number,
+        number | null,
+        number | null,
+        number,
+        number | null,
+        number | null,
+        number,
+        number,
+        number | null,
+        number | null,
+        number,
+        number[],
+        number | null,
+        number | null,
+        number | null,
+        number,
+        number,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number,
+        number,
+        string[],
+        string[],
+        string[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "20";
+    };
+    /** NormalizedGroupGateV1 */
+    NormalizedGroupGateV1: {
+      /** Fields */
+      fields: [
+        "decision-risk-formulas-v1",
+        "decision-risk-thresholds-v1",
+        "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8",
+        "NOT_LAGGING" | "LAGGING" | "UNKNOWN",
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number[],
+        number[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "21";
+    };
+    /** NormalizedGroupMemberV1 */
+    NormalizedGroupMemberV1: {
+      /** Fields */
+      fields: [string, string, string | null, string, boolean];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "22";
+    };
+    /** NormalizedIndexInputV1 */
+    NormalizedIndexInputV1: {
+      /** Fields */
+      fields: [
+        "SPY" | "QQQ" | "IWM",
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "23";
+    };
+    /** NormalizedIndexSleeveV1 */
+    NormalizedIndexSleeveV1: {
+      /** Fields */
+      fields: [
+        components["schemas"]["State"],
+        (-1 | 0 | 1) | null,
+        string[],
+        number[],
+        number[],
+        number,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "24";
+    };
+    /** NormalizedIndexVoteV1 */
+    NormalizedIndexVoteV1: {
+      /** Fields */
+      fields: [
+        number,
+        components["schemas"]["Vote"],
+        number | null,
+        number[],
+        string[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "25";
+    };
+    /** NormalizedInternalsSleeveV1 */
+    NormalizedInternalsSleeveV1: {
+      /** Fields */
+      fields: [
+        components["schemas"]["State"],
+        (-1 | 0 | 1) | null,
+        string[],
+        number[],
+        number,
+        number,
+        number,
+        number,
+        number,
+        string[],
+        string[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "26";
+    };
+    /** NormalizedLeadershipOutputV1 */
+    NormalizedLeadershipOutputV1: {
+      /** Fields */
+      fields: [
+        "leadership-output-v1",
+        "experimental_uncalibrated",
+        "leadership-formulas-v1",
+        "leadership-thresholds-v1",
+        string,
+        string,
+        number,
+        number,
+        string,
+        number[],
+        number[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "27";
+    };
+    /** NormalizedLegacyStrengthContextV1 */
+    NormalizedLegacyStrengthContextV1: {
+      /** Fields */
+      fields: [
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "28";
+    };
+    /** NormalizedMappingUniverseRules */
+    NormalizedMappingUniverseRules: {
+      /** Fields */
+      fields: [string, boolean, string[], string[], string[], number, number];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "29";
+    };
+    /** NormalizedMetricV1 */
+    NormalizedMetricV1: {
+      /** Fields */
+      fields: [string, number | null];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "30";
+    };
+    /** NormalizedMovingAverageV1 */
+    NormalizedMovingAverageV1: {
+      /** Fields */
+      fields: [
+        "EMA10" | "SMA20" | "SMA50",
+        number | null,
+        number | null,
+        number[] | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "31";
+    };
+    /** NormalizedPredicateV1 */
+    NormalizedPredicateV1: {
+      /** Fields */
+      fields: [string, boolean | null];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "32";
+    };
+    /** NormalizedPriceFeaturesV1 */
+    NormalizedPriceFeaturesV1: {
+      /** Fields */
+      fields: [string, number | null, number | null, number | null];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "33";
+    };
+    /** NormalizedPriceWindowV1 */
+    NormalizedPriceWindowV1: {
+      /** Fields */
+      fields: [number[], number[], number[]];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "34";
+    };
+    /** NormalizedRankedReturnV1 */
+    NormalizedRankedReturnV1: {
+      /** Fields */
+      fields: [
+        5 | 21 | 63 | 126 | 252,
+        number | null,
+        string | null,
+        number | null,
+        number,
+        string,
+        string,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "35";
+    };
+    /** NormalizedRawReturnV1 */
+    NormalizedRawReturnV1: {
+      /** Fields */
+      fields: [5 | 21 | 63 | 126 | 252, number | null, string | null];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "36";
+    };
+    /** NormalizedReasonV1 */
+    NormalizedReasonV1: {
+      /** Fields */
+      fields: [string, string];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "37";
+    };
+    /** NormalizedRegimeGateV1 */
+    NormalizedRegimeGateV1: {
+      /** Fields */
+      fields: [
+        "decision-risk-formulas-v1",
+        "decision-risk-thresholds-v1",
+        "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8",
+        components["schemas"]["State"],
+        boolean,
+        number | null,
+        string | null,
+        string | null,
+        number[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "38";
+    };
+    /** NormalizedRegimeInputV1 */
+    NormalizedRegimeInputV1: {
+      /** Fields */
+      fields: [
+        "market-regime-input-v1",
+        string,
+        number,
+        string,
+        number,
+        number[],
+        number[],
+        number[],
+        number,
+        number | null,
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "39";
+    };
+    /** NormalizedRegimeMemoryV1 */
+    NormalizedRegimeMemoryV1: {
+      /** Fields */
+      fields: [
+        ("GREEN" | "YELLOW" | "RED") | null,
+        string | null,
+        number,
+        ("GREEN" | "RED") | null,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "40";
+    };
+    /** NormalizedRegimeMultipliers */
+    NormalizedRegimeMultipliers: {
+      /** Fields */
+      fields: [number, number, number];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "41";
+    };
+    /** NormalizedRegimeOutputV1 */
+    NormalizedRegimeOutputV1: {
+      /** Fields */
+      fields: [
+        "market-regime-output-v1",
+        "market-regime-v1",
+        "market-regime-features-v1",
+        "market-regime-thresholds-v1",
+        "experimental_uncalibrated",
+        string,
+        number,
+        number,
+        components["schemas"]["State"],
+        components["schemas"]["State"],
+        ("GREEN" | "YELLOW" | "RED") | null,
+        ("GREEN" | "YELLOW" | "RED") | null,
+        string | null,
+        number,
+        number,
+        number,
+        string,
+        boolean,
+        string[],
+        number,
+        number,
+        number,
+        number,
+        string | null,
+        string,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "42";
+    };
+    /** NormalizedResearchUniverseRules */
+    NormalizedResearchUniverseRules: {
+      /** Fields */
+      fields: [string, boolean, string[], string[], string[], number, number];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "43";
+    };
+    /** NormalizedResearchUniverseV1 */
+    NormalizedResearchUniverseV1: {
+      /** Fields */
+      fields: [
+        "research-universe-input-v1",
+        number,
+        string,
+        "equity_research",
+        string[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "44";
+    };
+    /** NormalizedResidualV1 */
+    NormalizedResidualV1: {
+      /** Fields */
+      fields: [
+        "QQQ",
+        number | null,
+        number,
+        number | null,
+        number | null,
+        string[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "45";
+    };
+    /** NormalizedRetentionThresholds */
+    NormalizedRetentionThresholds: {
+      /** Fields */
+      fields: [number, number, number, number, boolean];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "46";
+    };
+    /** NormalizedRiskRules */
+    NormalizedRiskRules: {
+      /** Fields */
+      fields: [number, number, number, number, number, number];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "47";
+    };
+    /** NormalizedRuleV1 */
+    NormalizedRuleV1: {
+      /** Fields */
+      fields: [string, boolean];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "48";
+    };
+    /** NormalizedSetupActionEvidenceV1 */
+    NormalizedSetupActionEvidenceV1: {
+      /** Fields */
+      fields: [
+        "decision-risk-formulas-v1",
+        "decision-risk-thresholds-v1",
+        "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8",
+        string,
+        components["schemas"]["Family"],
+        components["schemas"]["Direction"],
+        components["schemas"]["Status"],
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        number | null,
+        number[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "49";
+    };
+    /** NormalizedSetupEvidenceV1 */
+    NormalizedSetupEvidenceV1: {
+      /** Fields */
+      fields: [
+        "setup-evidence-v1",
+        number,
+        string,
+        number,
+        number,
+        number | null,
+        string,
+        number | null,
+        number | null,
+        string,
+        string[],
+        string[],
+        number[],
+        string[],
+        string[],
+        string[],
+        boolean,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "50";
+    };
+    /** NormalizedSetupInputV1 */
+    NormalizedSetupInputV1: {
+      /** Fields */
+      fields: [
+        "setup-input-v1",
+        "setup-features-v1",
+        string,
+        string,
+        number,
+        string | null,
+        number,
+        number | null,
+        components["schemas"]["CorporateActionQA"],
+        string,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number[] | null,
+        number | null,
+        number | null,
+        number | null,
+        number[],
+        number | null,
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "51";
+    };
+    /** NormalizedSetupInputV2 */
+    NormalizedSetupInputV2: {
+      /** Fields */
+      fields: [
+        "setup-input-v2",
+        "setup-features-v2",
+        string,
+        string,
+        number,
+        string | null,
+        number,
+        number | null,
+        components["schemas"]["CorporateActionQA"],
+        string,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number[] | null,
+        number | null,
+        number | null,
+        number | null,
+        number[],
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "84";
+    };
+    /** NormalizedSetupInstanceV1 */
+    NormalizedSetupInstanceV1: {
+      /** Fields */
+      fields: [
+        "setup-instance-v1",
+        string,
+        string,
+        components["schemas"]["Family"],
+        components["schemas"]["Direction"],
+        string,
+        number,
+        components["schemas"]["Status"],
+        string,
+        number,
+        string | null,
+        number | null,
+        number | null,
+        number,
+        number,
+        number | null,
+        number,
+        number,
+        boolean,
+        boolean,
+        string | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "52";
+    };
+    /** NormalizedSetupMemberCountV1 */
+    NormalizedSetupMemberCountV1: {
+      /** Fields */
+      fields: [components["schemas"]["Family"], number | null];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "53";
+    };
+    /** NormalizedSetupOutputV1 */
+    NormalizedSetupOutputV1: {
+      /** Fields */
+      fields: [
+        "setup-output-v1",
+        "setup-engine-v1",
+        "setup-features-v1",
+        "setup-thresholds-v1",
+        string,
+        number,
+        number[],
+        number[],
+        number[],
+        string[],
+        string[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "54";
+    };
+    /** NormalizedSetupOutputV2 */
+    NormalizedSetupOutputV2: {
+      /** Fields */
+      fields: [
+        "setup-output-v2",
+        "setup-engine-v2",
+        "setup-features-v2",
+        "setup-thresholds-v2",
+        string,
+        number,
+        number[],
+        number[],
+        number[],
+        string[],
+        string[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "85";
+    };
+    /** NormalizedSetupStrengthContextV1 */
+    NormalizedSetupStrengthContextV1: {
+      /** Fields */
+      fields: [
+        components["schemas"]["Family"],
+        "FORMING" | "NEAR_TRIGGER" | "TRIGGERED",
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "55";
+    };
+    /** NormalizedSizeAmountsV1 */
+    NormalizedSizeAmountsV1: {
+      /** Fields */
+      fields: [
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "56";
+    };
+    /** NormalizedSizingInputV1 */
+    NormalizedSizingInputV1: {
+      /** Fields */
+      fields: [
+        string,
+        "decision-sizing-input-v1",
+        components["schemas"]["Direction"],
+        string,
+        string,
+        number,
+        number | null,
+        number,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "57";
+    };
+    /** NormalizedSizingProposalV1 */
+    NormalizedSizingProposalV1: {
+      /** Fields */
+      fields: [number | null, number | null, number | null, number | null];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "58";
+    };
+    /** NormalizedSizingResultV1 */
+    NormalizedSizingResultV1: {
+      /** Fields */
+      fields: [
+        "decision-risk-formulas-v1",
+        "decision-risk-thresholds-v1",
+        "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8",
+        number,
+        "VALID" | "INVALID",
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "59";
+    };
+    /** NormalizedSleevesV1 */
+    NormalizedSleevesV1: {
+      /** Fields */
+      fields: [number, number, number, number, number];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "60";
+    };
+    /** NormalizedSpotVolatilityIdentityV1 */
+    NormalizedSpotVolatilityIdentityV1: {
+      /** Fields */
+      fields: [
+        "spot-volatility-identity-v1",
+        "$VIX",
+        "deepvue-identity-disposition-v1",
+        "NON_SECURITY_MARKET_SERIES",
+        string,
+        string,
+        string,
+        "spot_implied_volatility_points",
+        string,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "61";
+    };
+    /** NormalizedStrengthContextV1 */
+    NormalizedStrengthContextV1: {
+      /** Fields */
+      fields: [
+        number | null,
+        components["schemas"]["StructureState"] | null,
+        number[] | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "62";
+    };
+    /** NormalizedStrengthEvidenceV1 */
+    NormalizedStrengthEvidenceV1: {
+      /** Fields */
+      fields: [
+        "strength-evidence-v1",
+        number,
+        number[],
+        number,
+        string,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number,
+        string[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "63";
+    };
+    /** NormalizedStrengthGateV1 */
+    NormalizedStrengthGateV1: {
+      /** Fields */
+      fields: [
+        "decision-risk-formulas-v1",
+        "decision-risk-thresholds-v1",
+        "59109ef7baa8af98f6aea0cdea726060b7ce1dac7f647d43e342b027c61518a8",
+        number | null,
+        number | null,
+        number | null,
+        boolean | null,
+        boolean | null,
+        boolean | null,
+        number[],
+        number[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "64";
+    };
+    /** NormalizedStrengthInputV1 */
+    NormalizedStrengthInputV1: {
+      /** Fields */
+      fields: [
+        "strength-input-v1",
+        string,
+        string,
+        number,
+        number[],
+        number,
+        number | null,
+        number | null,
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "65";
+    };
+    /** NormalizedStrengthSourceV1 */
+    NormalizedStrengthSourceV1: {
+      /** Fields */
+      fields: [
+        string,
+        string,
+        "split_adjusted",
+        string,
+        string,
+        "strength-source-v1",
+        string,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "66";
+    };
+    /** NormalizedStructureBreadthContextV1 */
+    NormalizedStructureBreadthContextV1: {
+      /** Fields */
+      fields: [string, number, number, number[]];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "67";
+    };
+    /** NormalizedStructureConditionsV1 */
+    NormalizedStructureConditionsV1: {
+      /** Fields */
+      fields: [
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "68";
+    };
+    /** NormalizedStructureConditionsV2 */
+    NormalizedStructureConditionsV2: {
+      /** Fields */
+      fields: [
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        boolean,
+        [string, boolean, number][],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "86";
+    };
+    /** NormalizedStructureContextV1 */
+    NormalizedStructureContextV1: {
+      /** Fields */
+      fields: [boolean | null, number | null, boolean | null];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "69";
+    };
+    /** NormalizedStructureEvidenceV1 */
+    NormalizedStructureEvidenceV1: {
+      /** Fields */
+      fields: [
+        "structure-evidence-v1",
+        "structure-engine-v1",
+        "structure-features-v1",
+        "structure-thresholds-v1",
+        string,
+        number,
+        components["schemas"]["StructureState"] | null,
+        components["schemas"]["StructureState"] | null,
+        components["schemas"]["StructureState"] | null,
+        string | null,
+        number,
+        number,
+        components["schemas"]["StructureState"] | null,
+        number,
+        boolean,
+        boolean,
+        boolean,
+        number,
+        string[],
+        ("insufficient_history" | "missing_data" | "nonpositive_input") | null,
+        string[],
+        number | null,
+        number | null,
+        string[],
+        number,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "70";
+    };
+    /** NormalizedStructureEvidenceV2 */
+    NormalizedStructureEvidenceV2: {
+      /** Fields */
+      fields: [
+        "structure-evidence-v2",
+        "structure-engine-v2",
+        "structure-features-v2",
+        "structure-thresholds-v2",
+        string,
+        number,
+        components["schemas"]["StructureState"] | null,
+        components["schemas"]["StructureState"] | null,
+        components["schemas"]["StructureState"] | null,
+        string | null,
+        number,
+        number,
+        components["schemas"]["StructureState"] | null,
+        number,
+        boolean,
+        boolean,
+        boolean,
+        number,
+        string[],
+        ("insufficient_history" | "missing_data" | "nonpositive_input") | null,
+        string[],
+        number | null,
+        number | null,
+        string[],
+        number,
+        [string, number][],
+        number,
+        number,
+        number,
+        string | null,
+        string | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "87";
+    };
+    /** NormalizedStructureInputV1 */
+    NormalizedStructureInputV1: {
+      /** Fields */
+      fields: [
+        "structure-input-v1",
+        "structure-features-v1",
+        string,
+        string,
+        string | null,
+        number,
+        number,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "71";
+    };
+    /** NormalizedStructureInputV2 */
+    NormalizedStructureInputV2: {
+      /** Fields */
+      fields: [
+        "structure-input-v2",
+        "structure-features-v2",
+        string,
+        string,
+        string | null,
+        number,
+        number,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "88";
+    };
+    /** NormalizedStructureMeasuresV1 */
+    NormalizedStructureMeasuresV1: {
+      /** Fields */
+      fields: [
+        boolean,
+        boolean,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number,
+        number | null,
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "72";
+    };
+    /** NormalizedStructureMeasuresV2 */
+    NormalizedStructureMeasuresV2: {
+      /** Fields */
+      fields: [number, number, number, number, number, number];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "89";
+    };
+    /** NormalizedStructureSourceV1 */
+    NormalizedStructureSourceV1: {
+      /** Fields */
+      fields: [string, string, "split_adjusted", string, string];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "73";
+    };
+    /** NormalizedStyleInputV1 */
+    NormalizedStyleInputV1: {
+      /** Fields */
+      fields: ["SPY" | "RSP" | "QQQ" | "QQQE", number | null];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "74";
+    };
+    /** NormalizedStyleSleeveV1 */
+    NormalizedStyleSleeveV1: {
+      /** Fields */
+      fields: [
+        components["schemas"]["State"],
+        (-1 | 0 | 1) | null,
+        string[],
+        number[],
+        number[],
+        number | null,
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "75";
+    };
+    /** NormalizedThresholdResultV1 */
+    NormalizedThresholdResultV1: {
+      /** Fields */
+      fields: [string, number | null, number, boolean | null];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "76";
+    };
+    /** NormalizedTradeThresholds */
+    NormalizedTradeThresholds: {
+      /** Fields */
+      fields: [number, number, number, number];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "77";
+    };
+    /** NormalizedTradeUniverseRules */
+    NormalizedTradeUniverseRules: {
+      /** Fields */
+      fields: [string, boolean, string[], string[], string[], number, number];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "78";
+    };
+    /** NormalizedUniverseDecisionInputV1 */
+    NormalizedUniverseDecisionInputV1: {
+      /** Fields */
+      fields: [string, string, number, string, number, number, string, string];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "79";
+    };
+    /** NormalizedUniverseMembership */
+    NormalizedUniverseMembership: {
+      /** Fields */
+      fields: [
+        boolean,
+        components["schemas"]["MembershipMode"],
+        string[],
+        string[],
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "80";
+    };
+    /** NormalizedUniverseMemberships */
+    NormalizedUniverseMemberships: {
+      /** Fields */
+      fields: [number, number, number];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "81";
+    };
+    /** NormalizedVolatilityInputV1 */
+    NormalizedVolatilityInputV1: {
+      /** Fields */
+      fields: [number, number | null, number | null, number | null];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "82";
+    };
+    /** NormalizedVolatilitySleeveV1 */
+    NormalizedVolatilitySleeveV1: {
+      /** Fields */
+      fields: [
+        components["schemas"]["State"],
+        (-1 | 0 | 1) | null,
+        string[],
+        number[],
+        number,
+        number | null,
+        number | null,
+      ];
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      model_type: "83";
     };
     /** PopulationCountV1 */
     PopulationCountV1: {
@@ -3088,11 +5192,34 @@ export interface components {
       /** Records */
       records: components["schemas"]["SymbolRecordV1"][];
     };
+    /** SymbolDetailV2 */
+    SymbolDetailV2: {
+      meta: components["schemas"]["ViewMetaV1"];
+      /** Records */
+      records: components["schemas"]["SymbolRecordV2"][];
+      /**
+       * Schema Version
+       * @default symbol-detail-v2
+       * @constant
+       */
+      schema_version: "symbol-detail-v2";
+    };
     /** SymbolRecordV1 */
     SymbolRecordV1: {
       /** Display Name */
       display_name: string;
       output: components["schemas"]["DecisionRiskOutputV1"];
+      /** Volume */
+      volume: number | null;
+      /** Volume Reason */
+      volume_reason: string | null;
+    };
+    /** SymbolRecordV2 */
+    SymbolRecordV2: {
+      /** Display Name */
+      display_name: string;
+      output: components["schemas"]["DecisionOutputViewV2"];
+      output_ref: components["schemas"]["EvidenceRefV2"];
       /** Volume */
       volume: number | null;
       /** Volume Reason */
@@ -3898,6 +6025,124 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Unprocessable Content */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Service Unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+    };
+  };
+  evidence_page_api_v2_evidence_get: {
+    parameters: {
+      query: {
+        fingerprint: string;
+        offset?: number;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["EvidencePageV2"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Unprocessable Content */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Service Unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+    };
+  };
+  symbol_detail_v2_api_v2_symbols__symbol__get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        symbol: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SymbolDetailV2"];
         };
       };
       /** @description Not Found */

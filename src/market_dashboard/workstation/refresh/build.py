@@ -6,8 +6,10 @@ from pathlib import Path
 
 from market_dashboard.aperture.leadership import fingerprint
 from market_dashboard.aperture.leadership_contracts import CurrentGroupProvenanceV2
+from market_dashboard.workstation.archive import read_snapshot, write_snapshot
 from market_dashboard.workstation.materialization.bootstrap import (
     BootstrapPlanV1,
+    CoveragePlanV1,
     verify_hashes,
 )
 from market_dashboard.workstation.materialization.contracts import GroupScheduleV1
@@ -17,7 +19,6 @@ from market_dashboard.workstation.models import (
     InputClockBindingV1,
     VersionsV1,
 )
-from market_dashboard.workstation.snapshot_v2 import WorkstationSnapshotV2
 
 
 def build_current(
@@ -30,6 +31,7 @@ def build_current(
     input_hashes,
     output,
     membership_config=None,
+    checkpoint_root=None,
 ):
     if now >= window["opening"] or now < window["close"]:
         raise ValueError("PREOPEN_COMPLETED_SESSION_CONTEXT_REQUIRED")
@@ -106,7 +108,18 @@ def build_current(
         }
     )
     loaded["manifest"] = manifest
-    plan = BootstrapPlanV1(
+    plan_type = BootstrapPlanV1
+    bounds = {}
+    if "coverage_manifest" in loaded:
+        plan_type = CoveragePlanV1
+        symbols = tuple(loaded["coverage_manifest"]["covered_symbols"])
+        bounds = {
+            "covered_symbols": symbols,
+            "max_symbols": len(symbols),
+            "max_output_bytes": 24 * 1024**2 + len(symbols) * 65536,
+        }
+    plan = plan_type(
+        **bounds,
         bootstrap=boot,
         evaluation=evaluation,
         as_of_session=window["market"],
@@ -115,8 +128,17 @@ def build_current(
         versions=VersionsV1(security_master=seed_plan.versions.security_master),
         manifest_fingerprint=fingerprint(manifest.model_dump(mode="json")),
     )
-    snapshot, diagnostics = replay(plan, loaded)
-    decoded = WorkstationSnapshotV2.model_validate_json(snapshot.model_dump_json())
+    from market_dashboard.workstation.materialization.io import atomic_write
+
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    # Persist reconstruction identity before expensive work, not only on success.
+    atomic_write(output.parent / "plan.json", plan.model_dump_json(indent=2).encode())
+    atomic_write(
+        output.parent / "manifest.json", manifest.model_dump_json(indent=2).encode()
+    )
+    snapshot, diagnostics = replay(plan, loaded, checkpoint_root=checkpoint_root)
+    decoded = snapshot
     if (
         decoded.freshness.state != "FRESH"
         or datetime.now(UTC) >= decoded.freshness.valid_until
@@ -124,8 +146,10 @@ def build_current(
         raise ValueError("BUILD_CROSSED_VALIDITY_BOUNDARY")
     verify_hashes(input_hashes)
     output = Path(output)
-    with output.open("xb") as stream:
-        stream.write(snapshot.model_dump_json().encode())
-    (output.parent / "plan.json").write_text(plan.model_dump_json(indent=2))
-    (output.parent / "manifest.json").write_text(manifest.model_dump_json(indent=2))
+    diagnostics.update(write_snapshot(output, snapshot))
+    del decoded, snapshot
+    import gc
+
+    gc.collect()
+    decoded = read_snapshot(output)
     return decoded, diagnostics

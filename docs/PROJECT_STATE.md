@@ -6,7 +6,34 @@ Current product authority: `docs/APERTURE_CURRENT_AUTHORITY.md`
 
 Working prototype baseline: `401e1b0afd6ad2a4678af4f1040014b5c9b568e9`
 
-## Current outcome
+## Expanded coverage milestone
+
+`AP-UNIVERSE-EXPANSION-001` follows the normal merge of reviewed PR #17 at
+`3a1499e2d22a7321c55dc4e03b4dba382d590aad`. The verified candidate union has 11,374
+identities. Current source reconciliation identifies 3,045 research-eligible and
+812 strict-trade candidates. Of the research names, 2,743 have ready history;
+130 short listed histories and 172 histories with missing sessions remain visible
+in coverage. Ten exact identities remain unresolved; six additional current
+identities resolve to unsupported exchanges. No alias or canonical parent is invented.
+
+The published population contains 3,077 covered instruments and required benchmarks.
+Its current calculation population is 2,743 research, 776 trade and 333 mapping
+members. Full hierarchy capture rows cover all research/trade members; themes cover
+1,101 research and 442 trade names. All four parent conflicts remain. These are
+current-cohort calculations, not historical membership or backtested rotation.
+
+The recovered full-population snapshot passed complete validation and real desktop/
+mobile browser checks. The supervised build/readback peaked at 1.47 GiB RSS; the
+independent API endpoint probe peaked at 1.09 GiB. The enabled timer is pinned to
+the verified detached recovery release `7de9858`; draft PR #18 remains unmerged.
+VIX remains explicitly UNKNOWN, and the September 8 action deadline is unchanged.
+
+See [the coverage contract](universe-expansion-v1.md) and
+[completion receipt](universe-expansion-v1-receipt.md) for actual deployment,
+snapshot clocks/fingerprint, measured scale, tests and remaining limitations.
+The earlier prototype facts below remain historical evidence.
+
+## Original prototype outcome
 
 Aperture has a working local React/TypeScript Workstation backed by FastAPI and a
 real normalized `LOCAL_SNAPSHOT`. The snapshot was built as a truthful
@@ -53,7 +80,7 @@ can be relaunched from the retained local snapshot.
 - Deepvue sub-industry and theme captures are verified bootstrap sources but remain
   local and are not runtime dependencies.
 - Earnings/catalyst coverage is incomplete.
-- The initial population is bounded, not the full U.S. equity research universe.
+- Published coverage is explicit; eligible names with missing or short histories remain outside newly admitted ready coverage. It is not a claim of complete U.S. equity coverage.
 - Book, Journal and benchmark learning remain future work.
 - The current UI needs user-driven workflow and visual refinement.
 - Aperture intentionally does not include charts; Deepvue handles chart review.
@@ -166,7 +193,8 @@ services stopped; the refresh timer remains enabled as requested.
 
 ## Next work
 
-The current Workstation is delivered in draft PR #17, which remains unmerged.
+The prior Workstation milestone was delivered in PR #17, merged at
+`3a1499e2d22a7321c55dc4e03b4dba382d590aad` before universe expansion.
 Beyond the September 8 action, the separately published operator reuse policy
 authorizes current-cohort membership within original-source age limits; the
 retained publication itself is not extended. See [the detailed receipt](current-refresh-v2.md)

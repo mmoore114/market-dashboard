@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 
+const evidenceDir =
+  process.env.APERTURE_SMOKE_EVIDENCE_DIR ?? "test-results/evidence";
+
 for (const viewport of [
   { width: 1366, height: 900 },
   { width: 390, height: 844 },
@@ -14,7 +17,7 @@ for (const viewport of [
     ).toBeVisible();
     await expect(page.getByText("SYNTHETIC FIXTURE").first()).toBeVisible();
     await page.screenshot({
-      path: `../docs/workstation-evidence/brief-${viewport.width}.png`,
+      path: `${evidenceDir}/brief-${viewport.width}.png`,
       fullPage: true,
     });
     await page
@@ -50,14 +53,14 @@ for (const viewport of [
         .scrollIntoViewIfNeeded();
     }
     await page.screenshot({
-      path: `../docs/workstation-evidence/tape-${viewport.width}.png`,
+      path: `${evidenceDir}/tape-${viewport.width}.png`,
       fullPage: true,
     });
     await page.getByRole("button", { name: "SIM110", exact: true }).click();
     await expect(page.getByRole("dialog")).toBeVisible();
     await expect(page.getByText("Decision checklist")).toBeVisible();
     await page.screenshot({
-      path: `../docs/workstation-evidence/detail-${viewport.width}.png`,
+      path: `${evidenceDir}/detail-${viewport.width}.png`,
     });
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).not.toBeVisible();
@@ -90,7 +93,7 @@ for (const viewport of [
       page.getByRole("heading", { name: "Canonical sizing result" }),
     ).toBeVisible();
     await page.screenshot({
-      path: `../docs/workstation-evidence/sizer-${viewport.width}.png`,
+      path: `${evidenceDir}/sizer-${viewport.width}.png`,
       fullPage: true,
     });
     expect(

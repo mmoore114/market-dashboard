@@ -12,8 +12,12 @@ export class ApiFailure extends Error {
     this.modeLabel = modeLabel;
   }
 }
-export async function get<T>(path: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`/api/v1${path}`, {
+export async function get<T>(
+  path: string,
+  options?: RequestInit,
+  version: "v1" | "v2" = "v1",
+): Promise<T> {
+  const response = await fetch(`/api/${version}${path}`, {
     signal: AbortSignal.timeout(15000),
     ...options,
     headers: { "Content-Type": "application/json", ...options?.headers },
