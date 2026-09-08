@@ -174,6 +174,91 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v2/research/groups": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Research Groups */
+    get: operations["research_groups_api_v2_research_groups_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v2/research/health": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Research Health */
+    get: operations["research_health_api_v2_research_health_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v2/research/members": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Research Members */
+    get: operations["research_members_api_v2_research_members_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v2/research/symbols": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Research Symbols */
+    get: operations["research_symbols_api_v2_research_symbols_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v2/research/tape": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Research Tape */
+    get: operations["research_tape_api_v2_research_tape_get"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v2/symbols/{symbol}": {
     parameters: {
       query?: never;
@@ -226,6 +311,30 @@ export interface components {
       status: "hypothesis";
       /** Universe Policy Version */
       universe_policy_version: string;
+    };
+    /** BlockerV1 */
+    BlockerV1: {
+      /**
+       * Category
+       * @enum {string}
+       */
+      category:
+        | "STRATEGY"
+        | "MISSING_DATA"
+        | "INVALID_DATA"
+        | "PROPOSAL"
+        | "LEGACY_SCOPE";
+      /**
+       * Codes
+       * @default []
+       */
+      codes: string[];
+      /** Detail */
+      detail: string;
+      /** Rung */
+      rung: string;
+      /** Title */
+      title: string;
     };
     /** BootstrapContextV1 */
     BootstrapContextV1: {
@@ -835,6 +944,31 @@ export interface components {
        * @constant
        */
       threshold_version: "decision-risk-thresholds-v1";
+    };
+    /** DecisionReviewV1 */
+    DecisionReviewV1: {
+      /** Active Setups */
+      active_setups: components["schemas"]["SetupReviewV1"][];
+      /** Blockers */
+      blockers: components["schemas"]["BlockerV1"][];
+      /** Historical Count */
+      historical_count: number;
+      /** Notes */
+      notes: string[];
+      /** Opposite Direction Count */
+      opposite_direction_count: number;
+      /**
+       * Schema Version
+       * @default decision-review-v1
+       * @constant
+       */
+      schema_version: "decision-review-v1";
+      /** Stored State */
+      stored_state: string;
+      /** Strength Summary */
+      strength_summary: string;
+      /** Trade Universe Eligible */
+      trade_universe_eligible: boolean;
     };
     /** DecisionRiskOutputV1 */
     DecisionRiskOutputV1: {
@@ -3871,6 +4005,130 @@ export interface components {
       /** Yellow Sleeves */
       yellow_sleeves: number;
     };
+    /** ResearchGroupV1 */
+    ResearchGroupV1: {
+      /** Act Count */
+      act_count: number;
+      /** Eligible Group Count */
+      eligible_group_count: number;
+      /** Group Id */
+      group_id: string;
+      /** Group Type */
+      group_type: string;
+      /** Leadership Rank */
+      leadership_rank: number | null;
+      /** Median Rs Comp */
+      median_RS_comp: number | null;
+      /** Median Rs Rotation */
+      median_RS_rotation: number | null;
+      /** Median Rotation Delta */
+      median_rotation_delta: number | null;
+      /** Name */
+      name: string;
+      /** Parent */
+      parent: string;
+      /** Reasons */
+      reasons: string[];
+      /** Total Members */
+      total_members: number;
+      /** Valid Members */
+      valid_members: number;
+      /** Watch Count */
+      watch_count: number;
+    };
+    /** ResearchGroupsV1 */
+    ResearchGroupsV1: {
+      meta: components["schemas"]["ViewMetaV1"];
+      /** Page */
+      page: number;
+      /** Pages */
+      pages: number;
+      /** Rows */
+      rows: components["schemas"]["ResearchGroupV1"][];
+      /** Total */
+      total: number;
+    };
+    /** ResearchHealthV1 */
+    ResearchHealthV1: {
+      /** Allowed Risk Fraction */
+      allowed_risk_fraction: number | null;
+      /**
+       * Membership Maintenance
+       * @default []
+       */
+      membership_maintenance: components["schemas"]["MembershipMaintenanceV1"][];
+      meta: components["schemas"]["ViewMetaV1"];
+      /** Missing */
+      missing: string[];
+      /** Regime Multiplier */
+      regime_multiplier: number | null;
+      /** Risk Fraction */
+      risk_fraction: number;
+    };
+    /** ResearchMemberV1 */
+    ResearchMemberV1: {
+      /** Reason */
+      reason: string | null;
+      row: components["schemas"]["ResearchRowV1"] | null;
+      /** Symbol */
+      symbol: string;
+    };
+    /** ResearchMembersV1 */
+    ResearchMembersV1: {
+      /** Members */
+      members: components["schemas"]["ResearchMemberV1"][];
+      meta: components["schemas"]["ViewMetaV1"];
+      /** Page */
+      page: number;
+      /** Pages */
+      pages: number;
+      /** Total */
+      total: number;
+    };
+    /** ResearchRowV1 */
+    ResearchRowV1: {
+      /** Rs Comp */
+      RS_comp: number | null;
+      /** Rs Rotation */
+      RS_rotation: number | null;
+      /** Decision */
+      decision: string;
+      /** Direction */
+      direction: string;
+      /** Display Name */
+      display_name: string;
+      /** Group Label */
+      group_label: string | null;
+      /** History Count */
+      history_count: number;
+      /** Price */
+      price: number | null;
+      primary_blocker: components["schemas"]["BlockerV1"] | null;
+      /** Rotation Delta */
+      rotation_delta: number | null;
+      /** Setups */
+      setups: components["schemas"]["SetupSummaryV1"][];
+      /** Structure */
+      structure: string | null;
+      /** Sub Industry */
+      sub_industry: string | null;
+      /** Symbol */
+      symbol: string;
+      /** Trade Universe Eligible */
+      trade_universe_eligible: boolean;
+    };
+    /** ResearchTapeV1 */
+    ResearchTapeV1: {
+      meta: components["schemas"]["ViewMetaV1"];
+      /** Page */
+      page: number;
+      /** Pages */
+      pages: number;
+      /** Rows */
+      rows: components["schemas"]["ResearchRowV1"][];
+      /** Total */
+      total: number;
+    };
     /** ResearchUniverseRules */
     ResearchUniverseRules: {
       /** Active Only */
@@ -3961,6 +4219,11 @@ export interface components {
     RuleSectionV1: {
       /** Lines */
       lines: string[];
+      /**
+       * Technical Lines
+       * @default []
+       */
+      technical_lines: string[];
       /** Title */
       title: string;
     };
@@ -4380,6 +4643,31 @@ export interface components {
        * @constant
        */
       threshold_version: "setup-thresholds-v2";
+    };
+    /** SetupReviewV1 */
+    SetupReviewV1: {
+      /** Direction */
+      direction: string;
+      /** Evaluated */
+      evaluated: boolean;
+      /** Family */
+      family: string;
+      /** Invalidation */
+      invalidation: number | null;
+      /** Local Errors */
+      local_errors: string[];
+      /** Qualification */
+      qualification: string;
+      /** Replay Required */
+      replay_required: boolean;
+      /** Setup Id */
+      setup_id: string;
+      /** Status */
+      status: string;
+      /** Trigger */
+      trigger: number | null;
+      /** Unrelated Errors */
+      unrelated_errors: string[];
     };
     /** SetupStrengthContextV1 */
     SetupStrengthContextV1: {
@@ -5220,10 +5508,20 @@ export interface components {
       display_name: string;
       output: components["schemas"]["DecisionOutputViewV2"];
       output_ref: components["schemas"]["EvidenceRefV2"];
+      review: components["schemas"]["DecisionReviewV1"];
       /** Volume */
       volume: number | null;
       /** Volume Reason */
       volume_reason: string | null;
+    };
+    /** SymbolSearchV1 */
+    SymbolSearchV1: {
+      /** Directions */
+      directions: string[];
+      /** Name */
+      name: string;
+      /** Symbol */
+      symbol: string;
     };
     /** TapeRowV1 */
     TapeRowV1: {
@@ -6085,6 +6383,323 @@ export interface operations {
         };
         content: {
           "application/json": components["schemas"]["EvidencePageV2"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Unprocessable Content */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Service Unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+    };
+  };
+  research_groups_api_v2_research_groups_get: {
+    parameters: {
+      query?: {
+        kind?: "SECTOR" | "GROUP" | "INDUSTRY" | "SUB_INDUSTRY" | "THEME";
+        include_unranked?: boolean;
+        sort?:
+          | "leadership_rank"
+          | "median_RS_comp"
+          | "median_RS_rotation"
+          | "median_rotation_delta"
+          | "valid_members"
+          | "watch_count"
+          | "name";
+        descending?: boolean;
+        q?: string;
+        page?: number;
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResearchGroupsV1"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Unprocessable Content */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Service Unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+    };
+  };
+  research_health_api_v2_research_health_get: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResearchHealthV1"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Unprocessable Content */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Service Unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+    };
+  };
+  research_members_api_v2_research_members_get: {
+    parameters: {
+      query: {
+        group_id: string;
+        kind?: "SECTOR" | "GROUP" | "INDUSTRY" | "SUB_INDUSTRY" | "THEME";
+        page?: number;
+        page_size?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResearchMembersV1"];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Unprocessable Content */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Service Unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+    };
+  };
+  research_symbols_api_v2_research_symbols_get: {
+    parameters: {
+      query?: {
+        q?: string;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["SymbolSearchV1"][];
+        };
+      };
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Unprocessable Content */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Internal Server Error */
+      500: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+      /** @description Service Unavailable */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ErrorV1"];
+        };
+      };
+    };
+  };
+  research_tape_api_v2_research_tape_get: {
+    parameters: {
+      query?: {
+        page?: number;
+        page_size?: number;
+        action?: ("NONE" | "WATCH" | "TRADE" | "ACT") | null;
+        structure?:
+          | ("NEUTRAL" | "EMERGING" | "UPTREND" | "DETERIORATING" | "DECLINE")
+          | null;
+        setup?: ("EP" | "CONTRACTION" | "TREND_PULLBACK" | "RANGE") | null;
+        group?: string | null;
+        min_rs_comp?: number | null;
+        min_rs_rotation?: number | null;
+        veto?: boolean | null;
+        sort?: "symbol" | "price" | "RS_comp" | "RS_rotation" | "decision";
+        descending?: boolean;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/json": components["schemas"]["ResearchTapeV1"];
         };
       };
       /** @description Not Found */

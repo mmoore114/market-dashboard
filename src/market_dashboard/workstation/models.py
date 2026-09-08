@@ -439,6 +439,7 @@ class SizerResponseV1(ContractModel):
 class RuleSectionV1(ContractModel):
     title: str
     lines: tuple[str, ...]
+    technical_lines: tuple[str, ...] = ()
 
 
 class RulesViewV1(ContractModel):

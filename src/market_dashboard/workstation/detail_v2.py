@@ -18,6 +18,7 @@ from market_dashboard.aperture.decision_contracts import (
 
 from .evidence_graph import Digest, EvidenceNodeV2, NodeRef
 from .models import SymbolRecordV1, ViewMetaV1
+from .research import DecisionReviewV1, review
 
 
 class EvidenceRefV2(ContractModel):
@@ -62,6 +63,7 @@ SymbolRecordV2 = view_model(
     {
         "output": (DecisionOutputViewV2, ...),
         "output_ref": (EvidenceRefV2, ...),
+        "review": (DecisionReviewV1, ...),
     },
 )
 
@@ -113,6 +115,7 @@ def symbol_view(snapshot, records, meta):
                     for k in SymbolRecordV1.model_fields
                     if k != "output"
                 },
+                review=review(output),
                 output=DecisionOutputViewV2(
                     **values, inputs=DecisionInputViewV2(**inputs)
                 ),

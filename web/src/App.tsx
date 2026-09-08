@@ -8,66 +8,73 @@ import { Detail } from "./Detail";
 import { Sizer } from "./Sizer";
 import { Groups, History } from "./Groups";
 import { Rules } from "./Rules";
-
-const routes = [
-  "brief",
-  "tape",
-  "groups",
-  "sizer",
-  "rules",
-  "history",
-] as const;
-type Route = (typeof routes)[number];
+import type { Direction } from "./research";
+const routes = ["brief", "groups", "tape", "sizer", "rules"] as const;
+type Route = (typeof routes)[number] | "history";
 function currentRoute(): Route {
-  const value = window.location.hash.slice(1);
-  return routes.includes(value as Route) ? (value as Route) : "brief";
+  const r = window.location.hash.slice(1);
+  return [...routes, "history"].includes(r) ? (r as Route) : "brief";
 }
-function preferences(): { filters: Filters; selected: string | null } {
+function preferences(): Filters {
   try {
-    const p = JSON.parse(sessionStorage.getItem("aperture-ui-v1") || "{}");
     return {
-      filters: { ...initialFilters, ...p.filters },
-      selected: typeof p.selected === "string" ? p.selected : null,
+      ...initialFilters,
+      ...JSON.parse(sessionStorage.getItem("aperture-ui-v1") || "{}").filters,
     };
   } catch {
-    return { filters: initialFilters, selected: null };
+    return initialFilters;
   }
 }
 export function App() {
   const [route, setRoute] = useState<Route>(currentRoute);
-  const [filters, setFilters] = useState<Filters>(() => preferences().filters);
-  const [selected, setSelected] = useState<string | null>(
-    () => preferences().selected,
-  );
-  const [sizerSymbol, setSizerSymbol] = useState("");
+  const [filters, setFilters] = useState(preferences);
+  const [selected, setSelected] = useState<{
+    symbol: string;
+    direction: Direction;
+  } | null>(null);
+  const [sizer, setSizer] = useState<{ symbol: string; direction: Direction }>({
+    symbol: "",
+    direction: "LONG",
+  });
+  const [group, setGroup] = useState<{ id: string; kind: string } | null>(null);
   const health = useQuery({
     queryKey: ["health"],
     queryFn: () => get<Schemas["HealthV1"]>("/health"),
     refetchInterval: 30000,
   });
+  const evidence = useQuery({
+    queryKey: ["research-health"],
+    queryFn: () =>
+      get<Schemas["ResearchHealthV1"]>("/research/health", undefined, "v2"),
+    enabled: health.data?.available === true,
+  });
   useEffect(() => {
-    const handle = () => {
+    const change = () => {
       setRoute(currentRoute());
       setSelected(null);
     };
-    window.addEventListener("hashchange", handle);
-    return () => window.removeEventListener("hashchange", handle);
+    window.addEventListener("hashchange", change);
+    return () => window.removeEventListener("hashchange", change);
   }, []);
   useEffect(() => {
     try {
-      sessionStorage.setItem(
-        "aperture-ui-v1",
-        JSON.stringify({ filters, selected }),
-      );
+      sessionStorage.setItem("aperture-ui-v1", JSON.stringify({ filters }));
     } catch {
-      /* Preferences are optional. */
+      /* Optional preferences. */
     }
-  }, [filters, selected]);
-  const sizeSymbol = (symbol: string) => {
-    setSizerSymbol(symbol);
+  }, [filters]);
+  const navigate = (r: Route) => {
     setSelected(null);
-    window.location.hash = "sizer";
-    setRoute("sizer");
+    setRoute(r);
+    window.location.hash = r;
+  };
+  const openTape = (action: string) => {
+    setFilters({ ...initialFilters, action });
+    navigate("tape");
+  };
+  const openGroup = (id: string, kind = "SUB_INDUSTRY") => {
+    setGroup({ id, kind });
+    navigate("groups");
   };
   const available = health.data?.available === true;
   return (
@@ -84,52 +91,37 @@ export function App() {
         </a>
         <span className="nav-label">WORKSPACE</span>
         <nav aria-label="Primary navigation">
-          {routes.map((r, i) => (
+          {routes.map((r) => (
             <a
               key={r}
-              href={`#${r}`}
+              href={"#" + r}
               aria-current={route === r ? "page" : undefined}
             >
-              <span className="nav-icon">{["◷", "▦", "⌗", "≡"][i]}</span>
-              {r === "history"
-                ? "Time Machine"
-                : r[0].toUpperCase() + r.slice(1)}
+              {r[0].toUpperCase() + r.slice(1)}
             </a>
           ))}
         </nav>
-        <div className="future-nav">
-          <span className="nav-label">LATER</span>
-          {["Book", "Journal"].map((r) => (
-            <button disabled key={r} aria-label={`${r} Planned`}>
-              {r}
-              <span>Planned</span>
-            </button>
-          ))}
-        </div>
+        <details className="future-nav">
+          <summary>Planned tools</summary>
+          <a href="#history">Time Machine</a>
+          <p>Book · Journal</p>
+        </details>
         <div className="sidebar-footer">
-          <span className="status-dot" />
-          Local workspace<small>Decision support · V1</small>
+          Local research<small>Discretionary decisions · no orders</small>
         </div>
       </aside>
       <div className="workspace-main">
         <header className="topbar">
-          <span>
-            WORKSPACE <b>/</b> {route.toUpperCase()}
-          </span>
+          <span>RESEARCH / {route.toUpperCase()}</span>
           <span className="hypothesis">EXPERIMENTAL · UNCALIBRATED</span>
         </header>
-        {health.data ? (
-          <Context meta={health.data.meta} />
-        ) : (
-          <div className="context">
-            <span>Checking snapshot mode and freshness…</span>
-          </div>
+        {health.data && (
+          <Context meta={health.data.meta} missing={evidence.data?.missing} />
         )}
         <main id="main-content" tabIndex={-1}>
           {health.isPending ? (
             <StatePanel title="Loading workstation">
-              Checking the local snapshot. No research is available until
-              validation completes.
+              Validating local evidence…
             </StatePanel>
           ) : health.error ? (
             <ErrorPanel
@@ -143,46 +135,70 @@ export function App() {
                   ? "Snapshot is stale"
                   : "Snapshot unavailable"
               }
-              retry={() => void health.refetch()}
             >
-              <p>Research content is blocked. Navigation remains available.</p>
-              {health.data?.meta.reasons.map((r) => (
-                <p key={r.code}>
-                  {r.explanation} <code>{r.code}</code>
-                </p>
-              ))}
+              <p>
+                Research is unavailable until a current verified snapshot is
+                supplied. The retained deadline is unchanged.
+              </p>
             </StatePanel>
           ) : (
             <>
-              {route === "brief" && <Brief onSelect={setSelected} />}
-              {route === "tape" && (
+              {route === "brief" && (
+                <Brief
+                  onSelect={(symbol, direction = "LONG") =>
+                    setSelected({ symbol, direction })
+                  }
+                  onTape={openTape}
+                  onGroup={openGroup}
+                />
+              )}
+              <div hidden={route !== "tape"}>
+                {/* Preserve list DOM, filters and scroll across detail/sizing. */}
                 <Tape
                   filters={filters}
                   onFilters={setFilters}
-                  onSelect={setSelected}
+                  onSelect={(symbol, direction = "LONG") =>
+                    setSelected({ symbol, direction })
+                  }
+                  onGroup={openGroup}
+                  enabled={route === "tape"}
+                />
+              </div>
+              <div hidden={route !== "groups"}>
+                <Groups
+                  onSelect={(symbol, direction = "LONG") =>
+                    setSelected({ symbol, direction })
+                  }
+                  initialGroup={group}
+                  enabled={route === "groups"}
+                />
+              </div>
+              {route === "sizer" && (
+                <Sizer
+                  key={sizer.symbol + "|" + sizer.direction}
+                  initialSymbol={sizer.symbol}
+                  initialDirection={sizer.direction}
                 />
               )}
-              {route === "sizer" && <Sizer initialSymbol={sizerSymbol} />}
               {route === "rules" && <Rules />}
-              {route === "groups" && <Groups />}
-              {route === "history" && (
-                <History session={health.data?.meta.as_of_session ?? ""} />
-              )}
+              {route === "history" && <History />}
             </>
           )}
         </main>
         <footer className="page-footer">
-          Aperture · transparent evidence for discretionary review
-          <span>
-            {health.data?.meta.mode_label ?? "Snapshot mode unverified"}
-          </span>
+          Aperture · evidence for discretionary review
+          <span>{health.data?.meta.mode_label}</span>
         </footer>
       </div>
       {selected && available && (
         <Detail
-          symbol={selected}
+          symbol={selected.symbol}
+          initialDirection={selected.direction}
           onClose={() => setSelected(null)}
-          onSize={sizeSymbol}
+          onSize={(symbol, direction) => {
+            setSizer({ symbol, direction });
+            navigate("sizer");
+          }}
         />
       )}
     </div>

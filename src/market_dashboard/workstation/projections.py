@@ -189,6 +189,13 @@ def tape(
     )
 
 
+def currency_label(value):
+    for scale, name in ((1e9, "billion"), (1e6, "million")):
+        if value >= scale:
+            return f"${value / scale:g} {name}"
+    return f"${value:,.0f}"
+
+
 def rules_view(snapshot, meta):
     rules = snapshot.rules
     e, r = rules.extension, rules.risk
@@ -198,8 +205,8 @@ def rules_view(snapshot, meta):
             lines=(
                 f"Equity trade policy: {rules.universe_policy_version}.",
                 (
-                    f"Price ≥ ${rules.equity_trade_universe.strict_entry.minimum_price:g}; market cap ≥ ${rules.equity_trade_universe.strict_entry.minimum_market_cap:g}; "
-                    f"ADV20 ≥ ${rules.equity_trade_universe.strict_entry.minimum_average_dollar_volume_20:g}; ADR20 ≥ {rules.equity_trade_universe.strict_entry.minimum_adr_percent_20:g}%."
+                    f"Price ≥ ${rules.equity_trade_universe.strict_entry.minimum_price:g}; market cap ≥ {currency_label(rules.equity_trade_universe.strict_entry.minimum_market_cap)}; "
+                    f"ADV20 ≥ {currency_label(rules.equity_trade_universe.strict_entry.minimum_average_dollar_volume_20)}; ADR20 ≥ {rules.equity_trade_universe.strict_entry.minimum_adr_percent_20:g}%."
                 ),
             ),
         ),
@@ -242,7 +249,7 @@ def rules_view(snapshot, meta):
         RuleSectionV1(
             title="Sizing",
             lines=(
-                f"Base risk = account equity × {r.risk_per_idea_fraction:g}. GREEN {r.regime_multipliers.green:g}; YELLOW {r.regime_multipliers.yellow:g}; RED {r.regime_multipliers.red:g}.",
+                f"Base risk budget: {r.risk_per_idea_fraction * 100:g}% of account equity. Regime multipliers: GREEN {r.regime_multipliers.green:g}×; YELLOW {r.regime_multipliers.yellow:g}×; RED {r.regime_multipliers.red:g}×. UNKNOWN does not authorize a size.",
                 f"Whole shares = floor(allowed risk / stop distance); pilot = floor(shares / {POLICY.pilot_divisor}).",
                 f"Optional default stop: entry ± {r.default_stop_wilder_atr_multiple:g} × Wilder ATR14. Entry and trade stop remain caller proposals.",
                 "Capital constraint = min(risk-based shares, floor(buying power / entry)).",
@@ -280,9 +287,126 @@ def rules_view(snapshot, meta):
                 ),
             ),
         )
+    readable = []
+    for section in sections:
+        raw = []
+        lines = []
+        for line in section.lines:
+            is_parameter = (
+                ":" in line
+                and " " not in line.split(":", 1)[0]
+                and line.split(":", 1)[0].islower()
+            )
+            if (
+                is_parameter
+                or "{<" in line
+                or "Maximum pre-trigger ages:" in line
+                or line.startswith("Equity trade policy:")
+            ):
+                raw.append(line)
+            else:
+                readable_line = (
+                    line.replace("RS_comp", "RS composite")
+                    .replace("RS_rotation", "rotation RS")
+                    .replace("rotation_delta", "rotation spread")
+                    .replace("ADV20", "20-session average dollar volume")
+                    .replace("ADR20", "20-session average daily range")
+                )
+                if readable_line != line:
+                    raw.append(line)
+                lines.append(readable_line)
+        if section.title == "Setup V2":
+            lines.append(
+                "Maximum pre-trigger age: "
+                + "; ".join(
+                    f"{family.value.replace('_', ' ').title()} {days} exchange sessions"
+                    for family, days in EXPIRY.items()
+                )
+                + "."
+            )
+            lines.append(
+                "Observation windows: "
+                + "; ".join(
+                    f"{family.value.replace('_', ' ').title()} {days} exchange sessions"
+                    for family, days in OBSERVATION.items()
+                )
+                + "."
+            )
+        if section.title == "Structure V2":
+            lines.append(
+                "Distances and moving-average spread use Wilder ATR14 units; SMA20's 10-session change and SMA50's 20-session change use their respective median ATR. Participation is the percentage of ten closes strictly above SMA20."
+            )
+            for name, values, labels, rule in (
+                (
+                    "Emerging",
+                    structure_parameters.emerging,
+                    (
+                        "distance above SMA50",
+                        "SMA20 slope",
+                        "SMA20−SMA50 spread",
+                        "SMA50 slope",
+                        "participation",
+                    ),
+                    "≥; distance and SMA20 slope required, at least four of five",
+                ),
+                (
+                    "Uptrend",
+                    structure_parameters.trend,
+                    (
+                        "distance above SMA50",
+                        "SMA20−SMA50 spread",
+                        "SMA20 slope",
+                        "SMA50 slope",
+                        "participation",
+                    ),
+                    "≥; distance and SMA50 slope required, at least four of five",
+                ),
+                (
+                    "Hold uptrend",
+                    structure_parameters.hold,
+                    (
+                        "distance above SMA50",
+                        "SMA20−SMA50 spread",
+                        "SMA50 slope",
+                        "participation",
+                    ),
+                    "≥; distance and SMA50 slope required, at least three of four",
+                ),
+                (
+                    "Damage",
+                    structure_parameters.damage,
+                    (
+                        "distance above SMA20",
+                        "participation",
+                        "SMA20 slope",
+                        "SMA20−SMA50 spread",
+                        "distance above SMA50",
+                    ),
+                    "≤; distance above SMA20 and participation required, at least four of five",
+                ),
+            ):
+                labeled = "; ".join(
+                    f"{label} {value * 100:g}%"
+                    if label == "participation"
+                    else f"{label} {value:g} ATR"
+                    for label, value in zip(labels, values)
+                )
+                lines.append(f"{name}: {labeled}. Each threshold {rule}.")
+            lines.append(
+                "Downward conditions mirror signed distances/slopes and use complementary participation; state transitions and confirmation counters remain authoritative."
+            )
+        if section.title == "Strength and rotation":
+            lines.append(
+                "Established strength OR the complete new-rotation branch qualifies; a failed alternative does not veto a passing branch. Rotation delta is the cross-sectional RS rotation minus RS composite, not historical movement."
+            )
+        readable.append(
+            RuleSectionV1(
+                title=section.title, lines=tuple(lines), technical_lines=tuple(raw)
+            )
+        )
     return RulesViewV1(
         meta=meta,
         versions=snapshot.versions,
         rules_fingerprint=rules.logical_fingerprint,
-        sections=sections,
+        sections=tuple(readable),
     )

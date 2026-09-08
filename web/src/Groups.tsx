@@ -1,162 +1,348 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { get, type Schemas } from "./api";
-import { ErrorPanel, StatePanel } from "./ui";
-
-function displayPath(id: string) {
-  try {
-    const path: unknown = JSON.parse(id);
-    if (Array.isArray(path))
-      return path.map((v) => v ?? "Unknown parent").join(" / ");
-  } catch {
-    /* Older catalogs use plain labels. */
-  }
-  return id;
-}
-
-export function Groups() {
-  const [kind, setKind] = useState("ALL");
-  const [search, setSearch] = useState("");
-  const query = useQuery({
-    queryKey: ["groups"],
-    queryFn: () => get<Schemas["GroupsViewV1"]>("/groups"),
+import { ErrorPanel, PageTitle, number } from "./ui";
+import {
+  levels,
+  levelNames,
+  groupName,
+  label,
+  type Direction,
+} from "./research";
+import { StockRows } from "./Tape";
+export function Groups({
+  onSelect = () => {},
+  initialGroup = null,
+  enabled = true,
+}: {
+  onSelect?: (symbol: string, direction?: Direction) => void;
+  initialGroup?: { id: string; kind: string } | null;
+  enabled?: boolean;
+}) {
+  const [kind, setKind] = useState("SUB_INDUSTRY");
+  const [q, setQ] = useState("");
+  const [all, setAll] = useState(false);
+  const [page, setPage] = useState(1);
+  const [sort, setSort] = useState("leadership_rank");
+  const [descending, setDescending] = useState(false);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [memberPage, setMemberPage] = useState(1);
+  useEffect(() => {
+    if (initialGroup) {
+      setKind(initialGroup.kind);
+      setSelected(initialGroup.id);
+      setMemberPage(1);
+    }
+  }, [initialGroup]);
+  const params = new URLSearchParams({
+    kind,
+    q,
+    page: String(page),
+    include_unranked: String(all),
+    sort,
+    descending: String(descending),
   });
-  if (query.error)
-    return (
-      <ErrorPanel error={query.error} retry={() => void query.refetch()} />
+  const query = useQuery({
+    queryKey: ["ranked-groups", params.toString()],
+    queryFn: () =>
+      get<Schemas["ResearchGroupsV1"]>(
+        "/research/groups?" + params,
+        undefined,
+        "v2",
+      ),
+    enabled,
+  });
+  const health = useQuery({
+    queryKey: ["research-health"],
+    queryFn: () =>
+      get<Schemas["ResearchHealthV1"]>("/research/health", undefined, "v2"),
+    enabled,
+  });
+  const memberParams = new URLSearchParams({
+    kind,
+    group_id: selected ?? "",
+    page: String(memberPage),
+  });
+  const members = useQuery({
+    queryKey: ["members", memberParams.toString()],
+    queryFn: () =>
+      get<Schemas["ResearchMembersV1"]>(
+        "/research/members?" + memberParams,
+        undefined,
+        "v2",
+      ),
+    enabled: enabled && !!selected,
+  });
+  const sorting = (key: string) => {
+    setDescending(
+      sort === key ? !descending : key !== "leadership_rank" && key !== "name",
     );
-  if (!query.data)
-    return (
-      <StatePanel title="Loading groups">
-        Checking published group evidence.
-      </StatePanel>
-    );
+    setSort(key);
+    setPage(1);
+  };
   return (
-    <section>
-      <h1>Groups</h1>
-      {query.data.reasons.map((r) => (
-        <p key={r.code}>
-          {r.explanation} <code>{r.code}</code>
-        </p>
-      ))}
-      <p>
-        Membership is a dated capture, not historical coverage. Hierarchy paths
-        preserve conflicting parents. Themes may overlap; no theme assignment
-        does not imply a confirmed exclusion.
-      </p>
-      {query.data.membership_maintenance?.map((source) => (
-        <p key={`${source.role}:${source.capture_date}`}>
-          {source.role === "hierarchy" ? "Hierarchy" : "Themes"} capture{" "}
-          {source.capture_date}
-          {" · "}
-          {source.age_days} calendar days old · {source.reuse_status}
-          {source.expires_at && <> · reuse expires {source.expires_at}</>}
-          {source.warning_at && (
-            <> · refresh warning from {source.warning_at}</>
-          )}
-          {" · "}Operator-approved reuse; Deepvue has not reconfirmed
-          membership.
-          {!source.applies_to_snapshot_capture && (
-            <>
-              {" "}
-              Newer capture available; displayed snapshot requires rebuilding.
-            </>
-          )}
-          {source.reason && (
-            <span style={{ overflowWrap: "anywhere" }}> {source.reason}</span>
-          )}
-        </p>
-      ))}
-      <label>
-        Group level{" "}
-        <select value={kind} onChange={(e) => setKind(e.target.value)}>
-          <option value="ALL">All levels</option>
-          {["SECTOR", "GROUP", "INDUSTRY", "SUB_INDUSTRY", "THEME"].map((k) => (
-            <option key={k}>{k}</option>
+    <>
+      <PageTitle eyebrow="GROUP LEADERSHIP" title="Groups">
+        <span className="muted">Ranks compare eligible peers at one level</span>
+      </PageTitle>
+      <div className="level-tabs" aria-label="Group levels">
+        {levels.map((k, i) => (
+          <button
+            key={k}
+            aria-pressed={kind === k}
+            onClick={() => {
+              setKind(k);
+              setPage(1);
+              setSelected(null);
+            }}
+          >
+            {levelNames[i]}
+          </button>
+        ))}
+      </div>
+      <div className="filters">
+        <label>
+          Find group
+          <input
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setPage(1);
+            }}
+          />
+        </label>
+        <label className="check-label">
+          <input
+            type="checkbox"
+            checked={all}
+            onChange={(e) => {
+              setAll(e.target.checked);
+              setPage(1);
+            }}
+          />
+          Include unranked groups
+        </label>
+        <span className="source-age">
+          {health.data?.membership_maintenance?.map((s) => (
+            <span key={s.role}>
+              {s.role === "hierarchy" ? "Hierarchy" : "Themes"} {s.age_days}d
+              old · {label(s.reuse_status)}{" "}
+            </span>
           ))}
-        </select>
-      </label>
-      <label>
-        Find group{" "}
-        <input value={search} onChange={(e) => setSearch(e.target.value)} />
-      </label>
-      {query.data.groups
-        .filter(
-          (g) =>
-            (kind === "ALL" || g.group_type === kind) &&
-            displayPath(g.group_id)
-              .toLowerCase()
-              .includes(search.toLowerCase()),
-        )
-        .map((g) => (
-          <details key={`${g.group_type}:${g.group_id}`}>
-            <summary>
-              {displayPath(g.group_id)} · {g.group_type}
-            </summary>
-            <p>
-              Members {g.total_members}; valid RS {g.valid_RS_comp_count};
-              coverage {g.coverage}
-            </p>
-            <p>
-              Source {g.membership.source_as_of_date}; effective{" "}
-              {g.membership.effective_session}; known{" "}
-              {g.membership.known_session}; valid through{" "}
-              {g.membership.valid_through}.
-            </p>
-            {"analysis_basis" in g.membership && (
-              <p>
-                CURRENT COHORT · market evidence{" "}
-                {g.membership.market_as_of_session}; membership known at{" "}
-                {g.membership.known_at}; evaluated{" "}
-                {g.membership.evaluation_timestamp}; action{" "}
-                {g.membership.action_session}. Historical rotation changes
-                unavailable.
+        </span>
+      </div>
+      <details className="data-details">
+        <summary>Membership & ranking details</summary>
+        <p>
+          Membership is an operator-approved dated capture, not provider
+          reconfirmation. Parent paths remain distinct and themes may overlap.
+          No historical rank movement is inferred.
+        </p>
+        <p>
+          Rotation RS is a cross-sectional score. Rotation spread is RS rotation
+          minus RS composite; it is not a change over time. WATCH/ACT counts are
+          unique LONG stocks within each group; groups can overlap.
+        </p>
+        {health.data?.membership_maintenance?.map((s) => (
+          <p key={s.role}>
+            {s.role}: capture {s.capture_date}; reuse expires{" "}
+            {s.expires_at ?? "Unavailable"};{" "}
+            {s.reason ?? "Within approved reuse policy"}.
+          </p>
+        ))}
+      </details>
+      <div hidden={!!selected}>
+        {query.error ? (
+          <ErrorPanel error={query.error} />
+        ) : (
+          <>
+            <div className="list-caption">
+              {query.data?.total ?? "…"}{" "}
+              {all ? "ranked and unranked" : "eligible ranked"} groups · rank 1
+              leads
+            </div>
+            <div className="table-scroll research-table">
+              <table aria-label="Ranked groups">
+                <thead>
+                  <tr>
+                    {[
+                      ["name", "Name"],
+                      ["leadership_rank", "Leadership rank"],
+                      ["median_RS_comp", "Median RS"],
+                      ["median_RS_rotation", "Rotation RS"],
+                      ["median_rotation_delta", "Rotation spread"],
+                      ["valid_members", "Covered / total"],
+                      ["watch_count", "WATCH / ACT"],
+                    ].map(([key, title]) => (
+                      <th key={key}>
+                        <button onClick={() => sorting(key)}>
+                          {title} {sort === key ? (descending ? "↓" : "↑") : ""}
+                        </button>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {query.data?.rows.map((g) => (
+                    <tr key={g.group_id}>
+                      <td className="group-name">
+                        <button
+                          onClick={() => {
+                            setSelected(g.group_id);
+                            setMemberPage(1);
+                          }}
+                        >
+                          {g.name}
+                        </button>
+                        <small title={g.parent}>{g.parent}</small>
+                      </td>
+                      <td>
+                        {g.leadership_rank == null ? (
+                          <span title={g.reasons.map(label).join("; ")}>
+                            Unranked
+                            <small>
+                              {g.reasons.length
+                                ? label(g.reasons[0])
+                                : "Insufficient ranking evidence"}
+                            </small>
+                          </span>
+                        ) : (
+                          <>
+                            {number(g.leadership_rank, 0)} /{" "}
+                            {g.eligible_group_count}
+                          </>
+                        )}
+                      </td>
+                      <td>{number(g.median_RS_comp)}</td>
+                      <td>{number(g.median_RS_rotation)}</td>
+                      <td>{number(g.median_rotation_delta)}</td>
+                      <td>
+                        {g.valid_members} / {g.total_members}
+                      </td>
+                      <td>
+                        {g.watch_count} / {g.act_count}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {query.data?.total === 0 && (
+              <p className="empty-inline">
+                No eligible groups at this level. Include unranked groups to
+                inspect coverage.
               </p>
             )}
-            <p>
-              Median RS {g.median_RS_comp ?? "Unavailable"}; leadership rank{" "}
-              {g.leadership_rank ?? "Unavailable"}; rotation rank{" "}
-              {g.group_rotation_rank ?? "Unavailable"}.
-            </p>
-            <p>
-              Outside research cohort {g.outside_universe_count}; excluded
-              non-securities {g.excluded_non_security_count}.
-            </p>
-            <p>
-              {[
-                ...g.leadership_rank_reasons,
-                ...g.rotation_rank_reasons,
-                ...g.missing_context_reasons,
-              ].join(", ")}
-            </p>
-            <ul>
-              {g.members.map((m) => (
-                <li key={m.source_symbol}>
-                  {m.source_symbol}
-                  {" · "}
-                  {m.identity_reason}
-                </li>
-              ))}
-            </ul>
-          </details>
-        ))}
-    </section>
+            <div className="pagination">
+              <span>
+                Page {page} of {query.data?.pages || 1}
+              </span>
+              <button disabled={page === 1} onClick={() => setPage(page - 1)}>
+                Previous groups
+              </button>
+              <button
+                disabled={!query.data || page >= query.data.pages}
+                onClick={() => setPage(page + 1)}
+              >
+                Next groups
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+      {selected && (
+        <section className="member-panel">
+          <header className="panel-header">
+            <div>
+              <button onClick={() => setSelected(null)}>
+                ← Back to ranked groups
+              </button>
+              <h2>{groupName(selected)}</h2>
+              <small className="muted">
+                {members.data?.total ?? "…"} published members · bounded pages
+              </small>
+            </div>
+          </header>
+          {members.error ? (
+            <ErrorPanel error={members.error} />
+          ) : (
+            <>
+              <div className="table-scroll research-table">
+                <table aria-label="Group members">
+                  <thead>
+                    <tr>
+                      {[
+                        "Symbol",
+                        "Price",
+                        "RS",
+                        "Structure",
+                        "Active setup",
+                        "Decision",
+                        "Sub-industry",
+                        "Primary blocker",
+                      ].map((h) => (
+                        <th key={h}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <StockRows
+                    rows={
+                      members.data?.members.flatMap((m) =>
+                        m.row ? [m.row] : [],
+                      ) ?? []
+                    }
+                    onSelect={onSelect}
+                  />
+                  {members.data?.members.some((m) => !m.row) && (
+                    <tbody>
+                      {members.data.members
+                        .filter((m) => !m.row)
+                        .map((m) => (
+                          <tr key={m.symbol}>
+                            <td>{m.symbol}</td>
+                            <td colSpan={7} className="muted">
+                              {m.reason}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  )}
+                </table>
+              </div>
+              <div className="pagination">
+                <span>
+                  Page {memberPage} of {members.data?.pages || 1}
+                </span>
+                <button
+                  disabled={memberPage === 1}
+                  onClick={() => setMemberPage(memberPage - 1)}
+                >
+                  Previous members
+                </button>
+                <button
+                  disabled={!members.data || memberPage >= members.data.pages}
+                  onClick={() => setMemberPage(memberPage + 1)}
+                >
+                  Next members
+                </button>
+              </div>
+            </>
+          )}
+        </section>
+      )}
+    </>
   );
 }
-export function History({ session }: { session: string }) {
-  const query = useQuery({
-    queryKey: ["history", session],
-    queryFn: () => get<Schemas["ErrorV1"]>(`/time-machine/${session}`),
-    retry: false,
-  });
+export function History() {
   return (
-    <section>
-      <h1>Time Machine</h1>
-      {query.error ? (
-        <ErrorPanel error={query.error} retry={() => void query.refetch()} />
-      ) : (
-        <p>Checking historical evidence availability.</p>
-      )}
-    </section>
+    <>
+      <PageTitle eyebrow="PLANNED" title="Time Machine" />
+      <p>
+        Historical research is unavailable. Current membership captures cannot
+        establish historical membership or past rotation. No historical snapshot
+        is configured.
+      </p>
+      <a href="#brief">Return to daily research</a>
+    </>
   );
 }

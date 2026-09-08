@@ -15,7 +15,7 @@ from market_dashboard.aperture import decision_components
 from market_dashboard.aperture.decision_contracts import SizingProposalV1
 from market_dashboard.aperture.rules import load_aperture_rules
 from market_dashboard.data.security_identity import MarketDataSymbol
-from market_dashboard.workstation import projections
+from market_dashboard.workstation import projections, research
 from market_dashboard.workstation.detail_v2 import (
     EvidencePageV2,
     SymbolDetailV2,
@@ -284,6 +284,171 @@ def create_app(store=None):
     @app.get("/api/v1/rules", response_model=RulesViewV1)
     def rules():
         return projections.rules_view(store.require(), store.meta())
+
+    @app.get("/api/v2/research/health", response_model=research.ResearchHealthV1)
+    def research_health():
+        snapshot = store.require()
+        missing = []
+        if snapshot.regime.inputs.volatility.close is None:
+            missing.append("VIX unavailable")
+        if snapshot.regime.status == "UNKNOWN":
+            missing.append("Market regime unconfirmed")
+        if any(r.output.earnings.eligibility == "UNKNOWN" for r in snapshot.records):
+            missing.append("Earnings coverage incomplete")
+        if any(
+            r.output.earnings.coverage_required_through is None
+            for r in snapshot.records
+        ):
+            missing.append("Retained earnings calendar too short")
+        return research.ResearchHealthV1(
+            meta=store.meta(),
+            missing=tuple(missing),
+            risk_fraction=snapshot.rules.risk.risk_per_idea_fraction,
+            regime_multiplier=getattr(
+                snapshot.rules.risk.regime_multipliers,
+                snapshot.regime.status.lower(),
+                None,
+            ),
+            allowed_risk_fraction=(
+                snapshot.rules.risk.risk_per_idea_fraction
+                * getattr(
+                    snapshot.rules.risk.regime_multipliers,
+                    snapshot.regime.status.lower(),
+                )
+            )
+            if snapshot.regime.status in ("GREEN", "YELLOW", "RED")
+            else None,
+            membership_maintenance=membership_maintenance(store, snapshot),
+        )
+
+    @app.get("/api/v2/research/tape", response_model=research.ResearchTapeV1)
+    def research_tape(
+        page: int = Query(1, ge=1),
+        page_size: int = Query(25, ge=1, le=100),
+        action: Literal["NONE", "WATCH", "TRADE", "ACT"] | None = None,
+        structure: Literal["NEUTRAL", "EMERGING", "UPTREND", "DETERIORATING", "DECLINE"]
+        | None = None,
+        setup: Literal["EP", "CONTRACTION", "TREND_PULLBACK", "RANGE"] | None = None,
+        group: str | None = Query(None, max_length=512),
+        min_rs_comp: float | None = Query(None, ge=0, le=100),
+        min_rs_rotation: float | None = Query(None, ge=0, le=100),
+        veto: bool | None = None,
+        sort: Literal[
+            "symbol", "price", "RS_comp", "RS_rotation", "decision"
+        ] = "symbol",
+        descending: bool = False,
+    ):
+        return research.tape_view(
+            store.require(),
+            store.meta(),
+            page=page,
+            page_size=page_size,
+            action=action,
+            structure=structure,
+            setup=setup,
+            group=group,
+            min_rs_comp=min_rs_comp,
+            min_rs_rotation=min_rs_rotation,
+            veto=veto,
+            sort=sort,
+            descending=descending,
+        )
+
+    @app.get("/api/v2/research/groups", response_model=research.ResearchGroupsV1)
+    def research_groups(
+        kind: Literal[
+            "SECTOR", "GROUP", "INDUSTRY", "SUB_INDUSTRY", "THEME"
+        ] = "SUB_INDUSTRY",
+        include_unranked: bool = False,
+        sort: Literal[
+            "leadership_rank",
+            "median_RS_comp",
+            "median_RS_rotation",
+            "median_rotation_delta",
+            "valid_members",
+            "watch_count",
+            "name",
+        ] = "leadership_rank",
+        descending: bool = False,
+        q: str = Query("", max_length=100),
+        page: int = Query(1, ge=1),
+        page_size: int = Query(25, ge=1, le=100),
+    ):
+        return research.groups_view(
+            store.require(),
+            store.meta(),
+            kind=kind,
+            include_unranked=include_unranked,
+            sort=sort,
+            descending=descending,
+            q=q,
+            page=page,
+            page_size=page_size,
+        )
+
+    @app.get("/api/v2/research/members", response_model=research.ResearchMembersV1)
+    def research_members(
+        group_id: str = Query(..., max_length=512),
+        kind: Literal[
+            "SECTOR", "GROUP", "INDUSTRY", "SUB_INDUSTRY", "THEME"
+        ] = "SUB_INDUSTRY",
+        page: int = Query(1, ge=1),
+        page_size: int = Query(25, ge=1, le=100),
+    ):
+        snapshot = store.require()
+        group = next(
+            (
+                g
+                for g in snapshot.groups
+                if (g.group_type, g.group_id) == (kind, group_id)
+            ),
+            None,
+        )
+        if group is None:
+            raise ApiError(
+                404, "GROUP_NOT_FOUND", "Choose an exact published group identity."
+            )
+        records = {
+            r.output.decision.symbol: r
+            for r in snapshot.records
+            if r.output.decision.direction == "LONG"
+        }
+        members = sorted(group.members, key=lambda m: m.source_symbol)
+        return research.ResearchMembersV1(
+            meta=store.meta(),
+            total=len(members),
+            page=page,
+            pages=(len(members) + page_size - 1) // page_size,
+            members=tuple(
+                research.ResearchMemberV1(
+                    symbol=m.source_symbol,
+                    row=research.research_row(records[m.market_data_symbol])
+                    if not m.non_security and m.market_data_symbol in records
+                    else None,
+                    reason=None
+                    if not m.non_security and m.market_data_symbol in records
+                    else "Outside calculated research coverage; " + m.identity_reason,
+                )
+                for m in members[(page - 1) * page_size : page * page_size]
+            ),
+        )
+
+    @app.get(
+        "/api/v2/research/symbols", response_model=tuple[research.SymbolSearchV1, ...]
+    )
+    def research_symbols(
+        q: str = Query("", max_length=80), limit: int = Query(20, ge=1, le=50)
+    ):
+        snapshot = store.require()
+        found = {}
+        for r in snapshot.records:
+            symbol = r.output.decision.symbol
+            if q.casefold() in (symbol + " " + r.display_name).casefold():
+                entry = found.setdefault(
+                    symbol, {"symbol": symbol, "name": r.display_name, "directions": []}
+                )
+                entry["directions"].append(r.output.decision.direction)
+        return tuple(research.SymbolSearchV1(**found[s]) for s in sorted(found)[:limit])
 
     @app.get("/api/v1/groups", response_model=GroupsViewV1)
     def groups():

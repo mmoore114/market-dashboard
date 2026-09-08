@@ -33,7 +33,7 @@ export function Chip({ value }: { value: string | null | undefined }) {
 export function Reasons({ reasons }: { reasons: readonly Reason[] }) {
   return (
     <ul className="reason-list">
-      {reasons.map((r, i) => (
+      {[...new Map(reasons.map((r) => [r.code, r])).values()].map((r, i) => (
         <li key={`${r.code}-${i}`}>
           <span>{r.explanation}</span>
           <code>{r.code}</code>
@@ -98,66 +98,59 @@ export function PageTitle({
     </header>
   );
 }
-export function Context({ meta }: { meta: Meta }) {
+export function Context({
+  meta,
+  missing,
+}: {
+  meta: Meta;
+  missing?: readonly string[];
+}) {
   return (
-    <div className="context">
-      <span>{meta.mode_label}</span>
-      {meta.evaluation?.bootstrap && <span>{meta.mode}</span>}
-      <span>
-        Market as of <b>{meta.as_of_session ?? "Unavailable"}</b>
-      </span>
-      <span>
-        Action session <b>{meta.action_session ?? "Unavailable"}</b>
-      </span>
-      {meta.evaluation && (
-        <>
-          {meta.evaluation.comparison && (
-            <span>
-              <b>ENGINE_VERSION_COMPARISON</b> {meta.evaluation.comparison.note}
-            </span>
-          )}
-          <span>
-            Evaluated{" "}
-            <b>
-              {meta.evaluation.bootstrap
-                ? new Intl.DateTimeFormat("en-US", {
-                    timeZone: "America/New_York",
-                    dateStyle: "medium",
-                    timeStyle: "long",
-                  }).format(new Date(meta.evaluation.evaluation_timestamp))
-                : meta.evaluation.evaluation_timestamp}
-            </b>
-          </span>
-          <span>
-            Population <b>{meta.evaluation.population_scope}</b>
-          </span>
-        </>
-      )}
-      {meta.evaluation?.source_fingerprint && (
+    <div className="context compact-context">
+      <div className="context-line">
+        <span>{meta.mode_label}</span>
         <span>
-          Source fingerprint <code>{meta.evaluation.source_fingerprint}</code>
+          Market data <b>{meta.as_of_session ?? "Unavailable"}</b>
         </span>
-      )}
-      {meta.evaluation?.bootstrap && (
-        <>
-          <span>{meta.evaluation.bootstrap.calculation_mode}</span>
-          <span>{meta.evaluation.bootstrap.historical_membership_status}</span>
-          <span>Ranks: {meta.evaluation.bootstrap.rank_basis}</span>
-          <span>
-            Covered {meta.evaluation.bootstrap.covered_population}; research{" "}
-            {meta.evaluation.bootstrap.first_observations.length}; strict trade{" "}
-            {meta.evaluation.bootstrap.strict_trade_members}; mapping{" "}
-            {meta.evaluation.bootstrap.mapping_members}
-          </span>
-          <span>
-            Not yet observed: {meta.evaluation.bootstrap.not_yet_observed};
-            missing: {meta.evaluation.bootstrap.missing_observations}
-          </span>
-        </>
-      )}
-      <span>
-        Freshness <b>{meta.freshness}</b>
-      </span>
+        <span>
+          Action <b>{meta.action_session ?? "Unavailable"}</b>
+        </span>
+        <span>
+          Snapshot <Chip value={meta.freshness} />
+        </span>
+        <span>
+          Evidence:{" "}
+          {missing ? (missing.length ? "Incomplete" : "Available") : "Checking"}
+        </span>
+      </div>
+      <details className="data-details">
+        <summary>Data details</summary>
+        <p>
+          Evaluated {meta.evaluation?.evaluation_timestamp ?? "Not supplied"}.
+          Freshness is separate from source completeness.
+        </p>
+        <p>{missing?.join(" · ")}</p>
+        <p>
+          Snapshot fingerprint <code>{meta.fingerprint}</code>
+        </p>
+        <p>
+          Source fingerprint <code>{meta.evaluation?.source_fingerprint}</code>
+        </p>
+        {meta.evaluation?.bootstrap && (
+          <p>
+            Current-state bootstrap ·{" "}
+            {meta.evaluation.bootstrap.first_observations.length} research
+            members · {meta.evaluation.bootstrap.strict_trade_members}{" "}
+            trade-universe members · {meta.evaluation.bootstrap.mapping_members}{" "}
+            mapping members. Historical membership is unavailable before its
+            stated coverage.
+          </p>
+        )}
+        <details>
+          <summary>Publication evidence</summary>
+          <pre>{JSON.stringify(meta.evaluation, null, 2)}</pre>
+        </details>
+      </details>
     </div>
   );
 }

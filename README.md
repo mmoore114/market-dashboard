@@ -36,6 +36,45 @@ and trade eligibility; missing VIX/earnings evidence stays explicit. See
 [its completion receipt](docs/universe-expansion-v1-receipt.md), and
 [daily refresh](docs/current-refresh-v2.md).
 
+## Daily research interface (stacked draft)
+
+AP-WORKSTATION-UX-001 adds Brief funnel navigation, ranked Groups (default
+Sub-industries), bounded member drilldown and compact active-direction Tape rows.
+Stock detail opens with its conclusion and blockers; Setups, original decision
+evidence and technical identity remain available in tabs. “Size this idea” carries
+the exact symbol/direction to explicit entry/stop and account proposals. Rules are
+rendered from canonical backend values, with technical parameters collapsed.
+
+Freshness is distinct from evidence completeness. `decision-review-v1` explains
+missing sources, misaligned data, strategy conditions and unentered proposals. It
+**does not rewrite retained Decision/Risk V1 outputs**: unrelated setup-family
+errors are disclosed as a retained global veto, never used to manufacture ACT.
+Future input preparation now includes verified exchange sessions beyond the
+required earnings horizon; it does not invent future observations. See the
+[assignment](docs/workstation-ux-001.md) and [receipt](docs/workstation-ux-001-receipt.md).
+The pinned daily runtime is unchanged until separately reviewed and deployed.
+
+For interactive development, use the existing explicitly labeled fixture mode if
+no current verified snapshot is available. Production freshness checks must remain
+in force. The read-only research browser suite targets an **already-running**
+isolated preview and never starts a refresh:
+
+```bash
+cd web
+APERTURE_UX_URL=http://127.0.0.1:5174 npm run test:research
+# Against an explicitly synthetic preview, run the fixture workflow instead:
+APERTURE_UX_FIXTURE=1 APERTURE_UX_URL=http://127.0.0.1:5175 npm run test:research
+```
+
+`APERTURE_UX_CAPTURES` and `APERTURE_UX_RESULTS` select private screenshot/result
+directories. A preview needs the feature branch API and UI together: start FastAPI
+with `APERTURE_MODE=FIXTURE` (or `LOCAL_SNAPSHOT` plus a genuinely current verified
+`APERTURE_SNAPSHOT_PATH`), build `web`, and serve its `dist` directory with an `/api`
+proxy to that API. Use separate loopback ports from the pinned Workstation. The
+live suite requires a current expanded population, exercises both 1366×768 and
+390×844, and rejects fewer than ten ordinary laptop Tape/Groups rows. It does not
+change snapshot clocks or replay engines.
+
 ## Launch and refresh
 
 From the tested installed repository (the pinned release used by the timer), with private configuration at

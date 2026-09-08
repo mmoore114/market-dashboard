@@ -84,6 +84,50 @@
         "title": "ApertureRules",
         "type": "object"
       },
+      "BlockerV1": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "enum": [
+              "STRATEGY",
+              "MISSING_DATA",
+              "INVALID_DATA",
+              "PROPOSAL",
+              "LEGACY_SCOPE"
+            ],
+            "title": "Category",
+            "type": "string"
+          },
+          "codes": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Codes",
+            "type": "array"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "rung": {
+            "title": "Rung",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "title",
+          "detail",
+          "rung"
+        ],
+        "title": "BlockerV1",
+        "type": "object"
+      },
       "BootstrapContextV1": {
         "additionalProperties": false,
         "properties": {
@@ -1315,6 +1359,70 @@
           "decision"
         ],
         "title": "DecisionOutputViewV2",
+        "type": "object"
+      },
+      "DecisionReviewV1": {
+        "additionalProperties": false,
+        "properties": {
+          "active_setups": {
+            "items": {
+              "$ref": "#/components/schemas/SetupReviewV1"
+            },
+            "title": "Active Setups",
+            "type": "array"
+          },
+          "blockers": {
+            "items": {
+              "$ref": "#/components/schemas/BlockerV1"
+            },
+            "title": "Blockers",
+            "type": "array"
+          },
+          "historical_count": {
+            "title": "Historical Count",
+            "type": "integer"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "opposite_direction_count": {
+            "title": "Opposite Direction Count",
+            "type": "integer"
+          },
+          "schema_version": {
+            "const": "decision-review-v1",
+            "default": "decision-review-v1",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "stored_state": {
+            "title": "Stored State",
+            "type": "string"
+          },
+          "strength_summary": {
+            "title": "Strength Summary",
+            "type": "string"
+          },
+          "trade_universe_eligible": {
+            "title": "Trade Universe Eligible",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "stored_state",
+          "trade_universe_eligible",
+          "strength_summary",
+          "blockers",
+          "active_setups",
+          "historical_count",
+          "opposite_direction_count",
+          "notes"
+        ],
+        "title": "DecisionReviewV1",
         "type": "object"
       },
       "DecisionRiskOutputV1": {
@@ -12670,6 +12778,461 @@
         "title": "RegimeOutputV1",
         "type": "object"
       },
+      "ResearchGroupV1": {
+        "additionalProperties": false,
+        "properties": {
+          "act_count": {
+            "title": "Act Count",
+            "type": "integer"
+          },
+          "eligible_group_count": {
+            "title": "Eligible Group Count",
+            "type": "integer"
+          },
+          "group_id": {
+            "title": "Group Id",
+            "type": "string"
+          },
+          "group_type": {
+            "title": "Group Type",
+            "type": "string"
+          },
+          "leadership_rank": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leadership Rank"
+          },
+          "median_RS_comp": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median Rs Comp"
+          },
+          "median_RS_rotation": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median Rs Rotation"
+          },
+          "median_rotation_delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median Rotation Delta"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "parent": {
+            "title": "Parent",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "total_members": {
+            "title": "Total Members",
+            "type": "integer"
+          },
+          "valid_members": {
+            "title": "Valid Members",
+            "type": "integer"
+          },
+          "watch_count": {
+            "title": "Watch Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "group_id",
+          "group_type",
+          "name",
+          "parent",
+          "leadership_rank",
+          "eligible_group_count",
+          "median_RS_comp",
+          "median_RS_rotation",
+          "median_rotation_delta",
+          "valid_members",
+          "total_members",
+          "watch_count",
+          "act_count",
+          "reasons"
+        ],
+        "title": "ResearchGroupV1",
+        "type": "object"
+      },
+      "ResearchGroupsV1": {
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/ViewMetaV1"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "pages": {
+            "title": "Pages",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ResearchGroupV1"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "meta",
+          "rows",
+          "total",
+          "page",
+          "pages"
+        ],
+        "title": "ResearchGroupsV1",
+        "type": "object"
+      },
+      "ResearchHealthV1": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed_risk_fraction": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allowed Risk Fraction"
+          },
+          "membership_maintenance": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/MembershipMaintenanceV1"
+            },
+            "title": "Membership Maintenance",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ViewMetaV1"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing",
+            "type": "array"
+          },
+          "regime_multiplier": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Regime Multiplier"
+          },
+          "risk_fraction": {
+            "title": "Risk Fraction",
+            "type": "number"
+          }
+        },
+        "required": [
+          "meta",
+          "missing",
+          "risk_fraction",
+          "regime_multiplier",
+          "allowed_risk_fraction"
+        ],
+        "title": "ResearchHealthV1",
+        "type": "object"
+      },
+      "ResearchMemberV1": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "row": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResearchRowV1"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "symbol": {
+            "title": "Symbol",
+            "type": "string"
+          }
+        },
+        "required": [
+          "symbol",
+          "row",
+          "reason"
+        ],
+        "title": "ResearchMemberV1",
+        "type": "object"
+      },
+      "ResearchMembersV1": {
+        "additionalProperties": false,
+        "properties": {
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/ResearchMemberV1"
+            },
+            "title": "Members",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ViewMetaV1"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "pages": {
+            "title": "Pages",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "meta",
+          "members",
+          "total",
+          "page",
+          "pages"
+        ],
+        "title": "ResearchMembersV1",
+        "type": "object"
+      },
+      "ResearchRowV1": {
+        "additionalProperties": false,
+        "properties": {
+          "RS_comp": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rs Comp"
+          },
+          "RS_rotation": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rs Rotation"
+          },
+          "decision": {
+            "title": "Decision",
+            "type": "string"
+          },
+          "direction": {
+            "title": "Direction",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "group_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Label"
+          },
+          "history_count": {
+            "title": "History Count",
+            "type": "integer"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "primary_blocker": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BlockerV1"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rotation_delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rotation Delta"
+          },
+          "setups": {
+            "items": {
+              "$ref": "#/components/schemas/SetupSummaryV1"
+            },
+            "title": "Setups",
+            "type": "array"
+          },
+          "structure": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Structure"
+          },
+          "sub_industry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sub Industry"
+          },
+          "symbol": {
+            "title": "Symbol",
+            "type": "string"
+          },
+          "trade_universe_eligible": {
+            "title": "Trade Universe Eligible",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "symbol",
+          "direction",
+          "display_name",
+          "price",
+          "RS_comp",
+          "RS_rotation",
+          "rotation_delta",
+          "structure",
+          "setups",
+          "history_count",
+          "decision",
+          "trade_universe_eligible",
+          "sub_industry",
+          "group_label",
+          "primary_blocker"
+        ],
+        "title": "ResearchRowV1",
+        "type": "object"
+      },
+      "ResearchTapeV1": {
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/ViewMetaV1"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "pages": {
+            "title": "Pages",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ResearchRowV1"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "meta",
+          "rows",
+          "total",
+          "page",
+          "pages"
+        ],
+        "title": "ResearchTapeV1",
+        "type": "object"
+      },
       "ResearchUniverseRules": {
         "additionalProperties": false,
         "properties": {
@@ -12925,6 +13488,14 @@
               "type": "string"
             },
             "title": "Lines",
+            "type": "array"
+          },
+          "technical_lines": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Technical Lines",
             "type": "array"
           },
           "title": {
@@ -14179,6 +14750,90 @@
           "rejected_ep"
         ],
         "title": "SetupOutputV2",
+        "type": "object"
+      },
+      "SetupReviewV1": {
+        "additionalProperties": false,
+        "properties": {
+          "direction": {
+            "title": "Direction",
+            "type": "string"
+          },
+          "evaluated": {
+            "title": "Evaluated",
+            "type": "boolean"
+          },
+          "family": {
+            "title": "Family",
+            "type": "string"
+          },
+          "invalidation": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invalidation"
+          },
+          "local_errors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Local Errors",
+            "type": "array"
+          },
+          "qualification": {
+            "title": "Qualification",
+            "type": "string"
+          },
+          "replay_required": {
+            "title": "Replay Required",
+            "type": "boolean"
+          },
+          "setup_id": {
+            "title": "Setup Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "trigger": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trigger"
+          },
+          "unrelated_errors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Unrelated Errors",
+            "type": "array"
+          }
+        },
+        "required": [
+          "setup_id",
+          "family",
+          "direction",
+          "status",
+          "evaluated",
+          "replay_required",
+          "trigger",
+          "invalidation",
+          "local_errors",
+          "unrelated_errors",
+          "qualification"
+        ],
+        "title": "SetupReviewV1",
         "type": "object"
       },
       "SetupStrengthContextV1": {
@@ -16865,6 +17520,9 @@
           "output_ref": {
             "$ref": "#/components/schemas/EvidenceRefV2"
           },
+          "review": {
+            "$ref": "#/components/schemas/DecisionReviewV1"
+          },
           "volume": {
             "anyOf": [
               {
@@ -16894,9 +17552,37 @@
           "display_name",
           "volume",
           "volume_reason",
-          "output_ref"
+          "output_ref",
+          "review"
         ],
         "title": "SymbolRecordV2",
+        "type": "object"
+      },
+      "SymbolSearchV1": {
+        "additionalProperties": false,
+        "properties": {
+          "directions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Directions",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "symbol": {
+            "title": "Symbol",
+            "type": "string"
+          }
+        },
+        "required": [
+          "symbol",
+          "name",
+          "directions"
+        ],
+        "title": "SymbolSearchV1",
         "type": "object"
       },
       "TapeRowV1": {
@@ -18602,6 +19288,657 @@
           }
         },
         "summary": "Evidence Page"
+      }
+    },
+    "/api/v2/research/groups": {
+      "get": {
+        "operationId": "research_groups_api_v2_research_groups_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "default": "SUB_INDUSTRY",
+              "enum": [
+                "SECTOR",
+                "GROUP",
+                "INDUSTRY",
+                "SUB_INDUSTRY",
+                "THEME"
+              ],
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_unranked",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Unranked",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "leadership_rank",
+              "enum": [
+                "leadership_rank",
+                "median_RS_comp",
+                "median_RS_rotation",
+                "median_rotation_delta",
+                "valid_members",
+                "watch_count",
+                "name"
+              ],
+              "title": "Sort",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "descending",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Descending",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 100,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResearchGroupsV1"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Research Groups"
+      }
+    },
+    "/api/v2/research/health": {
+      "get": {
+        "operationId": "research_health_api_v2_research_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResearchHealthV1"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Research Health"
+      }
+    },
+    "/api/v2/research/members": {
+      "get": {
+        "operationId": "research_members_api_v2_research_members_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "group_id",
+            "required": true,
+            "schema": {
+              "maxLength": 512,
+              "title": "Group Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "default": "SUB_INDUSTRY",
+              "enum": [
+                "SECTOR",
+                "GROUP",
+                "INDUSTRY",
+                "SUB_INDUSTRY",
+                "THEME"
+              ],
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResearchMembersV1"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Research Members"
+      }
+    },
+    "/api/v2/research/symbols": {
+      "get": {
+        "operationId": "research_symbols_api_v2_research_symbols_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "default": "",
+              "maxLength": 80,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SymbolSearchV1"
+                  },
+                  "title": "Response Research Symbols Api V2 Research Symbols Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Research Symbols"
+      }
+    },
+    "/api/v2/research/tape": {
+      "get": {
+        "operationId": "research_tape_api_v2_research_tape_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "NONE",
+                    "WATCH",
+                    "TRADE",
+                    "ACT"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Action"
+            }
+          },
+          {
+            "in": "query",
+            "name": "structure",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "NEUTRAL",
+                    "EMERGING",
+                    "UPTREND",
+                    "DETERIORATING",
+                    "DECLINE"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Structure"
+            }
+          },
+          {
+            "in": "query",
+            "name": "setup",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "EP",
+                    "CONTRACTION",
+                    "TREND_PULLBACK",
+                    "RANGE"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Setup"
+            }
+          },
+          {
+            "in": "query",
+            "name": "group",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 512,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Group"
+            }
+          },
+          {
+            "in": "query",
+            "name": "min_rs_comp",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 100,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Rs Comp"
+            }
+          },
+          {
+            "in": "query",
+            "name": "min_rs_rotation",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 100,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Rs Rotation"
+            }
+          },
+          {
+            "in": "query",
+            "name": "veto",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Veto"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "required": false,
+            "schema": {
+              "default": "symbol",
+              "enum": [
+                "symbol",
+                "price",
+                "RS_comp",
+                "RS_rotation",
+                "decision"
+              ],
+              "title": "Sort",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "descending",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Descending",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResearchTapeV1"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorV1"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Research Tape"
       }
     },
     "/api/v2/symbols/{symbol}": {

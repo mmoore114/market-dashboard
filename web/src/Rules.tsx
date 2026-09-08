@@ -21,11 +21,11 @@ export function Rules() {
   return (
     <>
       <PageTitle eyebrow="TRANSPARENT BY DESIGN" title="Rules & evidence">
-        <span className="hypothesis">{d.status}</span>
+        <span className="hypothesis">{d.status.replaceAll("_", " · ")}</span>
       </PageTitle>
       <p className="rules-intro">
-        Current hypotheses returned by the Python API. Thresholds remain
-        uncalibrated; every promotion retains its component evidence.
+        Current research rules. Thresholds remain uncalibrated; every promotion
+        retains its supporting evidence.
       </p>
       <div className="rules-grid">
         {d.sections.map((s) => (
@@ -36,11 +36,23 @@ export function Rules() {
                 <li key={i}>{line}</li>
               ))}
             </ul>
+            {s.technical_lines?.length ? (
+              <details>
+                <summary>Exact formulas & parameters</summary>
+                <ul>
+                  {s.technical_lines.map((line, i) => (
+                    <li key={i}>
+                      <code>{line}</code>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
           </section>
         ))}
       </div>
-      <section className="panel version-panel">
-        <h2>Exact version identities</h2>
+      <details className="panel version-panel">
+        <summary>Exact version identities & fingerprints</summary>
         <dl>
           {Object.entries(d.versions).map(([key, value]) => (
             <div key={key}>
@@ -55,7 +67,7 @@ export function Rules() {
         <code>{d.rules_fingerprint}</code>
         <p>Snapshot fingerprint</p>
         <code>{d.meta.fingerprint}</code>
-      </section>
+      </details>
     </>
   );
 }

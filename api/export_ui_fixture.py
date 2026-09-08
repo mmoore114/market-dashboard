@@ -26,6 +26,19 @@ def document():
             ("rules", "rules"),
         )
     }
+    for name, path in (
+        ("detail", "symbols/SIM110"),
+        ("research_health", "research/health"),
+        ("research_tape", "research/tape"),
+        ("research_groups", "research/groups"),
+        ("symbol_search", "research/symbols"),
+    ):
+        responses[name] = client.get("/api/v2/" + path).json()
+    group = responses["research_groups"]["rows"][0]
+    responses["research_members"] = client.get(
+        "/api/v2/research/members",
+        params={"kind": group["group_type"], "group_id": group["group_id"]},
+    ).json()
     for name, stop in [("size", 100.8), ("refusal", 110)]:
         responses[name] = client.post(
             "/api/v1/sizer",

@@ -1,46 +1,55 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { get, type Schemas } from "./api";
-import {
-  Chip,
-  ErrorPanel,
-  Metric,
-  Reasons,
-  StatePanel,
-  money,
-  number,
-} from "./ui";
-import { SizingResult } from "./Sizer";
-
+import { Chip, ErrorPanel, StatePanel, money, number, Reasons } from "./ui";
+import { categoryNames, groupName, label, type Direction } from "./research";
+const tabs = [
+  "Overview",
+  "Setups",
+  "Decision evidence",
+  "Data details",
+] as const;
 export function Detail({
   symbol,
+  initialDirection = "LONG",
   onClose,
   onSize,
 }: {
   symbol: string;
+  initialDirection?: Direction;
   onClose: () => void;
-  onSize: (symbol: string) => void;
+  onSize: (symbol: string, direction: Direction) => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const [tab, setTab] = useState<(typeof tabs)[number]>("Overview");
   const [copied, setCopied] = useState(false);
+  const [direction, setDirection] = useState<Direction>(initialDirection);
   const query = useQuery({
     queryKey: ["symbol", symbol],
     queryFn: () =>
       get<Schemas["SymbolDetailV2"]>(
-        `/symbols/${encodeURIComponent(symbol)}`,
+        "/symbols/" + encodeURIComponent(symbol),
         undefined,
         "v2",
       ),
   });
   useEffect(() => {
-    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const focused = document.activeElement as HTMLElement | null;
     const modal = dialog.current;
+    const scroll = window.scrollY;
     modal?.showModal();
     return () => {
       modal?.close();
-      previouslyFocused?.focus();
+      focused?.focus({ preventScroll: true });
+      window.scrollTo(0, scroll);
     };
   }, []);
+  const record =
+    query.data?.records.find(
+      (r) => r.output.decision.direction === direction,
+    ) ?? query.data?.records[0];
+  const o = record?.output;
+  const review = record?.review;
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(symbol);
@@ -52,14 +61,20 @@ export function Detail({
   return (
     <dialog
       ref={dialog}
-      className="detail-drawer"
+      className="detail-drawer research-detail"
       aria-labelledby="detail-title"
       onCancel={onClose}
     >
       <header className="drawer-header">
         <div>
-          <span className="eyebrow">SYMBOL EVIDENCE</span>
-          <h2 id="detail-title">{symbol}</h2>
+          <h2 id="detail-title">
+            {symbol}{" "}
+            <span className="company-name">{record?.display_name}</span>
+          </h2>
+          <span className="muted">
+            Price as of {query.data?.meta.as_of_session ?? "…"} ·{" "}
+            {query.data?.meta.mode_label}
+          </span>
         </div>
         <button aria-label="Close symbol detail" onClick={onClose}>
           Close ×
@@ -67,218 +82,303 @@ export function Detail({
       </header>
       {query.isPending ? (
         <StatePanel title="Loading symbol evidence">
-          Reading the complete checklist…
+          Reading bounded local evidence…
         </StatePanel>
       ) : query.error ? (
-        <ErrorPanel error={query.error} retry={() => void query.refetch()} />
+        <ErrorPanel error={query.error} />
       ) : (
-        <>
-          <div className="drawer-context">
-            {query.data.meta.mode_label} · {query.data.meta.as_of_session} →{" "}
-            {query.data.meta.action_session}
-          </div>
-          <div className="manual-handoff">
-            <div>
-              <b>Review chart in Deepvue</b>
-              <p>
-                Copy this exact symbol and open your chart workspace manually.
-              </p>
+        record &&
+        query.data &&
+        o &&
+        review && (
+          <>
+            <div className="detail-actions">
+              <button onClick={() => void copy()}>
+                {copied ? "Symbol copied" : "Copy symbol / Deepvue"}
+              </button>
+              <button
+                className="primary-button"
+                onClick={() => onSize(symbol, o.decision.direction)}
+              >
+                Size this idea →
+              </button>
+              {query.data.records.length > 1 && (
+                <label>
+                  Evidence direction
+                  <select
+                    value={direction}
+                    onChange={(e) => setDirection(e.target.value as Direction)}
+                  >
+                    {query.data.records.map((r) => (
+                      <option key={r.output.decision.direction}>
+                        {r.output.decision.direction}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <small>Open your Deepvue chart workspace manually.</small>
             </div>
-            <button onClick={() => void copy()}>
-              {copied ? "Symbol copied" : "Copy symbol"}
-            </button>
-            <span className="copy-symbol">{symbol}</span>
-          </div>
-          {query.data.records.map((record) => {
-            const o = record.output;
-            return (
-              <article key={o.decision.direction}>
-                <div className="detail-heading">
-                  <h3>
-                    {record.display_name} · {o.decision.direction}
-                  </h3>
-                  <Chip value={o.decision.state} />
-                </div>
-                <div className="metric-grid">
-                  <Metric
-                    label="Close"
-                    value={money(o.inputs.features.close)}
-                  />
-                  <Metric label="Volume" value={number(record.volume, 0)} />
-                  <Metric
-                    label="SMA50"
-                    value={money(o.inputs.features.sma50)}
-                  />
-                  <Metric
-                    label="Wilder ATR14"
-                    value={number(o.inputs.features.wilder_atr14, 2)}
-                  />
-                </div>
-                {record.volume_reason && (
-                  <p className="muted">{record.volume_reason}</p>
-                )}
-                <section className="detail-section">
-                  <h3>Decision checklist</h3>
-                  <ul className="checklist">
-                    {o.decision.gates.map((g) => (
-                      <li key={g.name}>
+            <div className="detail-summary">
+              <div>
+                <small>Stored decision</small>
+                <Chip value={o.decision.state} />
+              </div>
+              <div>
+                <small>Close</small>
+                <b>{money(o.inputs.features.close)}</b>
+              </div>
+              <div>
+                <small>Structure</small>
+                <Chip value={o.inputs.structure?.state} />
+              </div>
+              <div>
+                <small>RS composite / rotation</small>
+                <b>
+                  {number(o.strength.RS_comp)} /{" "}
+                  {number(o.strength.RS_rotation)}
+                </b>
+              </div>
+            </div>
+            <div
+              className="detail-tabs"
+              role="tablist"
+              aria-label="Stock detail sections"
+            >
+              {tabs.map((t) => (
+                <button
+                  key={t}
+                  role="tab"
+                  aria-selected={tab === t}
+                  onClick={() => setTab(t)}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+            <section role="tabpanel" aria-label={tab}>
+              {tab === "Overview" && (
+                <>
+                  <div className="overview-context">
+                    <p>
+                      <b>{review.strength_summary}</b>
+                    </p>
+                    <p>
+                      Trade-universe membership:{" "}
+                      {review.trade_universe_eligible
+                        ? "Eligible"
+                        : "Not eligible"}{" "}
+                      ·{" "}
+                      {o.group.sub_industry
+                        ? groupName(o.group.sub_industry.group_id)
+                        : "Sub-industry unassigned"}
+                    </p>
+                    <p>
+                      <b>Active setup: </b>
+                      {review.active_setups.length
+                        ? review.active_setups
+                            .map(
+                              (s) => label(s.family) + " · " + label(s.status),
+                            )
+                            .join("; ")
+                        : "None in this direction"}
+                      .
+                    </p>
+                  </div>
+                  <h3>Primary blockers</h3>
+                  <ul className="blocker-list">
+                    {review.blockers.slice(0, 3).map((b) => (
+                      <li key={b.title}>
+                        <span
+                          className={
+                            "blocker-category " + b.category.toLowerCase()
+                          }
+                        >
+                          {categoryNames[b.category]}
+                        </span>
                         <div>
-                          <b>
-                            {g.rung} / {g.name.replaceAll("_", " ")}
-                          </b>
-                          <Chip value={g.passed ? "PASS" : "FAIL"} />
+                          <b>{b.title}</b>
+                          <p>{b.detail}</p>
                         </div>
-                        <Reasons reasons={g.reasons} />
                       </li>
                     ))}
                   </ul>
-                </section>
-                <section className="detail-section">
-                  <h3>Structure</h3>
-                  <Chip value={o.inputs.structure?.state} />
-                  <p>
-                    {o.inputs.structure?.reason_codes.join(" · ") ??
-                      "Structure evidence unavailable"}
-                  </p>
-                </section>
-                <section className="detail-section">
-                  <h3>Strength & rotation</h3>
-                  <div className="metric-grid">
-                    <Metric
-                      label="RS composite"
-                      value={number(o.strength.RS_comp)}
-                    />
-                    <Metric
-                      label="RS rotation"
-                      value={number(o.strength.RS_rotation)}
-                    />
-                    <Metric
-                      label="Rotation delta"
-                      value={number(o.strength.rotation_delta)}
-                    />
-                  </div>
-                  <p>
-                    Established:{" "}
-                    {o.strength.established_strength == null
-                      ? "Unknown"
-                      : o.strength.established_strength
-                        ? "Pass"
-                        : "Fail"}{" "}
-                    · New rotation:{" "}
-                    {o.strength.new_rotation == null
-                      ? "Unknown"
-                      : o.strength.new_rotation
-                        ? "Pass"
-                        : "Fail"}
-                  </p>
-                  <Reasons reasons={o.strength.reasons} />
-                </section>
-                <section className="detail-section">
-                  <h3>Sub-industry</h3>
-                  <p>
-                    {o.group.sub_industry?.group_id ?? "Unknown membership"} ·
-                    rank {number(o.group.sub_industry?.leadership_rank)}
-                  </p>
-                  <Chip value={o.group.status} />
-                  <p>
-                    Rotation rank {number(o.group.group_rotation_rank)} · rank
-                    advantage {number(o.group.rotation_rank_advantage)}
-                  </p>
-                  <p>
-                    Themes (nonvoting):{" "}
-                    {o.group.themes.map((g) => g.group_id).join(", ") ||
-                      "None supplied"}
-                  </p>
-                  <Reasons reasons={o.group.reasons} />
-                </section>
-                <section className="detail-section">
-                  <h3>Regime</h3>
-                  <Chip value={o.regime.state} />
-                  <p>
-                    Eligible from{" "}
-                    {o.regime.eligible_from_session ?? "Unavailable"}
-                  </p>
-                  <Reasons reasons={o.regime.reasons} />
-                </section>
-                <section className="detail-section">
-                  <h3>Extension</h3>
-                  <p>
-                    {number(o.extension.signed_extension_sma50_atr, 2)} ATR ·{" "}
-                    {o.extension.inputs.direction}
-                  </p>
-                  <Chip value={o.extension.state} />
-                  <Reasons reasons={o.extension.reasons} />
-                </section>
-                <section className="detail-section">
-                  <h3>Earnings</h3>
-                  <Chip value={o.earnings.eligibility} />
-                  <p>
-                    Coverage through{" "}
-                    {o.earnings.coverage?.covered_through ?? "Unknown"} ·
-                    required through{" "}
-                    {o.earnings.coverage_required_through ?? "Unknown"}
-                  </p>
-                  <Reasons reasons={o.earnings.reasons} />
-                  {o.earnings.events.map((e, i) => (
-                    <div className="event-record" key={i}>
-                      <b>
-                        {e.inputs.event_type} ·{" "}
-                        {e.inputs.scheduled_session ?? "Unknown date"}
-                      </b>
-                      <p>
-                        {e.inputs.timing} · {e.inputs.confidence} ·{" "}
-                        {e.inputs.status} · distance{" "}
-                        {number(e.sessions_until_event, 0)}
-                      </p>
-                      <Reasons reasons={e.reasons} />
-                    </div>
-                  ))}
-                </section>
-                <section className="detail-section">
-                  <h3>
-                    All setup instances{" "}
-                    <span className="count">{o.decision.setups.length}</span>
-                  </h3>
-                  {o.decision.setups.length === 0 ? (
-                    <p className="muted">No setup instances supplied.</p>
-                  ) : (
-                    o.decision.setups.map((s) => (
-                      <div className="setup-record" key={s.setup_id}>
-                        <div>
-                          <b>
-                            {s.family.replaceAll("_", " ")} · {s.direction}
-                          </b>
-                          <Chip value={s.status} />
-                        </div>
-                        <code>{s.setup_id}</code>
-                        <p>
-                          Evaluated: {String(s.evaluated)} · replay required:{" "}
-                          {String(s.replay_required)} · ACT eligible:{" "}
-                          {String(s.act_eligible)}
-                        </p>
-                        <p>
-                          Lifecycle invalidation: {money(s.invalidation_level)}{" "}
-                          · separate from the trade stop
-                        </p>
-                        <Reasons reasons={s.reasons} />
-                      </div>
-                    ))
+                  {review.blockers.length > 3 && (
+                    <button onClick={() => setTab("Decision evidence")}>
+                      Review all {review.blockers.length} blockers →
+                    </button>
                   )}
-                </section>
-                <section className="detail-section">
-                  <h3>Current sizing evidence</h3>
-                  <button
-                    className="primary-button"
-                    onClick={() => onSize(symbol)}
-                  >
-                    Open Sizer what-if →
-                  </button>
-                  <SizingResult result={o.sizing} />
-                </section>
-              </article>
-            );
-          })}
-        </>
+                  {review.blockers.length === 0 && (
+                    <p>
+                      All stored decision gates passed. ACT requests
+                      discretionary chart review, not an order.
+                    </p>
+                  )}
+                </>
+              )}
+              {tab === "Setups" && (
+                <>
+                  <h3>Active setups · {o.decision.direction}</h3>
+                  {review.active_setups.length === 0 && (
+                    <p>No active setup in this direction.</p>
+                  )}
+                  {review.active_setups.map((s) => (
+                    <article className="setup-card" key={s.setup_id}>
+                      <h3>
+                        {label(s.family)} <Chip value={s.status} />
+                      </h3>
+                      <p>{s.qualification}</p>
+                      <div className="geometry">
+                        <span>Frozen reference {money(s.trigger)}</span>
+                        <span>
+                          Lifecycle invalidation {money(s.invalidation)}
+                        </span>
+                      </div>
+                      <p className="muted">
+                        Lifecycle invalidation is not your proposed trade stop.
+                        References come from canonical setup geometry.
+                      </p>
+                      {(s.local_errors.length > 0 ||
+                        s.replay_required ||
+                        !s.evaluated) && (
+                        <p className="inline-warning">
+                          {s.local_errors.map(label).join("; ")}{" "}
+                          {s.replay_required
+                            ? "Corrected-data replay required."
+                            : ""}{" "}
+                          {!s.evaluated
+                            ? "Not evaluated for this session."
+                            : ""}
+                        </p>
+                      )}
+                      {s.unrelated_errors.length > 0 && (
+                        <details>
+                          <summary>
+                            Other detection errors (separate scope)
+                          </summary>
+                          {s.unrelated_errors.map(label).join("; ")}
+                        </details>
+                      )}
+                    </article>
+                  ))}
+                  {review.notes.map((n) => (
+                    <p className="inline-warning" key={n}>
+                      {n}
+                    </p>
+                  ))}
+                  <details>
+                    <summary>
+                      Terminal history ({review.historical_count}) & opposite
+                      direction ({review.opposite_direction_count})
+                    </summary>
+                    {o.decision.setups
+                      .filter(
+                        (s) =>
+                          !s.active || s.direction !== o.decision.direction,
+                      )
+                      .map((s) => (
+                        <p key={s.setup_id}>
+                          {label(s.family)} · {s.direction} ·{" "}
+                          <Chip value={s.status} />
+                        </p>
+                      ))}
+                  </details>
+                </>
+              )}
+              {tab === "Decision evidence" && (
+                <>
+                  <h3>Decision evidence</h3>
+                  <p>
+                    These explanations describe the retained {o.decision.state}{" "}
+                    decision. Optional alternatives and unentered proposals are
+                    not stock-data failures.
+                  </p>
+                  <ul className="blocker-list">
+                    {review.blockers.map((b) => (
+                      <li key={b.title}>
+                        <span
+                          className={
+                            "blocker-category " + b.category.toLowerCase()
+                          }
+                        >
+                          {categoryNames[b.category]}
+                        </span>
+                        <div>
+                          <b>{b.title}</b>
+                          <p>{b.detail}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  <details>
+                    <summary>Strength alternatives</summary>
+                    <p>{review.strength_summary}</p>
+                    <p>
+                      Established: {String(o.strength.established_strength)};
+                      rotation: {String(o.strength.new_rotation)}. Either branch
+                      can independently pass.
+                    </p>
+                    <p>
+                      Rotation spread: {number(o.strength.rotation_delta)}{" "}
+                      points (rotation RS − composite RS), not historical
+                      change.
+                    </p>
+                  </details>
+                  <details>
+                    <summary>Complete original decision checklist</summary>
+                    {o.decision.gates.map((g) => (
+                      <section key={g.name}>
+                        <h4>
+                          {g.rung} / {label(g.name)} · stored{" "}
+                          {g.passed ? "pass" : "fail"}
+                        </h4>
+                        <Reasons reasons={g.reasons} />
+                      </section>
+                    ))}
+                  </details>
+                </>
+              )}
+              {tab === "Data details" && (
+                <>
+                  <p>
+                    Frozen snapshot evidence; interpretation version{" "}
+                    {review.schema_version}. Stored decisions and original
+                    hashes are not rewritten by this view.
+                  </p>
+                  <dl>
+                    <dt>Snapshot fingerprint</dt>
+                    <dd>
+                      <code>{query.data.meta.fingerprint}</code>
+                    </dd>
+                    <dt>Complete output reference</dt>
+                    <dd>
+                      <code>
+                        {record.output_ref.index} · {record.output_ref.id}
+                      </code>
+                    </dd>
+                    <dt>Shared Leadership reference</dt>
+                    <dd>
+                      <code>{o.inputs.leadership_ref?.id}</code>
+                    </dd>
+                    <dt>Shared Regime reference</dt>
+                    <dd>
+                      <code>{o.inputs.regime_ref?.id}</code>
+                    </dd>
+                  </dl>
+                  <p>
+                    Complete shared evidence remains available through the
+                    fingerprint-bound V2 evidence API; this browser does not
+                    download the full graph.
+                  </p>
+                  <details>
+                    <summary>Original local evidence JSON</summary>
+                    <pre>{JSON.stringify(o, null, 2)}</pre>
+                  </details>
+                </>
+              )}
+            </section>
+          </>
+        )
       )}
     </dialog>
   );
