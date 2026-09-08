@@ -326,7 +326,7 @@ def replay(plan, loaded, *, optimize_current=True, checkpoint_root=None):
             else None,
         )
         regime = evaluate_regime(inp, calendar=calendar, previous=regime)
-    del contexts, closes, group_history
+    del contexts, closes, group_history, prepared_regime, inp, raw, strength, groups
     engine_rules = loaded["rules"]
     proposals = (
         {(p.symbol, p.direction): p.sizing for p in loaded["proposals"].proposals}
@@ -357,7 +357,7 @@ def replay(plan, loaded, *, optimize_current=True, checkpoint_root=None):
     def records():
         for symbol in sorted(universe.symbols):
             structure = final_structures[symbol]
-            setups = final_setups[symbol]
+            setups = final_setups.pop(symbol)
             directions = sorted({"LONG"} | {d for s, d in proposals if s == symbol})
             for direction in directions:
                 inputs = DecisionInputV1(
@@ -407,6 +407,12 @@ def replay(plan, loaded, *, optimize_current=True, checkpoint_root=None):
                     if setups.inputs.volume is None
                     else None,
                 )
+
+        # The normalized producer is exhausted: no decision validator will use
+        # these identity caches again. Release original and validated inputs
+        # before the normalized table and decoded snapshot coexist.
+        validation_cache.objects.clear()
+        shared_validation.clear()
 
     print(
         __import__("json").dumps(

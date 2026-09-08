@@ -627,9 +627,17 @@ def materialize_v2(
             ),
             flush=True,
         )
-    addresses, evidence = builder.finish()
+    # Identity caches are needed only while accepting canonical objects.
+    # Drop them before allocating the final normalized table.
     builder.objects.clear()
     shared_cache.clear()
+    # The last yielded record also owns its complete local Setup graph.
+    if pending:
+        del r
+    import gc
+
+    gc.collect()
+    addresses, evidence = builder.finish()
     del builder
     refs = {
         k: (
